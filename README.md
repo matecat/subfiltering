@@ -13,7 +13,7 @@ use Matecat\SubFiltering\Filter;
 $filter = Filter::getInstance(new FeatureSet());
 ```
 
-The only required argument is a valid instance of `Matecat\SubFiltering\Contracts\FeatureSetInterface`.
+The only required argument is a concrete implementation of `Matecat\SubFiltering\Contracts\FeatureSetInterface`.
 
 There are three more arguments you can pass:
 
