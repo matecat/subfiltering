@@ -1,0 +1,39 @@
+{
+  "name": "matecat/subfiltering",
+  "type": "library",
+  "description": "Matecat Subfiltering component",
+  "keywords": ["xliff", "parsing", "php"],
+  "homepage": "https://github.com/matecat/subfiltering",
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/matecat/subfiltering/issues"
+  },
+  "authors": [
+    {
+      "name": "Mauro Cassani",
+      "email": "maurocassani1978@gmail.com",
+      "homepage": "https://github.com/mauretto78"
+    },
+    {
+      "name": "Domenico Lupinetti",
+      "email": "ostico@gmail.com",
+      "homepage": "https://github.com/ostico"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Matecat\\SubFiltering\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": { "Matecat\\SubFiltering\\Tests\\": "tests/" }
+  },
+  "require": {
+    "php": ">=5.5",
+    "matecat/xliff-parser": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.2",
+    "fzaninotto/faker": "^1.9"
+  }
+}
