@@ -19,7 +19,7 @@ There are three more arguments you can pass:
 
 - `$source` (string) - The source language
 - `$target` (string) - The target language
-- `$dataRefMap` (array) - Dataref map (only for segments from Xliff 2.0)
+- `$dataRefMap` (array) - A map used for tag replacement (only for segments from Xliff 2.0)
 
 ## Basic Usage
 
@@ -34,7 +34,7 @@ Once `Filter` class is instantiated you can use the following methods to convert
 - `fromRawXliffToLayer0`
 - `fromLayer0ToRawXliff`
 
-Where `Layer0` is the DB layer, `Layer1` is the intermediate layer and `Layer2` is the UI layer.
+Where `Layer0` is the DB layer, `Layer1` is the intermediate layer (used by [MyMemory](https://mymemory.translated.net/)) and `Layer2` is the UI layer.
 
 ## Support
 
