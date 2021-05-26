@@ -11,8 +11,8 @@ use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use Matecat\SubFiltering\Utils\CatUtils;
 use PHPUnit\Framework\TestCase;
 
-class SubFilteringTest extends TestCase {
-
+class SubFilteringTest extends TestCase
+{
     /**
      * @return Filter
      * @throws \Exception
@@ -486,25 +486,6 @@ class SubFilteringTest extends TestCase {
 
         $this->assertEquals($back_to_db_segment, $db_segment);
         $this->assertEquals($back_to_db_translation, $db_translation);
-    }
-
-    public function testPCLayer2ToLayer0()
-    {
-
-        $data_ref_map = [
-                'd1' => '_',
-                'd2' => '**',
-                'd3' => '`',
-        ];
-
-        $Filter = Filter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
-
-        $expected_db_translation = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>';
-        $l2_translation = 'Testo libero contenente <ph id="1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiJmd0Ow==" dataRef="d1" equiv-text="base64:Xw=="/>corsivo<ph id="1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="d1" equiv-text="base64:Xw=="/>';
-
-        $db_translation = $Filter->fromLayer2ToLayer0( $l2_translation );
-
-        $this->assertEquals($db_translation, $expected_db_translation);
     }
 
     /**

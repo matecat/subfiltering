@@ -4,6 +4,7 @@ namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
+use Matecat\SubFiltering\Contracts\FilterInterface;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DataRefReplace;
 use Matecat\SubFiltering\Filters\DataRefRestore;
@@ -54,8 +55,8 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  *
  * @package SubFiltering
  */
-class Filter {
-
+class Filter implements FilterInterface 
+{
     /**
      * @var Filter
      */
@@ -102,8 +103,8 @@ class Filter {
      */
     public static function getInstance( FeatureSetInterface $featureSet, $source = null, $target = null, array $dataRefMap = [] )
     {
-        if ( static::$_INSTANCE === null  ) {
-            static::$_INSTANCE = new Filter();
+        if ( static::$_INSTANCE === null ) {
+            static::$_INSTANCE = new static();
         }
 
         static::$_INSTANCE->setSource($source);
@@ -117,7 +118,7 @@ class Filter {
     /**
      * @param array $dataRefMap
      */
-    private function setDataRefMap(array $dataRefMap = [])
+    protected function setDataRefMap(array $dataRefMap = [])
     {
         $this->dataRefMap = $dataRefMap;
     }
@@ -125,7 +126,7 @@ class Filter {
     /**
      * @param string $source
      */
-    private function setSource( $source )
+    protected function setSource( $source )
     {
         $this->source = $source;
     }
@@ -133,7 +134,7 @@ class Filter {
     /**
      * @param string $target
      */
-    private function setTarget( $target )
+    protected function setTarget( $target )
     {
         $this->target = $target;
     }
