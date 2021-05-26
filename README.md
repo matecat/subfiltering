@@ -1,6 +1,6 @@
 # Matecat Subfiltering
 
-Subfiltering is a [Matecat](https://matecat.com) component used for string conversion from database to UI layer and viceversa.
+Subfiltering is a component used by [Matecat](https://matecat.com) and [MyMemory](https://mymemory.translated.net/)) for string conversion from database to UI layer and viceversa.
 
 ## How to use
 
@@ -9,7 +9,7 @@ There are two filters available (both are implementation of `AbstractFilter`):
 - `MateCatFilter`
 - `MyMemoryFilter`
 
-There is a slight difference between the two classes. To instantiate `MateCatFilter` class do the following:
+Use `getInstance` method to instantiate these classes:
 
 ```php
 
@@ -18,16 +18,7 @@ use Matecat\SubFiltering\MateCatFilter;
 $filter = MateCatFilter::getInstance(new FeatureSet(), 'it-IT', 'en-EN', []);
 ```
 
-Instead to use `MyMemoryFilter` (please note that ):
-
-```php
-
-use Matecat\SubFiltering\MyMemoryFilter;
-
-$filter = MyMemoryFilter::getInstance(new FeatureSet(), 'it-IT', 'en-EN');
-```
-
-The only required argument is a concrete implementation of `Matecat\SubFiltering\Contracts\FeatureSetInterface`.
+The first argument MUST be concrete implementation of `Matecat\SubFiltering\Contracts\FeatureSetInterface`.
 
 There are three more arguments you can pass:
 
@@ -37,7 +28,9 @@ There are three more arguments you can pass:
 
 ## Basic Usage
 
-Once `Filter` class is instantiated you can use the following methods to convert strings from one layer to another one:
+Once an intance of `AbstractFilter` class is instantiated you can use several methods to convert strings from one layer to another one.
+
+### MateCatFilter methods
 
 - `fromLayer0ToLayer2`
 - `fromLayer1ToLayer2`
@@ -48,7 +41,26 @@ Once `Filter` class is instantiated you can use the following methods to convert
 - `fromRawXliffToLayer0`
 - `fromLayer0ToRawXliff`
 
-Where `Layer0` is the DB layer, `Layer1` is the intermediate layer (used by [MyMemory](https://mymemory.translated.net/)) and `Layer2` is the UI layer.
+### MyMemoryFilter methods
+
+- `fromLayer0ToLayer1`
+- `fromLayer1ToLayer0`
+
+Where `Layer0` is the DB layer, `Layer1` is the intermediate layer and `Layer2` is the MateCat's UI layer.
+
+## Examples
+
+In the `tests` folder there is an fully working example of a concrete implementation of `FeatureSetInterface` with a custom filter.
+
+```
+// tests/Mocks 
+.
+├── Features
+│   ├── AirbnbFeature.php
+│   └── BaseFeature.php
+└── FeatureSet.php
+
+```
 
 ## Support
 

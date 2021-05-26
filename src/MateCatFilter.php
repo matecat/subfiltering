@@ -3,7 +3,6 @@
 namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DataRefReplace;
 use Matecat\SubFiltering\Filters\DataRefRestore;
@@ -56,29 +55,6 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  */
 class MateCatFilter extends AbstractFilter
 {
-    /**
-     * @param string              $source
-     * @param string              $target
-     * @param FeatureSetInterface $featureSet
-     * @param array               $dataRefMap
-     *
-     * @return AbstractFilter
-     * @throws \Exception
-     */
-    public static function getInstance( FeatureSetInterface $featureSet, $source = null, $target = null, array $dataRefMap = [] )
-    {
-        if ( static::$_INSTANCE === null or !(static::$_INSTANCE instanceof MateCatFilter) ) {
-            static::$_INSTANCE = new MateCatFilter();
-        }
-
-        static::$_INSTANCE->setSource($source);
-        static::$_INSTANCE->setTarget($target);
-        static::$_INSTANCE->setDataRefMap($dataRefMap);
-        static::$_INSTANCE->setFeatureSet( $featureSet );
-
-        return static::$_INSTANCE;
-    }
-
     /**
      * Used to transform database raw xml content ( Layer 0 ) to the UI structures ( Layer 2 )
      *

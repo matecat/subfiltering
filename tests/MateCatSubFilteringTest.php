@@ -3,10 +3,10 @@
 namespace Matecat\SubFiltering\Tests;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
+use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use Matecat\SubFiltering\Utils\CatUtils;
 use PHPUnit\Framework\TestCase;
@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 class MateCatSubFilteringTest extends TestCase
 {
     /**
-     * @return MateCatFilter
+     * @return \Matecat\SubFiltering\AbstractFilter
      * @throws \Exception
      */
     private function getFilterInstance()

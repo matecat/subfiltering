@@ -3,7 +3,6 @@
 namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -36,27 +35,6 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  */
 class MyMemoryFilter extends AbstractFilter
 {
-    /**
-     * @param string              $source
-     * @param string              $target
-     * @param FeatureSetInterface $featureSet
-     *
-     * @return AbstractFilter
-     * @throws \Exception
-     */
-    public static function getInstance( FeatureSetInterface $featureSet, $source = null, $target = null )
-    {
-        if ( static::$_INSTANCE === null or !(static::$_INSTANCE instanceof MyMemoryFilter) ) {
-            static::$_INSTANCE = new MyMemoryFilter();
-        }
-
-        static::$_INSTANCE->setSource($source);
-        static::$_INSTANCE->setTarget($target);
-        static::$_INSTANCE->setFeatureSet( $featureSet );
-
-        return static::$_INSTANCE;
-    }
-
     /**
      * Used to transform database raw xml content ( Layer 0 ) to the sub filtered structures, used for server to server ( Ex: TM/MT ) communications ( Layer 1 )
      *
