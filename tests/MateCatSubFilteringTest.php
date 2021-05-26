@@ -3,7 +3,7 @@
 namespace Matecat\SubFiltering\Tests;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
@@ -11,15 +11,15 @@ use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use Matecat\SubFiltering\Utils\CatUtils;
 use PHPUnit\Framework\TestCase;
 
-class SubFilteringTest extends TestCase
+class MateCatSubFilteringTest extends TestCase
 {
     /**
-     * @return Filter
+     * @return MateCatFilter
      * @throws \Exception
      */
     private function getFilterInstance()
     {
-        return Filter::getInstance(new FeatureSet(), 'en-US','it-IT');
+        return MateCatFilter::getInstance(new FeatureSet(), 'en-US','it-IT');
     }
     
     /**
@@ -305,7 +305,7 @@ class SubFilteringTest extends TestCase
                 'source2' => '&lt;a href=%s&gt;',
         ];
 
-        $Filter = Filter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
 
         $db_segment     = "Hi %s .";
         $db_translation = "Tere %s .";
@@ -339,7 +339,7 @@ class SubFilteringTest extends TestCase
                 'source1' => '&lt;br&gt;',
         ];
 
-        $Filter = Filter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
 
         $db_segment     = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
         $db_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
@@ -382,7 +382,7 @@ class SubFilteringTest extends TestCase
                 "source7" => "<g id=\"oZ3oW_0KaicFXFDS\" ctype=\"x-html-li\" \/>"
         ];
 
-        $Filter = Filter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
 
         $db_segment = '<pc id="source1" dataRefStart="source1">Click the image on the left, read the information and then select the contact type that would replace the red question mark.</pc><pc id="source2" dataRefStart="source2"><pc id="source3" dataRefStart="source3">Things to consider:</pc></pc><pc id="source4" dataRefStart="source4"><pc id="source5" dataRefStart="source5">The rider stated the car had a different tag from another state.</pc><pc id="source6" dataRefStart="source6">The rider stated the car had a color from the one registered in Bliss.</pc><pc id="source7" dataRefStart="source7">The rider can’t tell if the driver matched the profile picture.</pc></pc>';
         $expected_l1_segment = '<pc id="source1" dataRefStart="source1">Click the image on the left, read the information and then select the contact type that would replace the red question mark.</pc><pc id="source2" dataRefStart="source2"><pc id="source3" dataRefStart="source3">Things to consider:</pc></pc><pc id="source4" dataRefStart="source4"><pc id="source5" dataRefStart="source5">The rider stated the car had a different tag from another state.</pc><pc id="source6" dataRefStart="source6">The rider stated the car had a color from the one registered in Bliss.</pc><pc id="source7" dataRefStart="source7">The rider can’t tell if the driver matched the profile picture.</pc></pc>';
@@ -402,7 +402,7 @@ class SubFilteringTest extends TestCase
     public function testPCWithoutAnyDataRefMap() {
         $data_ref_map = [];
 
-        $Filter = Filter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
 
         $db_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
         $expected_l1_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
@@ -426,7 +426,7 @@ class SubFilteringTest extends TestCase
                 'd1' => '_',
         ];
 
-        $Filter = Filter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
 
         $db_segment = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>.';
         $db_translation = 'Free text containing <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">curvise</pc>.';
@@ -462,7 +462,7 @@ class SubFilteringTest extends TestCase
                 'd2' => '](http://repubblica.it)',
         ];
 
-        $Filter = Filter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
 
         $db_segment     = 'Link semplice: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
         $db_translation = 'Simple link: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
@@ -498,7 +498,7 @@ class SubFilteringTest extends TestCase
                 'source1' => 'x',
         ];
 
-        $Filter = Filter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
 
         $db_segment = 'Text <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
         $db_translation = 'Testo <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';

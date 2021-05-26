@@ -2,7 +2,7 @@
 
 namespace Matecat\SubFiltering\Tests;
 
-use Matecat\SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\MyMemoryFilter;
 use Matecat\SubFiltering\Tests\Mocks\Features\AirbnbFeature;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
@@ -11,14 +11,14 @@ use PHPUnit\Framework\TestCase;
 class MyMemorySubFilteringTest extends TestCase
 {
     /**
-     * @return Filter
+     * @return MateCatFilter
      * @throws \Exception
      */
     private function getFilterInstance()
     {
         $featureSet = new FeatureSet([new AirbnbFeature()]);
 
-        return MyMemoryFilter::getInstance($featureSet, 'en-US','it-IT', []);
+        return MyMemoryFilter::getInstance($featureSet, 'en-US','it-IT');
     }
 
     public function testVariablesWithHTML()

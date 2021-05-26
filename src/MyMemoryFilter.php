@@ -5,26 +5,17 @@ namespace Matecat\SubFiltering;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
-use Matecat\SubFiltering\Filters\DataRefReplace;
-use Matecat\SubFiltering\Filters\DataRefRestore;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
-use Matecat\SubFiltering\Filters\FromLayer2ToRawXML;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\HtmlPlainTextDecoder;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
-use Matecat\SubFiltering\Filters\LtGtDoubleEncode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
-use Matecat\SubFiltering\Filters\PlaceBreakingSpacesInXliff;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
-use Matecat\SubFiltering\Filters\RemoveDangerousChars;
 use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
-use Matecat\SubFiltering\Filters\RestoreTabsPlaceholders;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
-use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
-use Matecat\SubFiltering\Filters\SpacesToNBSPForView;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
@@ -43,7 +34,28 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  *
  * @package Matecat\SubFiltering
  */
-class MyMemoryFilter extends Filter {
+class MyMemoryFilter extends AbstractFilter
+{
+    /**
+     * @param string              $source
+     * @param string              $target
+     * @param FeatureSetInterface $featureSet
+     *
+     * @return AbstractFilter
+     * @throws \Exception
+     */
+    public static function getInstance( FeatureSetInterface $featureSet, $source = null, $target = null )
+    {
+        if ( static::$_INSTANCE === null or !(static::$_INSTANCE instanceof MyMemoryFilter) ) {
+            static::$_INSTANCE = new MyMemoryFilter();
+        }
+
+        static::$_INSTANCE->setSource($source);
+        static::$_INSTANCE->setTarget($target);
+        static::$_INSTANCE->setFeatureSet( $featureSet );
+
+        return static::$_INSTANCE;
+    }
 
     /**
      * Used to transform database raw xml content ( Layer 0 ) to the sub filtered structures, used for server to server ( Ex: TM/MT ) communications ( Layer 1 )
@@ -66,7 +78,7 @@ class MyMemoryFilter extends Filter {
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 
         /** @var $channel Pipeline */
-        $channel = $this->_featureSet->filter( 'fromLayer0ToLayer1', $channel );
+        $channel = $this->featureSet->filter( 'fromLayer0ToLayer1', $channel );
 
         return $channel->transform( $segment );
     }
@@ -96,7 +108,7 @@ class MyMemoryFilter extends Filter {
         $channel->addLast( new SplitPlaceholder() );
 
         /** @var $channel Pipeline */
-        $channel = $this->_featureSet->filter( 'fromLayer1ToLayer0', $channel );
+        $channel = $this->featureSet->filter( 'fromLayer1ToLayer0', $channel );
 
         return $channel->transform( $segment );
     }

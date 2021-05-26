@@ -4,7 +4,6 @@ namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
-use Matecat\SubFiltering\Contracts\FilterInterface;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DataRefReplace;
 use Matecat\SubFiltering\Filters\DataRefRestore;
@@ -55,88 +54,29 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  *
  * @package SubFiltering
  */
-class Filter implements FilterInterface 
+class MateCatFilter extends AbstractFilter
 {
-    /**
-     * @var Filter
-     */
-    protected static $_INSTANCE;
-
-    /**
-     * @var FeatureSetInterface
-     */
-    protected $_featureSet;
-
-    /**
-     * @var string
-     */
-    protected $source;
-
-    /**
-     * @var string
-     */
-    protected $target;
-
-    /**
-     * @var array
-     */
-    protected $dataRefMap = [];
-
-    /**
-     * Update/Add featureSet
-     *
-     * @param FeatureSetInterface $featureSet
-     */
-    protected function _featureSet( FeatureSetInterface $featureSet )
-    {
-        $this->_featureSet = $featureSet;
-    }
-
     /**
      * @param string              $source
      * @param string              $target
      * @param FeatureSetInterface $featureSet
      * @param array               $dataRefMap
      *
-     * @return Filter
+     * @return AbstractFilter
      * @throws \Exception
      */
     public static function getInstance( FeatureSetInterface $featureSet, $source = null, $target = null, array $dataRefMap = [] )
     {
-        if ( static::$_INSTANCE === null ) {
-            static::$_INSTANCE = new static();
+        if ( static::$_INSTANCE === null or !(static::$_INSTANCE instanceof MateCatFilter) ) {
+            static::$_INSTANCE = new MateCatFilter();
         }
 
         static::$_INSTANCE->setSource($source);
         static::$_INSTANCE->setTarget($target);
         static::$_INSTANCE->setDataRefMap($dataRefMap);
-        static::$_INSTANCE->_featureSet( $featureSet );
+        static::$_INSTANCE->setFeatureSet( $featureSet );
 
         return static::$_INSTANCE;
-    }
-
-    /**
-     * @param array $dataRefMap
-     */
-    protected function setDataRefMap(array $dataRefMap = [])
-    {
-        $this->dataRefMap = $dataRefMap;
-    }
-
-    /**
-     * @param string $source
-     */
-    protected function setSource( $source )
-    {
-        $this->source = $source;
-    }
-
-    /**
-     * @param string $target
-     */
-    protected function setTarget( $target )
-    {
-        $this->target = $target;
     }
 
     /**
@@ -174,7 +114,7 @@ class Filter implements FilterInterface
         $channel->addLast( new DataRefReplace($this->dataRefMap) );
 
         /** @var $channel Pipeline */
-        $channel = $this->_featureSet->filter( 'fromLayer1ToLayer2', $channel );
+        $channel = $this->featureSet->filter( 'fromLayer1ToLayer2', $channel );
 
         return $channel->transform( $segment );
     }
@@ -199,7 +139,7 @@ class Filter implements FilterInterface
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 
         /** @var $channel Pipeline */
-        $channel = $this->_featureSet->filter( 'fromLayer2ToLayer1', $channel );
+        $channel = $this->featureSet->filter( 'fromLayer2ToLayer1', $channel );
 
         return $channel->transform( $segment );
     }
@@ -244,7 +184,7 @@ class Filter implements FilterInterface
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 
         /** @var $channel Pipeline */
-        $channel = $this->_featureSet->filter( 'fromLayer0ToLayer1', $channel );
+        $channel = $this->featureSet->filter( 'fromLayer0ToLayer1', $channel );
 
         return $channel->transform( $segment );
     }
@@ -275,7 +215,7 @@ class Filter implements FilterInterface
         $channel->addLast( new SplitPlaceholder() );
 
         /** @var $channel Pipeline */
-        $channel = $this->_featureSet->filter( 'fromLayer1ToLayer0', $channel );
+        $channel = $this->featureSet->filter( 'fromLayer1ToLayer0', $channel );
 
         return $channel->transform( $segment );
     }
@@ -297,7 +237,7 @@ class Filter implements FilterInterface
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 
         /** @var $channel Pipeline */
-        $channel = $this->_featureSet->filter( 'fromRawXliffToLayer0', $channel );
+        $channel = $this->featureSet->filter( 'fromRawXliffToLayer0', $channel );
 
         return $channel->transform( $segment );
     }
@@ -320,7 +260,7 @@ class Filter implements FilterInterface
         $channel->addLast( new LtGtEncode() );
 
         /** @var $channel Pipeline */
-        $channel = $this->_featureSet->filter( 'fromLayer0ToRawXliff', $channel );
+        $channel = $this->featureSet->filter( 'fromLayer0ToRawXliff', $channel );
 
         return $channel->transform( $segment );
     }

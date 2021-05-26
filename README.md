@@ -4,13 +4,27 @@ Subfiltering is a [Matecat](https://matecat.com) component used for string conve
 
 ## How to use
 
-To instantiate `Filter` class do the following:
+There are two filters available (both are implementation of `AbstractFilter`):
+
+- `MateCatFilter`
+- `MyMemoryFilter`
+
+There is a slight difference between the two classes. To instantiate `MateCatFilter` class do the following:
 
 ```php
 
-use Matecat\SubFiltering\Filter;
+use Matecat\SubFiltering\MateCatFilter;
 
-$filter = Filter::getInstance(new FeatureSet());
+$filter = MateCatFilter::getInstance(new FeatureSet(), 'it-IT', 'en-EN', []);
+```
+
+Instead to use `MyMemoryFilter` (please note that ):
+
+```php
+
+use Matecat\SubFiltering\MyMemoryFilter;
+
+$filter = MyMemoryFilter::getInstance(new FeatureSet(), 'it-IT', 'en-EN');
 ```
 
 The only required argument is a concrete implementation of `Matecat\SubFiltering\Contracts\FeatureSetInterface`.
