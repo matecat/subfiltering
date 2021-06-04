@@ -20,7 +20,7 @@ $filter = MateCatFilter::getInstance(new FeatureSet(), 'it-IT', 'en-EN', []);
 
 The first argument MUST be concrete implementation of `Matecat\SubFiltering\Contracts\FeatureSetInterface`.
 
-There are three more arguments you can pass:
+The other three arguments are optional:
 
 - `$source` (string) - The source language
 - `$target` (string) - The target language
@@ -28,7 +28,7 @@ There are three more arguments you can pass:
 
 ## Basic Usage
 
-Once an intance of `AbstractFilter` class is instantiated you can use several methods to convert strings from one layer to another one.
+Once `AbstractFilter` class is instantiated you can use several methods to convert strings from one layer to another one.
 
 ### MateCatFilter methods
 
