@@ -98,28 +98,6 @@ class MateCatSubFilteringTest extends TestCase
 
     }
 
-//    /**
-//     * Filters BUG, segmentation on HTML ( Should be fixed, anyway we try to cover )
-//     * @throws \Exception
-//     */
-//    public function testComplexBrokenHtmlInXML()
-//    {
-//        $filter = $this->getFilterInstance();
-//
-//        $segment   = '%{abb:flag.nolinkvalidation[0]} &lt;div class="panel"&gt; &lt;div class="panel-body"&gt; &lt;p&gt;You can read this article in &lt;a href="/help/article/1381?';
-//        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
-//        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
-//
-//        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
-//
-//        $string_from_UI = '<ph id="mtc_1" equiv-text="base64:JXthYmI6ZmxhZy5ub2xpbmt2YWxpZGF0aW9uWzBdfQ=="/> <ph id="mtc_2" equiv-text="base64:Jmx0O2RpdiBjbGFzcz0icGFuZWwiJmd0Ow=="/> <ph id="mtc_3" equiv-text="base64:Jmx0O2RpdiBjbGFzcz0icGFuZWwtYm9keSImZ3Q7"/> <ph id="mtc_4" equiv-text="base64:Jmx0O3AmZ3Q7"/>You can read this article in &lt;a href="/help/article/1381?';
-//
-//        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
-//        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
-//        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
-//
-//    }
-
     /**
      * @throws \Exception
      */
@@ -243,16 +221,6 @@ class MateCatSubFilteringTest extends TestCase
     public function testHTMLFromLayer2()
     {
         $filter = $this->getFilterInstance();
-
-        //Original JSON value from Airbnb
-        //"&lt;br>&lt;br>This will "
-
-        //Xliff Value
-        //"&amp;lt;br&gt;&amp;lt;br&gt;This will "
-
-        //Fixed by airbnb plugin in Database
-        //"&lt;br&gt;&lt;br&gt;This will"
-
         $expected_segment = '&lt;b&gt;de %1$s, &lt;/b&gt;que';
 
         //Start test
@@ -273,6 +241,17 @@ class MateCatSubFilteringTest extends TestCase
         $seg_transformed = $channel->transform( $segment );
 
         $this->assertEquals( $segment, $seg_transformed );
+    }
+
+    public function testTwigFilterWithSingleBrackets()
+    {
+        $segment  = 'Hi {this strings would not be escaped}. Instead {{this one}} is a valid twig expression. Also {%%ciao%%} is valid!';
+        $expected = 'Hi {this strings would not be escaped}. Instead <ph id="mtc_1" equiv-text="base64:e3t0aGlzIG9uZX19"/> is a valid twig expression. Also <ph id="mtc_2" equiv-text="base64:eyUlY2lhbyUlfQ=="/> is valid!';
+
+        $channel = new Pipeline();
+        $channel->addLast( new TwigToPh() );
+        $seg_transformed = $channel->transform( $segment );
+        $this->assertEquals( $expected, $seg_transformed );
     }
 
     public function testTwigUngreedy()
