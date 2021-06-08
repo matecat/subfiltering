@@ -71,15 +71,9 @@ class HtmlParser {
 
         $originalSplit = preg_split( '//u', $segment, -1, PREG_SPLIT_NO_EMPTY );
 
-//        $strippedSplit = preg_split( '//u', str_replace( [ "<", ">" ], "", $segment ), -1, PREG_SPLIT_NO_EMPTY );
-//        if ( $originalSplit == $strippedSplit ) {
-//            return $segment;
-//        }
-
         $state             = static::STATE_PLAINTEXT;
         $html_buffer       = '';
         $plain_text_buffer = '';
-        $depth             = 0;
         $in_quote_char     = '';
         $output            = '';
 
@@ -106,20 +100,15 @@ class HtmlParser {
                             break;
                         }
 
-                        // we're seeing a nested '<'
-                        $depth++;
+                        // if we found a second less than symbol the first one IS NOT a tag,
+                        // treat the html_buffer as plain text and attach to the output
+                        $output .= $this->_fixWrongBuffer( $html_buffer );
+                        $html_buffer = $char;
                         break;
 
                     case '>':
                         // ignore '>' if inside a quote
                         if ( $in_quote_char ) {
-                            break;
-                        }
-
-                        // something like this is happening: '<<>>'
-                        if ( $depth ) {
-                            $depth--;
-
                             break;
                         }
 
