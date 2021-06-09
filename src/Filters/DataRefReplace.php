@@ -31,14 +31,14 @@ class DataRefReplace extends AbstractHandler {
     {
         // dataRefMap is present only in xliff 2.0 files
         if ( empty( $this->dataRefMap ) ) {
-            $segment = $this->replaceXliffPhTagsWithNoDataRefToMatecatPhTags($segment);
+            $segment = $this->replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
 
             return $this->replaceXliffPcTagsToMatecatPhTags($segment);
         }
 
         $dataRefReplacer = new DataRefReplacer( $this->dataRefMap );
         $segment = $dataRefReplacer->replace( $segment );
-        $segment = $this->replaceXliffPhTagsWithNoDataRefToMatecatPhTags($segment);
+        $segment = $this->replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
 
         return $this->replaceXliffPcTagsToMatecatPhTags($segment);
     }
@@ -59,7 +59,7 @@ class DataRefReplace extends AbstractHandler {
      *
      * @return string|string[]
      */
-    private function replaceXliffPhTagsWithNoDataRefToMatecatPhTags($segment)
+    private function replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment)
     {
         preg_match_all('/&lt;(ph .*?)&gt;/iu', $segment, $phTags);
 
