@@ -3,6 +3,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\XliffParser\Utils\HtmlParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 
 class DataRefReplace extends AbstractHandler {
@@ -30,13 +31,72 @@ class DataRefReplace extends AbstractHandler {
     {
         // dataRefMap is present only in xliff 2.0 files
         if ( empty( $this->dataRefMap ) ) {
+            $segment = $this->replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
+
             return $this->replaceXliffPcTagsToMatecatPhTags($segment);
         }
 
         $dataRefReplacer = new DataRefReplacer( $this->dataRefMap );
         $segment = $dataRefReplacer->replace( $segment );
+        $segment = $this->replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
 
         return $this->replaceXliffPcTagsToMatecatPhTags($segment);
+    }
+
+    /**
+     * This function replace encoded ph tags (from Xliff 2.0) without any dataRef correspondence
+     * to regular Matecat <ph> tag for UI presentation
+     *
+     * Example:
+     *
+     * We can control who sees content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.
+     *
+     * is transformed to:
+     *
+     * We can control who sees content when with &lt;ph id="mtc_ph_u_1" equiv-text="base64:Jmx0O3BoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8mZ3Q7"/&gt;Visibility Constraints.
+     *
+     * @param $segment
+     *
+     * @return string|string[]
+     */
+    private function replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment)
+    {
+        preg_match_all('/&lt;(ph .*?)&gt;/iu', $segment, $phTags);
+
+        if(count($phTags[0]) === 0)  {
+            return $segment;
+        }
+
+        $phIndex = 1;
+
+        foreach ($phTags[0] as $phTag){
+            // check if phTag has not any correspondence on dataRef map
+            if($this->isAPhTagWithNoDataRefCorrespondence($phTag)){
+                $phMatecat = '&lt;ph id="mtc_ph_u_'.$phIndex.'" equiv-text="base64:'.base64_encode($phTag).'"/&gt;';
+                $segment = str_replace($phTag, $phMatecat, $segment);
+                $phIndex++;
+            }
+        }
+
+        return $segment;
+    }
+
+    /**
+     * This function checks if a ph tag with dataRef attribute a correspondence on dataRef map
+     *
+     * @param string $phTag
+     *
+     * @return bool
+     */
+    private function isAPhTagWithNoDataRefCorrespondence($phTag)
+    {
+        $parsed = HtmlParser::parse($phTag);
+
+        return (
+            isset($parsed[0]) and
+            isset($parsed[0]->attributes['dataRef']) and
+            !array_key_exists($parsed[0]->attributes['dataRef'], $this->dataRefMap
+        ));
     }
 
     /**
