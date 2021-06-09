@@ -271,6 +271,25 @@ class MateCatSubFilteringTest extends TestCase
      **************************
      */
 
+    public function testPhWithoutDataRef()
+    {
+        $db_segment = 'We can control who sees content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
+
+        $expected_l1_segment = 'We can control who sees content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
+        $expected_l2_segment = 'We can control who sees content when with &lt;ph id="mtc_ph_u_1" equiv-text="base64:Jmx0O3BoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8mZ3Q7"/&gt;Visibility Constraints.';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db_segment =$Filter->fromLayer1ToLayer0($l1_segment);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+    }
+
     /**
      * @throws \Exception
      */
