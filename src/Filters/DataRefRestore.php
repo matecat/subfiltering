@@ -29,13 +29,49 @@ class DataRefRestore extends AbstractHandler {
     public function transform( $segment )
     {
         if(empty($this->dataRefMap)){
+            $segment = $this->restoreXliffPhTagsFromMatecatPhTags($segment);
+
             return $this->restoreXliffPcTagsFromMatecatPhTags($segment);
         }
 
         $dataRefReplacer = new DataRefReplacer($this->dataRefMap);
         $segment = $dataRefReplacer->restore($segment);
+        $segment = $this->restoreXliffPhTagsFromMatecatPhTags($segment);
 
         return $this->restoreXliffPcTagsFromMatecatPhTags($segment);
+    }
+
+    /**
+     * This function restores <ph> tags (encoded as Matecat ph tags) without any dataRef correspondence
+     * for the persistence layer (layer 0).
+     *
+     * Example:
+     *
+     * Saame nähtavuse piirangutega kontrollida, kes sisu näeb .<ph id="mtc_ph_u_1" equiv-text="base64:Jmx0O3BoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8mZ3Q7"/>
+     *
+     * is transformed to:
+     *
+     * Saame nähtavuse piirangutega kontrollida, kes sisu näeb .<ph id="source1" dataRef="source1"/>
+     *
+     * @param $segment
+     *
+     * @return string
+     */
+    private function restoreXliffPhTagsFromMatecatPhTags( $segment)
+    {
+        preg_match_all('/<(ph id="mtc_ph_u_(.*?)" equiv-text="(.*?)")\/>/iu', $segment, $matches);
+
+        if(empty($matches[0])){
+            return $segment;
+        }
+
+        foreach ($matches[0] as $index => $match){
+            $value = base64_decode(str_replace('base64:', '', $matches[3][$index]));
+            $value = str_replace(['&lt;','&gt;'], ['<', '>'], $value);
+            $segment = str_replace($match, $value, $segment);
+        }
+
+        return $segment;
     }
 
     /**
