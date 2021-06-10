@@ -285,9 +285,12 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals($l1_segment, $expected_l1_segment);
         $this->assertEquals($l2_segment, $expected_l2_segment);
 
-        $back_to_db_segment =$Filter->fromLayer1ToLayer0($l1_segment);
+        // Persistance test
+        $from_UI = 'Saame nähtavuse piirangutega kontrollida, kes sisu näeb .<ph id="mtc_ph_u_1" equiv-text="base64:Jmx0O3BoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8mZ3Q7"/>';
+        $exptected_db_segment = 'Saame nähtavuse piirangutega kontrollida, kes sisu näeb .<ph id="source1" dataRef="source1"/>';
+        $back_to_db_segment =$Filter->fromLayer1ToLayer0($from_UI);
 
-        $this->assertEquals($back_to_db_segment, $db_segment);
+        $this->assertEquals($back_to_db_segment, $exptected_db_segment);
     }
 
     /**
