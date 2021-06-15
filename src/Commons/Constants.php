@@ -5,9 +5,6 @@ namespace Matecat\SubFiltering\Commons;
 
 class Constants {
 
-    const ENCODED_LTPLACEHOLDER  = "##ENCODED_LESSTHAN##";
-    const ENCODED_GTPLACEHOLDER  = "##ENCODED_GREATERTHAN##";
-
     const LTPLACEHOLDER  = "##LESSTHAN##";
     const GTPLACEHOLDER  = "##GREATERTHAN##";
     const AMPPLACEHOLDER = "##AMPPLACEHOLDER##";

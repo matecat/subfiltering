@@ -11,8 +11,6 @@ class LtGtEncode extends AbstractHandler {
         // restore < e >
         $segment = str_replace("<", "&lt;", $segment);
         $segment = str_replace(">", "&gt;", $segment);
-        $segment = str_replace(Constants::ENCODED_LTPLACEHOLDER,"&lt;", $segment);
-        $segment = str_replace(Constants::ENCODED_GTPLACEHOLDER, "&gt;", $segment);
 
         return $segment;
     }
