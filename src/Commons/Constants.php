@@ -1,16 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * @author domenico domenico@translated.net / ostico@gmail.com
- * Date: 05/11/18
- * Time: 17.12
- *
- */
 
 namespace Matecat\SubFiltering\Commons;
 
 
 class Constants {
+
+    const ENCODED_LTPLACEHOLDER  = "##ENCODED_LESSTHAN##";
+    const ENCODED_GTPLACEHOLDER  = "##ENCODED_GREATERTHAN##";
 
     const LTPLACEHOLDER  = "##LESSTHAN##";
     const GTPLACEHOLDER  = "##GREATERTHAN##";
