@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * @author domenico domenico@translated.net / ostico@gmail.com
- * Date: 05/11/18
- * Time: 17.12
- *
- */
 
 namespace Matecat\SubFiltering\Commons;
 

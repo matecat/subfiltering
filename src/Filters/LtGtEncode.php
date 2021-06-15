@@ -3,6 +3,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\SubFiltering\Commons\Constants;
 
 class LtGtEncode extends AbstractHandler {
 
@@ -10,6 +11,7 @@ class LtGtEncode extends AbstractHandler {
         // restore < e >
         $segment = str_replace("<", "&lt;", $segment);
         $segment = str_replace(">", "&gt;", $segment);
+
         return $segment;
     }
 

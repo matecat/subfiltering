@@ -88,6 +88,18 @@ class HtmlParser {
                         $plain_text_buffer = '';
                         break;
 
+                    //
+                    // *************************************
+                    // NOTE 2021-06-15
+                    // *************************************
+                    //
+                    // This case covers simple greater than sign (>),
+                    // otherwise is ignored and leaved as >.
+                    //
+                    case '>':
+                        $plain_text_buffer .= $this->_fixWrongBuffer( $char );
+                        break;
+
                     default:
                         $plain_text_buffer .= $char;
                         break;
@@ -216,6 +228,17 @@ class HtmlParser {
 
         //string ends with plain text, so no state change is triggered at the end of string
         if ( '' !==  $plain_text_buffer and null !== $plain_text_buffer  ) {
+
+            //
+            // *************************************
+            // NOTE 2021-06-15
+            // *************************************
+            //
+            // At this point $output variable should contains
+            // same less than or greater than signs which MUST be converted to < and >
+            // so we need to finalize plain text also on it, and THEN append $plain_text_buffer
+            //
+            $output = $this->_finalizePlainText( $output );
             $output .= $this->_finalizePlainText( $plain_text_buffer );
         }
 

@@ -243,6 +243,72 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals( $segment, $seg_transformed );
     }
 
+    /**
+     **************************
+     * TWIG
+     **************************
+     */
+
+    public function testTwigFilterWithLessThan()
+    {
+        // less than %lt;
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
+
+        $db_segment  = '{% if count &lt; 3 %}';
+        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/&gt;';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db = $Filter->fromLayer1ToLayer0($expected_l1_segment);
+
+        $this->assertEquals($db_segment, $back_to_db);
+    }
+
+    public function testTwigFilterWithGreaterThan()
+    {
+        // less than %gt;
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
+
+        $db_segment  = '{% if count &gt; 3 %}';
+        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:eyUgaWYgY291bnQgJmd0OyAzICV9"/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:eyUgaWYgY291bnQgJmd0OyAzICV9"/&gt;';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db = $Filter->fromLayer1ToLayer0($expected_l1_segment);
+
+        $this->assertEquals($db_segment, $back_to_db);
+    }
+
+    public function testTwigFilterWithLessThanAndGreaterThan()
+    {
+        // less than %lt;
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
+
+        $db_segment  = '{% if count &lt; 10 and &gt; 3 %}';
+        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAxMCBhbmQgJmd0OyAzICV9"/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAxMCBhbmQgJmd0OyAzICV9"/&gt;';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db = $Filter->fromLayer1ToLayer0($expected_l1_segment);
+
+        $this->assertEquals($db_segment, $back_to_db);
+    }
+
     public function testTwigFilterWithSingleBrackets()
     {
         $segment  = 'Hi {this strings would not be escaped}. Instead {{this one}} is a valid twig expression. Also {%%ciao%%} is valid!';
