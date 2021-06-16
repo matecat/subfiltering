@@ -269,6 +269,26 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals($db_segment, $back_to_db);
     }
 
+    public function testTwigFilterWithLessThanAttachedToANumber()
+    {
+        // less than %lt;
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
+
+        $db_segment  = '{% if count &lt;3 %}';
+        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:eyUgaWYgY291bnQgJmx0OzMgJX0="/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:eyUgaWYgY291bnQgJmx0OzMgJX0="/&gt;';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db = $Filter->fromLayer1ToLayer0($expected_l1_segment);
+
+        $this->assertEquals($db_segment, $back_to_db);
+    }
+
     public function testTwigFilterWithGreaterThan()
     {
         // less than %gt;
