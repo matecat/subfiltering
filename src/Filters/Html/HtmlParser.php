@@ -179,6 +179,37 @@ class HtmlParser {
                         break;
 
                     default:
+
+                        // Check the last char
+                        if($idx === (count($originalSplit)-1)){
+
+                            $html_buffer .= $char;
+
+                            //
+                            // *************************************
+                            // NOTE 2021-06-16
+                            // *************************************
+                            //
+                            // Check if $html_buffer is valid. If not, then
+                            // convert it to $plain_text_buffer.
+                            //
+                            // Example:
+                            //
+                            // $html_buffer = '<3 %}'
+                            //
+                            // is not a valid tag, so it's converted to $plain_text_buffer
+                            //
+                            if(!$this->_isTagValid( $html_buffer )){
+                                $state = static::STATE_PLAINTEXT; // but we work in XML text, so encode it
+                                $plain_text_buffer .= $this->_fixWrongBuffer( $html_buffer );
+                                $html_buffer = '';
+
+                                break;
+                            }
+
+                            break;
+                        }
+
                         $html_buffer .= $char;
                         break;
                 }
@@ -245,5 +276,4 @@ class HtmlParser {
         return $output;
 
     }
-
 }
