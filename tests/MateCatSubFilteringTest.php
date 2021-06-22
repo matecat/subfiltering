@@ -458,6 +458,25 @@ class MateCatSubFilteringTest extends TestCase
      **************************
      */
 
+    public function testWithTwoPCTagsWithLessThanBetweenThem() {
+        $data_ref_map = [
+            "source1" => "<br>",
+            "source2" => "<hr>",
+        ];
+
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', $data_ref_map );
+
+        $db_segment = '<pc id="source1" dataRefStart="source1">&lt;<pc id="source2" dataRefStart="source2">Rider </pc></pc>';
+        $expected_l1_segment = '<pc id="source1" dataRefStart="source1">&lt;<pc id="source2" dataRefStart="source2">Rider </pc></pc>';
+        $expected_l2_segment = '&lt;ph id="source1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiJmd0Ow==" dataRef="source1" equiv-text="base64:PGJyPg=="/&gt;&lt;&lt;ph id="source2_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UyIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTIiJmd0Ow==" dataRef="source2" equiv-text="base64:PGhyPg=="/&gt;Rider &lt;ph id="source2_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source2" equiv-text="base64:PGhyPg=="/&gt;&lt;ph id="source1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source1" equiv-text="base64:PGJyPg=="/&gt;';
+
+        $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+    }
+
     public function testPCWithComplexDataRefMap() {
         $data_ref_map = [
                 "source3" => "<g id=\"jcP-TFFSO2CSsuLt\" ctype=\"x-html-strong\" \/>",
