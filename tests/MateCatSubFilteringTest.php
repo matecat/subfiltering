@@ -629,4 +629,15 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals($back_to_db_segment, $db_segment);
         $this->assertEquals($back_to_db_translation, $db_translation);
     }
+
+    public function testDontTouchAlreadyParsedPhTags()
+    {
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
+
+        $segment = 'Frase semplice: <ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>.';
+        $expected = 'Frase semplice: &lt;ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/&gt;.';
+        $l2_segment = $Filter->fromLayer0ToLayer2($segment);
+
+        $this->assertEquals($expected, $l2_segment);
+    }
 }
