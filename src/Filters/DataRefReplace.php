@@ -82,7 +82,9 @@ class DataRefReplace extends AbstractHandler {
     }
 
     /**
-     * This function checks if a ph tag with dataRef attribute a correspondence on dataRef map
+     * This function checks if a ph tag with dataRef attribute
+     * and without equiv-text
+     * a correspondence on dataRef map
      *
      * @param string $phTag
      *
@@ -95,6 +97,7 @@ class DataRefReplace extends AbstractHandler {
         return (
             isset($parsed[0]) and
             isset($parsed[0]->attributes['dataRef']) and
+            !isset($parsed[0]->attributes['equiv-text']) and
             !array_key_exists($parsed[0]->attributes['dataRef'], $this->dataRefMap
         ));
     }
