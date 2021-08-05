@@ -2,6 +2,7 @@
 
 return [
         '%-os',
+        '%-ot',
         '%-kal',
         '%-ban',
 ];
