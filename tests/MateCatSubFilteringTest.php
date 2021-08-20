@@ -659,4 +659,24 @@ class MateCatSubFilteringTest extends TestCase
 
         $this->assertEquals($back_to_db_segment, $db_segment);
     }
+
+    public function testPhTagsWithoutDataRef()
+    {
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
+
+        //dataRef="source1"
+        $db_segment = '<ph id="1j" type="other" subType="m:j"/>';
+        $expected_l1_segment = '<ph id="1j" type="other" subType="m:j"/>';
+        $expected_l2_segment = '&lt;ph id="mtc_ph_u_1" equiv-text="base64:Jmx0O3BoIGlkPSIxaiIgdHlwZT0ib3RoZXIiIHN1YlR5cGU9Im06aiIvJmd0Ow=="/&gt;';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+    }
 }

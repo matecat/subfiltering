@@ -94,12 +94,21 @@ class DataRefReplace extends AbstractHandler {
     {
         $parsed = HtmlParser::parse($phTag);
 
-        return (
-            isset($parsed[0]) and
-            isset($parsed[0]->attributes['dataRef']) and
-            !isset($parsed[0]->attributes['equiv-text']) and
-            !array_key_exists($parsed[0]->attributes['dataRef'], $this->dataRefMap
-        ));
+        if(!isset($parsed[0])){
+            return false;
+        }
+
+        // if has equiv-text don't touch
+        if(isset($parsed[0]->attributes['equiv-text'])){
+            return false;
+        }
+
+        // if has dataRef attribute check if there is correspondence on dataRef map
+        if(isset($parsed[0]->attributes['dataRef'])){
+            return !array_key_exists($parsed[0]->attributes['dataRef'], $this->dataRefMap);
+        }
+
+        return true;
     }
 
     /**
