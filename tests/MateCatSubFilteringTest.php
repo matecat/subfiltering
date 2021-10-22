@@ -7,6 +7,7 @@ use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Tests\Mocks\Features\UberFeature;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use Matecat\SubFiltering\Utils\CatUtils;
 use PHPUnit\Framework\TestCase;
@@ -732,6 +733,28 @@ class MateCatSubFilteringTest extends TestCase
 
         $this->assertEquals($l1_segment, $expected_l1_segment);
         $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+    }
+
+    /**
+     **************************
+     * Uber pipeline
+     **************************
+     */
+
+    public function testWithUberPipeline()
+    {
+        $Filter = MateCatFilter::getInstance( new FeatureSet([new UberFeature()]), 'en-EN','et-ET', [] );
+
+        $db_segment = 'Ciao questo è una prova {RIDER}';
+        $expected_l1_segment = 'Ciao questo è una prova <ph id="mtc_1" equiv-text="base64:e1JJREVSfQ=="/>';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
 
         $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
 
