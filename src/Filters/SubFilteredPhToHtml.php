@@ -24,6 +24,7 @@ class SubFilteredPhToHtml extends AbstractHandler {
         preg_match_all( '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>|siU', $segment, $html, PREG_SET_ORDER ); // Ungreedy
         foreach ( $html as $subfilter_tag ) {
             $value = base64_decode( $subfilter_tag[ 1 ] );
+            $value = html_entity_decode( $value, ENT_NOQUOTES | ENT_XML1 );
             $segment = str_replace( $subfilter_tag[0], $value, $segment );
         }
 
