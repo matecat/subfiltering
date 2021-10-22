@@ -700,8 +700,8 @@ class MateCatSubFilteringTest extends TestCase
     {
         $Filter = MateCatFilter::getInstance( new FeatureSet([new UberFeature()]), 'en-EN','et-ET', [] );
 
-        $db_segment = 'Ciao questo è una prova {RIDER}';
-        $expected_l1_segment = 'Ciao questo è una prova <ph id="mtc_1" equiv-text="base64:e1JJREVSfQ=="/>';
+        $db_segment = 'Ciao questo è una prova {RIDER}. { RIDER } non viene bloccato.';
+        $expected_l1_segment = 'Ciao questo è una prova <ph id="mtc_1" equiv-text="base64:e1JJREVSfQ=="/>. { RIDER } non viene bloccato.';
 
         $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
 
