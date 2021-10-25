@@ -699,6 +699,15 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals($back_to_db_segment, $db_segment);
     }
 
+    /**
+     * This test is RED if the function:
+     *
+     * $value = html_entity_decode( $value, ENT_NOQUOTES | ENT_XML1 );
+     *
+     * inside SubFilteredPhToHtml is enabled
+     *
+     * @throws \Exception
+     */
     public function testWithEncodedText()
     {
         $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
@@ -706,6 +715,34 @@ class MateCatSubFilteringTest extends TestCase
         $db_segment = '&lt;x id="3"/&gt;Primary Care Facilities&lt;x id="7"/&gt;';
         $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/>Primary Care Facilities<ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/>';
         $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/&gt;Primary Care Facilities&lt;ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/&gt;';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+        $this->assertEquals($l2_segment, $expected_l2_segment);
+
+        $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+    }
+
+    /**
+     * This test is GREEN independently if the function:
+     *
+     * $value = html_entity_decode( $value, ENT_NOQUOTES | ENT_XML1 );
+     *
+     * inside SubFilteredPhToHtml is enabled or not
+     *
+     * @throws \Exception
+     */
+    public function testWithEncodedAnchor()
+    {
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
+
+        $db_segment = '&lt;a href="#"&gt;Link&lt;/a&gt;';
+        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:Jmx0O2EgaHJlZj0iIyImZ3Q7"/>Link<ph id="mtc_2" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O2EgaHJlZj0iIyImZ3Q7"/&gt;Link&lt;ph id="mtc_2" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/&gt;';
 
         $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
