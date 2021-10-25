@@ -7,6 +7,7 @@ use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Tests\Mocks\Features\UberFeature;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use Matecat\SubFiltering\Utils\CatUtils;
 use PHPUnit\Framework\TestCase;
@@ -680,61 +681,34 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals($back_to_db_segment, $db_segment);
     }
 
-//    public function testXTags()
-//    {
-//        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
-//
-//        $db_segment = '&lt;x id="3"/&gt;Primary Care Facilities&lt;x id="7"/&gt;';
-//        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/>Primary Care Facilities<ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/>';
-//        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/&gt;Primary Care Facilities&lt;ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/&gt;';
-//
-//        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
-//        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
-//
-//        $this->assertEquals($l1_segment, $expected_l1_segment);
-//        $this->assertEquals($l2_segment, $expected_l2_segment);
-//
-//        $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
-//
-//        $this->assertEquals($back_to_db_segment, $db_segment);
-//    }
-//
-//    public function testWithComplexUrls()
-//    {
-//        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
-//
-//        $db_segment = '&lt;li&gt;Bergamo: &lt;a href="http://www.comune.bergamo.it/servizi/Menu/dinamica.aspx?idSezione=3780&amp;#38;idArea=1182&amp;#38;idCat=555&amp;#38;ID=28395&amp;#38;TipoElemento=categoria" target="_blank"&gt;Italian&lt;/a&gt; &lt;/li&gt;&#10;&#917760;';
-//        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:Jmx0O2xpJmd0Ow=="/>Bergamo: <ph id="mtc_2" equiv-text="base64:Jmx0O2EgaHJlZj0iaHR0cDovL3d3dy5jb211bmUuYmVyZ2Ftby5pdC9zZXJ2aXppL01lbnUvZGluYW1pY2EuYXNweD9pZFNlemlvbmU9Mzc4MCZhbXA7IzM4O2lkQXJlYT0xMTgyJmFtcDsjMzg7aWRDYXQ9NTU1JmFtcDsjMzg7SUQ9MjgzOTUmYW1wOyMzODtUaXBvRWxlbWVudG89Y2F0ZWdvcmlhIiB0YXJnZXQ9Il9ibGFuayImZ3Q7"/>Italian<ph id="mtc_3" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> <ph id="mtc_4" equiv-text="base64:Jmx0Oy9saSZndDs="/>&#10;&#917760;';
-//        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O2xpJmd0Ow=="/&gt;Bergamo: &lt;ph id="mtc_2" equiv-text="base64:Jmx0O2EgaHJlZj0iaHR0cDovL3d3dy5jb211bmUuYmVyZ2Ftby5pdC9zZXJ2aXppL01lbnUvZGluYW1pY2EuYXNweD9pZFNlemlvbmU9Mzc4MCZhbXA7IzM4O2lkQXJlYT0xMTgyJmFtcDsjMzg7aWRDYXQ9NTU1JmFtcDsjMzg7SUQ9MjgzOTUmYW1wOyMzODtUaXBvRWxlbWVudG89Y2F0ZWdvcmlhIiB0YXJnZXQ9Il9ibGFuayImZ3Q7"/&gt;Italian&lt;ph id="mtc_3" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/&gt; &lt;ph id="mtc_4" equiv-text="base64:Jmx0Oy9saSZndDs="/&gt;##$_0A$##󠄀';
-//
-//        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
-//        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
-//
-//        $this->assertEquals($l1_segment, $expected_l1_segment);
-//        $this->assertEquals($l2_segment, $expected_l2_segment);
-//
-//        $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
-//
-//        $this->assertEquals($back_to_db_segment, $db_segment);
-//
-//    }
+    public function testXTags()
+    {
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
 
-//    public function testWithEncodedText()
-//    {
-//        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
-//
-//        $db_segment = '&lt;x id="3"/&gt;Primary Care Facilities&lt;x id="7"/&gt;';
-//        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/>Primary Care Facilities<ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/>';
-//        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/&gt;Primary Care Facilities&lt;ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/&gt;';
-//
-//        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
-//        $l2_segment     = $Filter->fromLayer1ToLayer2( $l1_segment );
-//
-//        $this->assertEquals($l1_segment, $expected_l1_segment);
-//        $this->assertEquals($l2_segment, $expected_l2_segment);
-//
-//        $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
-//
-//        $this->assertEquals($back_to_db_segment, $db_segment);
-//    }
+        $db_segment = '&lt;x id="3"/&gt;Primary Care Facilities&lt;x id="7"/&gt;';
+        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/>Primary Care Facilities<ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/&gt;Primary Care Facilities&lt;ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/&gt;';
+    }
+
+    /**
+     **************************
+     * Uber pipeline
+     **************************
+     */
+
+    public function testWithUberPipeline()
+    {
+        $Filter = MateCatFilter::getInstance( new FeatureSet([new UberFeature()]), 'en-EN','et-ET', [] );
+
+        $db_segment = 'Ciao questo è una prova {RIDER}. { RIDER } non viene bloccato.';
+        $expected_l1_segment = 'Ciao questo è una prova <ph id="mtc_1" equiv-text="base64:e1JJREVSfQ=="/>. { RIDER } non viene bloccato.';
+
+        $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
+
+        $this->assertEquals($l1_segment, $expected_l1_segment);
+
+        $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
+
+        $this->assertEquals($back_to_db_segment, $db_segment);
+    }
 }

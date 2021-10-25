@@ -82,6 +82,24 @@ class Pipeline {
     }
 
     /**
+     * Remove handler from pipeline
+     *
+     * @param AbstractHandler $handlerToDelete
+     *
+     * @return $this
+     */
+    public function remove( AbstractHandler $handlerToDelete ) {
+        foreach ( $this->handlers as $pos => $handler ) {
+            if ( $handler->getName() == $handlerToDelete->getName() ) {
+                unset($this->handlers[$pos]);
+                break;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @param AbstractHandler $handler
      *
      * @return Pipeline
