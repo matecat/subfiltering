@@ -9,6 +9,7 @@
 
 namespace Matecat\SubFiltering\Filters\Html;
 
+use Matecat\SubFiltering\Commons\Pipeline;
 use ReflectionException;
 use ReflectionMethod;
 use RuntimeException;
@@ -34,6 +35,21 @@ class HtmlParser {
     const STATE_HTML      = 1;
     const STATE_COMMENT   = 2;
     const STATE_JS_CSS    = 3;
+
+    /**
+     * @var Pipeline
+     */
+    private $pipeline;
+
+    /**
+     * HtmlParser constructor.
+     *
+     * @param Pipeline $pipeline
+     */
+    public function __construct(Pipeline $pipeline = null)
+    {
+        $this->pipeline = $pipeline;
+    }
 
     /**
      * @var CallbacksHandler
@@ -141,6 +157,10 @@ class HtmlParser {
                             $output .= $this->_fixWrongBuffer( $html_buffer );
                         }
 
+                        if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                            $this->pipeline->setSegmentIsHtml();
+                        }
+
                         $html_buffer = '';
                         break;
 
@@ -171,6 +191,10 @@ class HtmlParser {
                             $state       = static::STATE_PLAINTEXT; // but we work in XML text, so encode it
                             $output      .= $this->_fixWrongBuffer( '< ' );
                             $html_buffer = '';
+
+                            if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                                $this->pipeline->setSegmentIsHtml();
+                            }
 
                             break;
                         }
@@ -204,6 +228,10 @@ class HtmlParser {
                                 $plain_text_buffer .= $this->_fixWrongBuffer( $html_buffer );
                                 $html_buffer = '';
 
+                                if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                                    $this->pipeline->setSegmentIsHtml();
+                                }
+
                                 break;
                             }
 
@@ -223,6 +251,10 @@ class HtmlParser {
                             $state       = static::STATE_PLAINTEXT;
                             $output      .= $this->_finalizeScriptTag( $html_buffer );
                             $html_buffer = '';
+
+                            if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                                $this->pipeline->setSegmentIsHtml();
+                            }
                         }
 
                         break;
@@ -241,6 +273,10 @@ class HtmlParser {
                             $state       = static::STATE_PLAINTEXT;
                             $output      .= $this->_finalizeScriptTag( $html_buffer );
                             $html_buffer = '';
+
+                            if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                                $this->pipeline->setSegmentIsHtml();
+                            }
                         }
 
                         break;
@@ -254,22 +290,16 @@ class HtmlParser {
 
         //HTML Partial, add wrong HTML to preserve string content
         if ( !empty( $html_buffer ) ) {
+
+            if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                $this->pipeline->setSegmentIsHtml();
+            }
+
             $output .= $this->_fixWrongBuffer( $html_buffer );
         }
 
         //string ends with plain text, so no state change is triggered at the end of string
         if ( '' !==  $plain_text_buffer and null !== $plain_text_buffer  ) {
-
-            //
-            // *************************************
-            // NOTE 2021-06-15
-            // *************************************
-            //
-            // At this point $output variable should contains
-            // same less than or greater than signs which MUST be converted to < and >
-            // so we need to finalize plain text also on it, and THEN append $plain_text_buffer
-            //
-            $output = $this->_finalizePlainText( $output );
             $output .= $this->_finalizePlainText( $plain_text_buffer );
         }
 

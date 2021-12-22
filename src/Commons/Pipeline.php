@@ -16,11 +16,17 @@ class Pipeline {
      */
     protected $handlers;
 
+    /**
+     * @var int
+     */
     protected $id_number = -1;
 
-    public function __construct() {
+    /**
+     * @var bool
+     */
+    private $segmentIsHtml = false;
 
-    }
+    public function __construct() {}
 
     public function getNextId(){
         $this->id_number++;
@@ -29,6 +35,20 @@ class Pipeline {
 
     public function resetId(){
         $this->id_number = -1;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSegmentIsHtml()
+    {
+        return $this->segmentIsHtml;
+    }
+
+
+    public function setSegmentIsHtml()
+    {
+        $this->segmentIsHtml = true;
     }
 
     /**

@@ -80,6 +80,20 @@ class MateCatSubFilteringTest extends TestCase
     /**
      * @throws \Exception
      */
+    public function testComplexUrls()
+    {
+        $filter = $this->getFilterInstance();
+
+        $fromUi = '<ph id="mtc_14" equiv-text="base64:Jmx0O2EgaHJlZj0iaHR0cHM6Ly9hdXRoLnViZXIuY29tL2xvZ2luLz9icmVlemVfbG9jYWxfem9uZT1kY2ExJmFtcDthbXA7bmV4dF91cmw9aHR0cHMlM0ElMkYlMkZkcml2ZXJzLnViZXIuY29tJTJGcDMlMkYmYW1wO2FtcDtzdGF0ZT00MElLeF9YR0N1OXRobEtrSUkxUmRCOFlhUVRVY0g1aE1uVnllWXJCN0lBJTNEIiZndDs="/>Partner Dashboard<ph id="mtc_15" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> to match the payment document you uploaded';
+        $expectedToDb = '&lt;a href="https://auth.uber.com/login/?breeze_local_zone=dca1&amp;amp;next_url=https%3A%2F%2Fdrivers.uber.com%2Fp3%2F&amp;amp;state=40IKx_XGCu9thlKkII1RdB8YaQTUcH5hMnVyeYrB7IA%3D"&gt;Partner Dashboard&lt;/a&gt; to match the payment document you uploaded';
+        $toDb = $filter->fromLayer1ToLayer0( $fromUi );
+
+        $this->assertEquals($toDb, $expectedToDb);
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testComplexXML()
     {
         $filter = $this->getFilterInstance();
@@ -186,7 +200,7 @@ class MateCatSubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         //DB segment
-        $segment   = '&amp;lt;b&amp;gt;de %1$s, &amp;lt;/b&amp;gt;que';
+        $segment   = '&lt;b&gt;de %1$s, &lt;/b&gt;que';
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
@@ -679,15 +693,6 @@ class MateCatSubFilteringTest extends TestCase
         $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
 
         $this->assertEquals($back_to_db_segment, $db_segment);
-    }
-
-    public function testXTags()
-    {
-        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN','et-ET', [] );
-
-        $db_segment = '&lt;x id="3"/&gt;Primary Care Facilities&lt;x id="7"/&gt;';
-        $expected_l1_segment = '<ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/>Primary Care Facilities<ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/>';
-        $expected_l2_segment = '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjMiLyZndDs="/&gt;Primary Care Facilities&lt;ph id="mtc_2" equiv-text="base64:Jmx0O3ggaWQ9IjciLyZndDs="/&gt;';
     }
 
     /**
