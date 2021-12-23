@@ -24,7 +24,7 @@ class Pipeline {
     /**
      * @var bool
      */
-    private $segmentIsHtml = false;
+    private $segmentContainsHtml = false;
 
     public function __construct() {}
 
@@ -40,15 +40,15 @@ class Pipeline {
     /**
      * @return bool
      */
-    public function isSegmentIsHtml()
+    public function segmentContainsHtml()
     {
-        return $this->segmentIsHtml;
+        return $this->segmentContainsHtml;
     }
 
 
-    public function setSegmentIsHtml()
+    public function setSegmentContainsHtml()
     {
-        $this->segmentIsHtml = true;
+        $this->segmentContainsHtml = true;
     }
 
     /**

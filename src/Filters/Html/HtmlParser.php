@@ -158,7 +158,7 @@ class HtmlParser {
                         }
 
                         if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
-                            $this->pipeline->setSegmentIsHtml();
+                            $this->pipeline->setSegmentContainsHtml();
                         }
 
                         $html_buffer = '';
@@ -193,7 +193,7 @@ class HtmlParser {
                             $html_buffer = '';
 
                             if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
-                                $this->pipeline->setSegmentIsHtml();
+                                $this->pipeline->setSegmentContainsHtml();
                             }
 
                             break;
@@ -229,7 +229,7 @@ class HtmlParser {
                                 $html_buffer = '';
 
                                 if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
-                                    $this->pipeline->setSegmentIsHtml();
+                                    $this->pipeline->setSegmentContainsHtml();
                                 }
 
                                 break;
@@ -253,7 +253,7 @@ class HtmlParser {
                             $html_buffer = '';
 
                             if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
-                                $this->pipeline->setSegmentIsHtml();
+                                $this->pipeline->setSegmentContainsHtml();
                             }
                         }
 
@@ -275,7 +275,7 @@ class HtmlParser {
                             $html_buffer = '';
 
                             if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
-                                $this->pipeline->setSegmentIsHtml();
+                                $this->pipeline->setSegmentContainsHtml();
                             }
                         }
 
@@ -292,7 +292,7 @@ class HtmlParser {
         if ( !empty( $html_buffer ) ) {
 
             if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
-                $this->pipeline->setSegmentIsHtml();
+                $this->pipeline->setSegmentContainsHtml();
             }
 
             $output .= $this->_fixWrongBuffer( $html_buffer );

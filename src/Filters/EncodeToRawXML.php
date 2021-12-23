@@ -19,7 +19,7 @@ class EncodeToRawXML extends AbstractHandler
         $segment = preg_replace( '/&(#13;|#x0D;)|\r/', '##_ent_0D_##', $segment );
 
         //allow double encoding if the segment is HTML
-        if($this->pipeline->isSegmentIsHtml()){
+        if($this->pipeline->segmentContainsHtml()){
             $segment = htmlspecialchars( $segment, ENT_NOQUOTES | ENT_XML1, 'UTF-8', true );
         }
 
