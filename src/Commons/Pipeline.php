@@ -21,12 +21,20 @@ class Pipeline {
      */
     protected $id_number = -1;
 
+    protected $source;
+    protected $target;
+    protected $dataRefMap;
+
     /**
      * @var bool
      */
     private $segmentContainsHtml = false;
 
-    public function __construct() {}
+    public function __construct( $source = null, $target = null, $dataRefMap = [] ) {
+        $this->source = $source;
+        $this->target = $target;
+        $this->dataRefMap = $dataRefMap;
+    }
 
     public function getNextId(){
         $this->id_number++;
@@ -49,6 +57,27 @@ class Pipeline {
     public function setSegmentContainsHtml()
     {
         $this->segmentContainsHtml = true;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getSource() {
+        return $this->source;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getTarget() {
+        return $this->target;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function getDataRefMap() {
+        return $this->dataRefMap;
     }
 
     /**

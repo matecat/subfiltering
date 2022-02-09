@@ -14,31 +14,31 @@ class DataRefRestore extends AbstractHandler {
 
     /**
      * DataRefReplace constructor.
-     *
-     * @param array $dataRefMap
      */
-    public function __construct( array $dataRefMap = [])
-    {
+    public function __construct() {
         parent::__construct();
-        $this->dataRefMap = $dataRefMap;
     }
 
     /**
      * @inheritDoc
      */
-    public function transform( $segment )
-    {
-        if(empty($this->dataRefMap)){
-            $segment = $this->restoreXliffPhTagsFromMatecatPhTags($segment);
+    public function transform( $segment ) {
 
-            return $this->restoreXliffPcTagsFromMatecatPhTags($segment);
+        if ( empty( $this->dataRefMap ) ) {
+            $this->dataRefMap = $this->pipeline->getDataRefMap();
         }
 
-        $dataRefReplacer = new DataRefReplacer($this->dataRefMap);
-        $segment = $dataRefReplacer->restore($segment);
-        $segment = $this->restoreXliffPhTagsFromMatecatPhTags($segment);
+        if ( empty( $this->dataRefMap ) ) {
+            $segment = $this->restoreXliffPhTagsFromMatecatPhTags( $segment );
 
-        return $this->restoreXliffPcTagsFromMatecatPhTags($segment);
+            return $this->restoreXliffPcTagsFromMatecatPhTags( $segment );
+        }
+
+        $dataRefReplacer = new DataRefReplacer( $this->dataRefMap );
+        $segment         = $dataRefReplacer->restore( $segment );
+        $segment         = $this->restoreXliffPhTagsFromMatecatPhTags( $segment );
+
+        return $this->restoreXliffPcTagsFromMatecatPhTags( $segment );
     }
 
     /**
@@ -57,18 +57,17 @@ class DataRefRestore extends AbstractHandler {
      *
      * @return string
      */
-    private function restoreXliffPhTagsFromMatecatPhTags( $segment)
-    {
-        preg_match_all('/<(ph id="mtc_ph_u_(.*?)" equiv-text="(.*?)")\/>/iu', $segment, $matches);
+    private function restoreXliffPhTagsFromMatecatPhTags( $segment ) {
+        preg_match_all( '/<(ph id="mtc_ph_u_(.*?)" equiv-text="(.*?)")\/>/iu', $segment, $matches );
 
-        if(empty($matches[0])){
+        if ( empty( $matches[ 0 ] ) ) {
             return $segment;
         }
 
-        foreach ($matches[0] as $index => $match){
-            $value = base64_decode(str_replace('base64:', '', $matches[3][$index]));
-            $value = str_replace(['&lt;','&gt;'], ['<', '>'], $value);
-            $segment = str_replace($match, $value, $segment);
+        foreach ( $matches[ 0 ] as $index => $match ) {
+            $value   = base64_decode( str_replace( 'base64:', '', $matches[ 3 ][ $index ] ) );
+            $value   = str_replace( [ '&lt;', '&gt;' ], [ '<', '>' ], $value );
+            $segment = str_replace( $match, $value, $segment );
         }
 
         return $segment;
@@ -90,18 +89,17 @@ class DataRefRestore extends AbstractHandler {
      *
      * @return string
      */
-    private function restoreXliffPcTagsFromMatecatPhTags( $segment)
-    {
-        preg_match_all('/<(ph id="mtc_u_(.*?)" equiv-text="(.*?)")\/>/iu', $segment, $matches);
+    private function restoreXliffPcTagsFromMatecatPhTags( $segment ) {
+        preg_match_all( '/<(ph id="mtc_u_(.*?)" equiv-text="(.*?)")\/>/iu', $segment, $matches );
 
-        if(empty($matches[0])){
+        if ( empty( $matches[ 0 ] ) ) {
             return $segment;
         }
 
-        foreach ($matches[0] as $index => $match){
-            $value = base64_decode(str_replace('base64:', '', $matches[3][$index]));
-            $value = str_replace(['&lt;','&gt;'], ['<', '>'], $value);
-            $segment = str_replace($match, $value, $segment);
+        foreach ( $matches[ 0 ] as $index => $match ) {
+            $value   = base64_decode( str_replace( 'base64:', '', $matches[ 3 ][ $index ] ) );
+            $value   = str_replace( [ '&lt;', '&gt;' ], [ '<', '>' ], $value );
+            $segment = str_replace( $match, $value, $segment );
         }
 
         return $segment;

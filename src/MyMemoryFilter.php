@@ -33,8 +33,7 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  *
  * @package Matecat\SubFiltering
  */
-class MyMemoryFilter extends AbstractFilter
-{
+class MyMemoryFilter extends AbstractFilter {
     /**
      * Used to transform database raw xml content ( Layer 0 ) to the sub filtered structures, used for server to server ( Ex: TM/MT ) communications ( Layer 1 )
      *
@@ -43,15 +42,14 @@ class MyMemoryFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer0ToLayer1($segment)
-    {
-        $channel = new Pipeline();
+    public function fromLayer0ToLayer1( $segment ) {
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
-        $channel->addLast( new SprintfToPH($this->source, $this->target) );
+        $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 
@@ -69,9 +67,8 @@ class MyMemoryFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer1ToLayer0($segment)
-    {
-        $channel = new Pipeline();
+    public function fromLayer1ToLayer0( $segment ) {
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );

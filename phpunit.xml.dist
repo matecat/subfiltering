@@ -7,12 +7,10 @@
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
-         syntaxCheck="true"
-         beStrictAboutTestSize="true"
          beStrictAboutTestsThatDoNotTestAnything="true">
 
     <testsuites>
-        <testsuite name="Xliff Parser Suite">
+        <testsuite name="Subfiltering Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

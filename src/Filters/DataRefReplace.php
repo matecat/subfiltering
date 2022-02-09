@@ -15,32 +15,32 @@ class DataRefReplace extends AbstractHandler {
 
     /**
      * DataRefReplace constructor.
-     *
-     * @param array $dataRefMap
      */
-    public function __construct( array $dataRefMap = [] )
-    {
+    public function __construct() {
         parent::__construct();
-        $this->dataRefMap = $dataRefMap;
     }
 
     /**
      * @inheritDoc
      */
-    public function transform( $segment )
-    {
+    public function transform( $segment ) {
+
+        if ( empty( $this->dataRefMap ) ) {
+            $this->dataRefMap = $this->pipeline->getDataRefMap();
+        }
+
         // dataRefMap is present only in xliff 2.0 files
         if ( empty( $this->dataRefMap ) ) {
-            $segment = $this->replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
+            $segment = $this->replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
 
-            return $this->replaceXliffPcTagsToMatecatPhTags($segment);
+            return $this->replaceXliffPcTagsToMatecatPhTags( $segment );
         }
 
         $dataRefReplacer = new DataRefReplacer( $this->dataRefMap );
-        $segment = $dataRefReplacer->replace( $segment );
-        $segment = $this->replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
+        $segment         = $dataRefReplacer->replace( $segment );
+        $segment         = $this->replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
 
-        return $this->replaceXliffPcTagsToMatecatPhTags($segment);
+        return $this->replaceXliffPcTagsToMatecatPhTags( $segment );
     }
 
     /**
@@ -59,21 +59,20 @@ class DataRefReplace extends AbstractHandler {
      *
      * @return string|string[]
      */
-    private function replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment)
-    {
-        preg_match_all('/&lt;(ph .*?)&gt;/iu', $segment, $phTags);
+    private function replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
+        preg_match_all( '/&lt;(ph .*?)&gt;/iu', $segment, $phTags );
 
-        if(count($phTags[0]) === 0)  {
+        if ( count( $phTags[ 0 ] ) === 0 ) {
             return $segment;
         }
 
         $phIndex = 1;
 
-        foreach ($phTags[0] as $phTag){
+        foreach ( $phTags[ 0 ] as $phTag ) {
             // check if phTag has not any correspondence on dataRef map
-            if($this->isAPhTagWithNoDataRefCorrespondence($phTag)){
-                $phMatecat = '&lt;ph id="mtc_ph_u_'.$phIndex.'" equiv-text="base64:'.base64_encode($phTag).'"/&gt;';
-                $segment = str_replace($phTag, $phMatecat, $segment);
+            if ( $this->isAPhTagWithNoDataRefCorrespondence( $phTag ) ) {
+                $phMatecat = '&lt;ph id="mtc_ph_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $phTag ) . '"/&gt;';
+                $segment   = str_replace( $phTag, $phMatecat, $segment );
                 $phIndex++;
             }
         }
@@ -90,22 +89,21 @@ class DataRefReplace extends AbstractHandler {
      *
      * @return bool
      */
-    private function isAPhTagWithNoDataRefCorrespondence($phTag)
-    {
-        $parsed = HtmlParser::parse($phTag);
+    private function isAPhTagWithNoDataRefCorrespondence( $phTag ) {
+        $parsed = HtmlParser::parse( $phTag );
 
-        if(!isset($parsed[0])){
+        if ( !isset( $parsed[ 0 ] ) ) {
             return false;
         }
 
         // if has equiv-text don't touch
-        if(isset($parsed[0]->attributes['equiv-text'])){
+        if ( isset( $parsed[ 0 ]->attributes[ 'equiv-text' ] ) ) {
             return false;
         }
 
         // if has dataRef attribute check if there is correspondence on dataRef map
-        if(isset($parsed[0]->attributes['dataRef'])){
-            return !array_key_exists($parsed[0]->attributes['dataRef'], $this->dataRefMap);
+        if ( isset( $parsed[ 0 ]->attributes[ 'dataRef' ] ) ) {
+            return !array_key_exists( $parsed[ 0 ]->attributes[ 'dataRef' ], $this->dataRefMap );
         }
 
         return true;
@@ -127,26 +125,26 @@ class DataRefReplace extends AbstractHandler {
      *
      * @return string|string[]
      */
-    private function replaceXliffPcTagsToMatecatPhTags($segment) {
+    private function replaceXliffPcTagsToMatecatPhTags( $segment ) {
 
-        preg_match_all('/&lt;(pc .*?)&gt;/iu', $segment, $openingPcTags);
-        preg_match_all('/&lt;(\/pc)&gt;/iu', $segment, $closingPcTags);
+        preg_match_all( '/&lt;(pc .*?)&gt;/iu', $segment, $openingPcTags );
+        preg_match_all( '/&lt;(\/pc)&gt;/iu', $segment, $closingPcTags );
 
-        if(count($openingPcTags[0]) === 0)  {
+        if ( count( $openingPcTags[ 0 ] ) === 0 ) {
             return $segment;
         }
 
         $phIndex = 1;
 
-        foreach ($openingPcTags[0] as $openingPcTag){
-            $phMatecat = '&lt;ph id="mtc_u_'.$phIndex.'" equiv-text="base64:'.base64_encode($openingPcTag).'"/&gt;';
-            $segment = str_replace($openingPcTag, $phMatecat, $segment);
+        foreach ( $openingPcTags[ 0 ] as $openingPcTag ) {
+            $phMatecat = '&lt;ph id="mtc_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $openingPcTag ) . '"/&gt;';
+            $segment   = str_replace( $openingPcTag, $phMatecat, $segment );
             $phIndex++;
         }
 
-        foreach ($closingPcTags[0] as $closingPcTag){
-            $phMatecat = '&lt;ph id="mtc_u_'.$phIndex.'" equiv-text="base64:'.base64_encode($closingPcTag).'"/&gt;';
-            $segment = str_replace($closingPcTag, $phMatecat, $segment);
+        foreach ( $closingPcTags[ 0 ] as $closingPcTag ) {
+            $phMatecat = '&lt;ph id="mtc_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $closingPcTag ) . '"/&gt;';
+            $segment   = str_replace( $closingPcTag, $phMatecat, $segment );
             $phIndex++;
         }
 
