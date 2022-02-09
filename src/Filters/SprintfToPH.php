@@ -12,10 +12,8 @@ class SprintfToPH extends AbstractHandler {
     private $source;
     private $target;
 
-    public function __construct( $source = null, $target = null) {
+    public function __construct() {
         parent::__construct();
-        $this->source = $source;
-        $this->target = $target;
     }
 
     /**
@@ -35,14 +33,15 @@ class SprintfToPH extends AbstractHandler {
      *</code>
      *
      * @param $segment
+     *
      * @return string
      */
     public function transform( $segment ) {
 
-        $sprintfLocker = new SprintfLocker($this->source, $this->target);
+        $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
 
         //placeholding
-        $segment = $sprintfLocker->lock($segment);
+        $segment = $sprintfLocker->lock( $segment );
 
         // Octal parsing is disabled due to Hungarian percentages 20%-os
         // preg_match_all( '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?(?:[b-fiosuxX]))/', $segment, $vars, PREG_SET_ORDER );
@@ -59,7 +58,7 @@ class SprintfToPH extends AbstractHandler {
         }
 
         //revert placeholding
-        $segment = $sprintfLocker->unlock($segment);
+        $segment = $sprintfLocker->unlock( $segment );
 
         return $segment;
     }

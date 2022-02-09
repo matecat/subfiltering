@@ -53,8 +53,7 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  *
  * @package SubFiltering
  */
-class MateCatFilter extends AbstractFilter
-{
+class MateCatFilter extends AbstractFilter {
     /**
      * Used to transform database raw xml content ( Layer 0 ) to the UI structures ( Layer 2 )
      *
@@ -63,10 +62,9 @@ class MateCatFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer0ToLayer2( $segment )
-    {
+    public function fromLayer0ToLayer2( $segment ) {
         return $this->fromLayer1ToLayer2(
-            $this->fromLayer0ToLayer1( $segment )
+                $this->fromLayer0ToLayer1( $segment )
         );
     }
 
@@ -78,16 +76,15 @@ class MateCatFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer1ToLayer2( $segment )
-    {
-        $channel = new Pipeline();
+    public function fromLayer1ToLayer2( $segment ) {
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new SpacesToNBSPForView() );
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new RestoreTabsPlaceholders() );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
-        $channel->addLast( new DataRefReplace($this->dataRefMap) );
+        $channel->addLast( new DataRefReplace() );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer1ToLayer2', $channel );
@@ -103,12 +100,11 @@ class MateCatFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer2ToLayer1( $segment )
-    {
-        $channel = new Pipeline();
+    public function fromLayer2ToLayer1( $segment ) {
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
-        $channel->addLast( new PlaceHoldXliffTags());
+        $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new FromLayer2TorawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
@@ -132,8 +128,7 @@ class MateCatFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer2ToLayer0( $segment )
-    {
+    public function fromLayer2ToLayer0( $segment ) {
         return $this->fromLayer1ToLayer0(
                 $this->fromLayer2ToLayer1( $segment )
         );
@@ -147,15 +142,14 @@ class MateCatFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer0ToLayer1( $segment )
-    {
-        $channel = new Pipeline();
+    public function fromLayer0ToLayer1( $segment ) {
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
-        $channel->addLast( new PlaceHoldXliffTags());
+        $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
-        $channel->addLast( new SprintfToPH($this->source, $this->target) );
+        $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 
@@ -173,15 +167,14 @@ class MateCatFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer1ToLayer0( $segment )
-    {
-        $channel = new Pipeline();
-        $channel->addLast( new DataRefRestore($this->dataRefMap) );
+    public function fromLayer1ToLayer0( $segment ) {
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
+        $channel->addLast( new DataRefRestore() );
         $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
-        $channel->addLast( new PlaceHoldXliffTags());
+        $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new LtGtEncode() );
@@ -204,10 +197,9 @@ class MateCatFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromRawXliffToLayer0( $segment )
-    {
-        $channel = new Pipeline();
-        $channel->addLast( new PlaceHoldXliffTags());
+    public function fromRawXliffToLayer0( $segment ) {
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
+        $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new PlaceBreakingSpacesInXliff() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
@@ -226,10 +218,9 @@ class MateCatFilter extends AbstractFilter
      * @return mixed
      * @throws \Exception
      */
-    public function fromLayer0ToRawXliff( $segment )
-    {
-        $channel = new Pipeline();
-        $channel->addLast( new PlaceHoldXliffTags());
+    public function fromLayer0ToRawXliff( $segment ) {
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
+        $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new RemoveDangerousChars() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
@@ -254,8 +245,7 @@ class MateCatFilter extends AbstractFilter
      *
      * @return string
      */
-    public function realignIDInLayer1( $source, $target )
-    {
+    public function realignIDInLayer1( $source, $target ) {
         $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
         preg_match_all( $pattern, $source, $src_tags, PREG_PATTERN_ORDER );
         preg_match_all( $pattern, $target, $trg_tags, PREG_PATTERN_ORDER );
