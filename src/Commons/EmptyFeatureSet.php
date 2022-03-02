@@ -11,6 +11,9 @@ namespace Matecat\SubFiltering\Commons;
 
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 
+/**
+ * Used from sources which want not to implement a custom object from this package
+ */
 class EmptyFeatureSet implements FeatureSetInterface {
 
     /**

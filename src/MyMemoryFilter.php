@@ -47,7 +47,7 @@ class MyMemoryFilter extends AbstractFilter {
      *
      * @return mixed
      */
-    public function fromLayer0ToLayer1( $segment, $cid = false ) {
+    public function fromLayer0ToLayer1( $segment, $cid = null ) {
         $channel = new Pipeline( $this->source, $this->target );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
