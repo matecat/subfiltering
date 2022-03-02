@@ -11,15 +11,20 @@ use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
+use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
+use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
+use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
+use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\SubFilteredPhToHtml;
 use Matecat\SubFiltering\Filters\TwigToPh;
+use Matecat\SubFiltering\Filters\Variables;
 
 /**
  * Class MyMemoryFilter
@@ -38,25 +43,42 @@ class MyMemoryFilter extends AbstractFilter {
      * Used to transform database raw xml content ( Layer 0 ) to the sub filtered structures, used for server to server ( Ex: TM/MT ) communications ( Layer 1 )
      *
      * @param $segment
+     * @param $cid
      *
      * @return mixed
-     * @throws \Exception
      */
-    public function fromLayer0ToLayer1( $segment ) {
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
+    public function fromLayer0ToLayer1( $segment, $cid = false ) {
+        $channel = new Pipeline( $this->source, $this->target );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
+        if ( $cid == 'airbnb' ) {
+            $channel->addLast( new Variables() ); // SE AIRBNB
+            $channel->addLast( new SmartCounts() );
+        }
+
         $channel->addLast( new TwigToPh() );
         $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromLayer0ToLayer1', $channel );
+        if ( $cid == 'skyscanner' ) {
+            $channel->remove( new TwigToPh() );
+            $channel->remove( new SprintfToPH() );
+            $channel->addAfter( new HtmlToPh(), new RubyOnRailsI18n() );
+            $channel->addAfter( new RubyOnRailsI18n(), new Percentages() );
+            $channel->addAfter( new Percentages(), new SprintfToPH() );
+            $channel->addAfter( new SprintfToPH(), new TwigToPh() );
+            $channel->addAfter( new TwigToPh(), new SingleCurlyBracketsToPh() );
+        }
+
+        if ( $cid == 'uber' ) {
+            $channel->addAfter( new TwigToPh(), new SingleCurlyBracketsToPh() );
+        }
 
         return $channel->transform( $segment );
+
     }
 
     /**
