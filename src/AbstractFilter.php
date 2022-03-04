@@ -66,6 +66,14 @@ abstract class AbstractFilter
     }
 
     /**
+     * Destroy the singleton
+     */
+    public static function destroyInstance()
+    {
+        static::$_INSTANCE = null;
+    }
+
+    /**
      * @param string              $source
      * @param string              $target
      * @param FeatureSetInterface $featureSet

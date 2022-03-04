@@ -3,7 +3,6 @@
 namespace Matecat\SubFiltering\Tests;
 
 use Matecat\SubFiltering\MyMemoryFilter;
-use Matecat\SubFiltering\Tests\Mocks\Features\AirbnbFeature;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\TestCase;
 
@@ -15,11 +14,16 @@ class MyMemorySubFilteringTest extends TestCase
      */
     private function getFilterInstance()
     {
-        $featureSet = new FeatureSet([new AirbnbFeature()]);
+        MyMemoryFilter::destroyInstance(); // for isolation test
 
-        return MyMemoryFilter::getInstance($featureSet, 'en-US','it-IT', []);
+        return MyMemoryFilter::getInstance(new FeatureSet(), 'en-US','it-IT', []);
     }
 
+    /**
+     * Test for Airbnb
+     *
+     * @throws \Exception
+     */
     public function testVariablesWithHTML()
     {
         $filter = $this->getFilterInstance();
@@ -28,6 +32,54 @@ class MyMemorySubFilteringTest extends TestCase
         $segment_from_UI = 'Airbnb account.<ph id="mtc_1" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" equiv-text="base64:JXtcbn0="/>1) From ';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
-        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'airbnb' ) );
+    }
+
+    /**
+     * Test for skyscanner
+     *
+     * @throws \Exception
+     */
+    public function testSingleSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @this is a variable@ is not valid';
+        $segment_from_UI = 'This syntax @this is a variable@ is not valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'skyscanner' ) );
+
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @this_is_a_variable@ is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QHRoaXNfaXNfYV92YXJpYWJsZUA="/> is valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'skyscanner' ) );
+    }
+
+    /**
+     * Test for skyscanner
+     *
+     * @throws \Exception
+     */
+    public function testDoubleSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @@this is a variable@@ is not valid';
+        $segment_from_UI = 'This syntax @@this is a variable@@ is not valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'skyscanner' ) );
+
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @@this_is_a_variable@@ is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'skyscanner' ) );
     }
 }

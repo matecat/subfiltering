@@ -54,7 +54,7 @@ class TestHandlersOrder extends TestCase {
         $this->channel->addAfter( new SprintfToPH(), new TwigToPh() );
         $this->channel->addAfter( new TwigToPh(), new SingleCurlyBracketsToPh() );
 
-        $reflection = new ReflectionClass( $this->channel );
+        $reflection = new \ReflectionClass( $this->channel );
         $property   = $reflection->getProperty( 'handlers' );
         $property->setAccessible( true );
         $handlersList = $property->getValue( $this->channel );

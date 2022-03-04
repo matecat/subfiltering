@@ -12,12 +12,16 @@ use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use Matecat\SubFiltering\Utils\CatUtils;
 use PHPUnit\Framework\TestCase;
 
-class MateCatSubFilteringTest extends TestCase {
+class MateCatSubFilteringTest extends TestCase
+{
     /**
      * @return \Matecat\SubFiltering\AbstractFilter
      * @throws \Exception
      */
-    private function getFilterInstance() {
+    private function getFilterInstance()
+    {
+        MateCatFilter::destroyInstance(); // for isolation test
+
         return MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT' );
     }
 
