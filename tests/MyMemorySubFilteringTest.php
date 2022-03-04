@@ -14,6 +14,8 @@ class MyMemorySubFilteringTest extends TestCase
      */
     private function getFilterInstance()
     {
+        MyMemoryFilter::destroyInstance(); // for isolation test
+
         return MyMemoryFilter::getInstance(new FeatureSet(), 'en-US','it-IT', []);
     }
 
