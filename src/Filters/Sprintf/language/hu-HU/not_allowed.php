@@ -1,8 +1,16 @@
 <?php
 
 return [
-        '%-os',
-        '%-ot',
-        '%-kal',
-        '%-ban',
+        '%-os' => [
+            'type' => 'exact'
+        ],
+        '%-ot' => [
+            'type' => 'exact'
+        ],
+        '%-kal' => [
+            'type' => 'exact'
+        ],
+        '%-ban' => [
+            'type' => 'exact'
+        ],
 ];
