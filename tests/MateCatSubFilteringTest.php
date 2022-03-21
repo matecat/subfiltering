@@ -245,7 +245,8 @@ class MateCatSubFilteringTest extends TestCase
      **************************
      */
 
-    public function testSprintf() {
+    public function testSprintf()
+    {
         $channel = new Pipeline( 'hu-HU', 'az-AZ' );
         $channel->addLast( new SprintfToPH() );
 
@@ -253,6 +254,14 @@ class MateCatSubFilteringTest extends TestCase
         $seg_transformed = $channel->transform( $segment );
 
         $this->assertEquals( $segment, $seg_transformed );
+
+        $segment         = 'Legalább 10%-aaa befejezett foglalás 20%-bbb VAGY';
+        $seg_transformed = $channel->transform( $segment );
+
+        $this->assertEquals( $segment, $seg_transformed );
+
+        $channel = new Pipeline( 'hu-HU', 'it-IT' );
+        $channel->addLast( new SprintfToPH() );
 
         $segment         = 'Legalább 10%-aaa befejezett foglalás 20%-bbb VAGY';
         $seg_transformed = $channel->transform( $segment );
