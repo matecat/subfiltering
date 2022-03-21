@@ -1,6 +1,10 @@
 <?php
 
 return [
-    '%-ige',
-    '%ige',
+    '%-ige' => [
+        'type' => 'exact'
+    ],
+    '%ige' => [
+        'type' => 'exact'
+    ],
 ];

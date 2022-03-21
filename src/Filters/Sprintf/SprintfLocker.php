@@ -5,6 +5,12 @@ namespace Matecat\SubFiltering\Filters\Sprintf;
 class SprintfLocker {
 
     /**
+     * Protection tags
+     */
+    const PRE_LOCK_TAG  = '_____########';
+    const POST_LOCK_TAG = '########_____';
+
+    /**
      * @var null
      */
     private $source;
@@ -25,22 +31,23 @@ class SprintfLocker {
     private $replacementMap = [];
 
     /**
-     * Analiser constructor.
+     * SprintfLocker constructor.
      *
      * @param null $source
      * @param null $target
      */
-    public function __construct($source = null, $target = null) {
+    public function __construct($source = null, $target = null)
+    {
         $this->source = $source;
         $this->target = $target;
         $this->notAllowedMap = $this->createNotAllowedMap();
-        $this->replacementMap = $this->createReplacementMap();
     }
 
     /**
      * @return array
      */
-    private function createNotAllowedMap() {
+    private function createNotAllowedMap()
+    {
         $map = [];
 
         $all = include __DIR__ . "/language/all/not_allowed.php";
@@ -59,27 +66,71 @@ class SprintfLocker {
         return $map;
     }
 
-    private function createReplacementMap() {
-        $map = [];
+    /**
+     * @param $segment
+     *
+     * @return string
+     */
+    public function lock($segment)
+    {
+        $replacementMap = $this->createReplacementMap($segment);
+        $this->replacementMap = $replacementMap;
 
-        foreach ($this->notAllowedMap as $item){
-            $map[] = '_____########'.str_replace(['%','-','_'],'', $item).'########_____';
+        return str_replace( array_keys($replacementMap), array_values($replacementMap), $segment );
+    }
+
+    /**
+     * @param $segment
+     *
+     * @return string
+     */
+    public function unlock($segment)
+    {
+        $replacementMap = $this->replacementMap;
+
+        return str_replace( array_values($replacementMap), array_keys($replacementMap),  $segment );
+    }
+
+    /**
+     * Create the replacement map
+     *
+     * @param $segment
+     *
+     * @return array
+     */
+    private function createReplacementMap( $segment)
+    {
+        $replacementMap = [];
+
+        foreach ($this->notAllowedMap as $item => $details){
+
+            $type = $details['type'];
+
+            switch ($type){
+                case 'exact':
+                    $replacementMap[$item] = self::PRE_LOCK_TAG . $this->maskString($item) . self::POST_LOCK_TAG;
+                    break;
+
+                case 'regex':
+                    preg_match_all('/'.$item.'/', $segment, $matches);
+
+                    foreach ($matches[0] as $match){
+                        $replacementMap[$match] = self::PRE_LOCK_TAG . $this->maskString($match) . self::POST_LOCK_TAG;
+                    }
+                    break;
+            }
         }
 
-        return $map;
+        return $replacementMap;
     }
 
     /**
+     * @param $string
+     *
      * @return string
      */
-    public function lock($segment){
-        return str_replace( $this->notAllowedMap, $this->replacementMap, $segment );
-    }
-
-    /**
-     * @return string
-     */
-    public function unlock($segment){
-        return str_replace( $this->replacementMap, $this->notAllowedMap, $segment );
+    private function maskString($string)
+    {
+        return str_replace(['%','-','_'],'', $string);
     }
 }
