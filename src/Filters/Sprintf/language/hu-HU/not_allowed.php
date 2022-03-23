@@ -1,16 +1,7 @@
 <?php
 
 return [
-        '%-os' => [
-            'type' => 'exact'
-        ],
-        '%-ot' => [
-            'type' => 'exact'
-        ],
-        '%-kal' => [
-            'type' => 'exact'
-        ],
-        '%-ban' => [
-            'type' => 'exact'
+        '%-[a-zA-Z]{1,3}' => [
+                'type' => 'regex'
         ],
 ];
