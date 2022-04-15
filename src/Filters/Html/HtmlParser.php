@@ -140,7 +140,7 @@ class HtmlParser {
                             break;
                         }
 
-                        if ( in_array( substr( $html_buffer, 0, 6 ), [ '<scrip', '<style' ] ) ) {
+                        if ( in_array( substr( $html_buffer, 0, 8 ), [ '<script ', '<style', '<script', '<style ' ] ) ) {
                             $html_buffer .= $char;
                             $state       = static::STATE_JS_CSS;
                             break;
