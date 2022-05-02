@@ -76,7 +76,6 @@ class MyMemoryFilter extends AbstractFilter {
             $channel->addAfter( new Snails(), new Percentages() );
             $channel->addAfter( new Percentages(), new SprintfToPH() );
             $channel->addAfter( new SprintfToPH(), new TwigToPh() );
-            $channel->addAfter( new TwigToPh(), new SingleCurlyBracketsToPh() );
         }
 
         if ( $cid == 'uber' ) {
