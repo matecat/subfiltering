@@ -271,6 +271,51 @@ class MateCatSubFilteringTest extends TestCase
 
     /**
      **************************
+     * Tag XLIFF inside a XLIFF
+     **************************
+     */
+
+    public function testXliffTagsInsideAXliffFile() {
+
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
+
+        $xliffTags = [
+            [
+                'db_segment' => '&lt;g id="1"&gt;',
+                'expected_l1_segment' => '<ph id="mtc_1" equiv-text="base64:Jmx0O2cgaWQ9IjEiJmd0Ow=="/>',
+                'expected_l2_segment' => '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O2cgaWQ9IjEiJmd0Ow=="/&gt;',
+            ],
+            [
+                'db_segment' => '&lt;x id="1"/&gt;',
+                'expected_l1_segment' => '<ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/>',
+                'expected_l2_segment' => '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/&gt;',
+            ],
+            [
+                'db_segment' => '&lt;pc id="1"&gt;',
+                'expected_l1_segment' => '<ph id="mtc_1" equiv-text="base64:Jmx0O3BjIGlkPSIxIiZndDs="/>',
+                'expected_l2_segment' => '&lt;ph id="mtc_1" equiv-text="base64:Jmx0O3BjIGlkPSIxIiZndDs="/&gt;',
+            ],
+        ];
+
+        foreach ($xliffTags as $xliffTag){
+            $db_segment          = $xliffTag['db_segment'];
+            $expected_l1_segment = $xliffTag['expected_l1_segment'];
+            $expected_l2_segment = $xliffTag['expected_l2_segment'];
+
+            $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
+            $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
+
+            $this->assertEquals( $l1_segment, $expected_l1_segment );
+            $this->assertEquals( $l2_segment, $expected_l2_segment );
+
+            $back_to_db = $Filter->fromLayer1ToLayer0( $expected_l1_segment );
+
+            $this->assertEquals( $db_segment, $back_to_db );
+        }
+    }
+
+    /**
+     **************************
      * TWIG
      **************************
      */
