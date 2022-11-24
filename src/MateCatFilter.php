@@ -23,6 +23,7 @@ use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreTabsPlaceholders;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
+use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
 use Matecat\SubFiltering\Filters\SpacesToNBSPForView;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
@@ -175,6 +176,7 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new RestoreXliffTagsInXliff() );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new LtGtEncode() );
