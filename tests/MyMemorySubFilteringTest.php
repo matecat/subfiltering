@@ -37,6 +37,7 @@ class MyMemorySubFilteringTest extends TestCase
 
     /**
      * Test for skyscanner
+     * (promoted to global behavior)
      *
      * @throws \Exception
      */
@@ -48,7 +49,7 @@ class MyMemorySubFilteringTest extends TestCase
         $segment_from_UI = 'This syntax @this is a variable@ is not valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
-        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'skyscanner' ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
 
         $filter = $this->getFilterInstance();
 
@@ -56,11 +57,12 @@ class MyMemorySubFilteringTest extends TestCase
         $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QHRoaXNfaXNfYV92YXJpYWJsZUA="/> is valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
-        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'skyscanner' ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
     /**
      * Test for skyscanner
+     * (promoted to global behavior)
      *
      * @throws \Exception
      */
@@ -72,7 +74,7 @@ class MyMemorySubFilteringTest extends TestCase
         $segment_from_UI = 'This syntax @@this is a variable@@ is not valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
-        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'skyscanner' ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
 
         $filter = $this->getFilterInstance();
 
@@ -80,6 +82,6 @@ class MyMemorySubFilteringTest extends TestCase
         $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
-        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'skyscanner' ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 }

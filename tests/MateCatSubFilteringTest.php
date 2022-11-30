@@ -757,4 +757,49 @@ class MateCatSubFilteringTest extends TestCase
 
         $this->assertEquals( $back_to_db_segment, $db_segment );
     }
+
+    /**
+     **************************
+     * Skyscanner pipeline
+     * (promoted to global behavior)
+     **************************
+     */
+
+    public function testSingleSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @this is a variable@ is not valid';
+        $segment_from_UI = 'This syntax @this is a variable@ is not valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @this_is_a_variable@ is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QHRoaXNfaXNfYV92YXJpYWJsZUA="/> is valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testDoubleSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @@this is a variable@@ is not valid';
+        $segment_from_UI = 'This syntax @@this is a variable@@ is not valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @@this_is_a_variable@@ is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
 }

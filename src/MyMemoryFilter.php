@@ -58,25 +58,19 @@ class MyMemoryFilter extends AbstractFilter {
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
+
         if ( $cid == 'airbnb' ) {
             $channel->addLast( new Variables() );
             $channel->addLast( new SmartCounts() );
         }
 
-        $channel->addLast( new TwigToPh() );
+        $channel->addLast( new RubyOnRailsI18n() );
+        $channel->addLast( new Snails() );
+        $channel->addLast( new Percentages() );
         $channel->addLast( new SprintfToPH() );
+        $channel->addLast( new TwigToPh() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
-
-        if ( $cid == 'skyscanner' ) {
-            $channel->remove( new TwigToPh() );
-            $channel->remove( new SprintfToPH() );
-            $channel->addAfter( new HtmlToPh(), new RubyOnRailsI18n() );
-            $channel->addAfter( new RubyOnRailsI18n(), new Snails() );
-            $channel->addAfter( new Snails(), new Percentages() );
-            $channel->addAfter( new Percentages(), new SprintfToPH() );
-            $channel->addAfter( new SprintfToPH(), new TwigToPh() );
-        }
 
         if ( $cid == 'uber' ) {
             $channel->addAfter( new TwigToPh(), new SingleCurlyBracketsToPh() );
