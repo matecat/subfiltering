@@ -13,6 +13,8 @@ use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
 use Matecat\SubFiltering\Filters\Percentages;
+use Matecat\SubFiltering\Filters\PercentNumberSnail;
+use Matecat\SubFiltering\Filters\PercentSnail;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
@@ -66,6 +68,8 @@ class MyMemoryFilter extends AbstractFilter {
 
         $channel->addLast( new RubyOnRailsI18n() );
         $channel->addLast( new Snails() );
+        $channel->addLast( new PercentSnail() );
+        $channel->addLast( new PercentNumberSnail() );
         $channel->addLast( new Percentages() );
         $channel->addLast( new SprintfToPH() );
         $channel->addLast( new TwigToPh() );

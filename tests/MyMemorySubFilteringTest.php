@@ -61,11 +61,12 @@ class MyMemorySubFilteringTest extends TestCase
     }
 
     /**
-     * Test for skyscanner
+     **************************
+     * Skyscanner pipeline
      * (promoted to global behavior)
-     *
-     * @throws \Exception
+     **************************
      */
+
     public function testDoubleSnailSyntax()
     {
         $filter = $this->getFilterInstance();
@@ -80,6 +81,39 @@ class MyMemorySubFilteringTest extends TestCase
 
         $db_segment      = 'This syntax @@this_is_a_variable@@ is valid';
         $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testPercentDoubleCurlyBracketsSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'Save up to ​%{{|discount|}} with these hotels';
+        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testPercentSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string: %@ is a IOS placeholder %@.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" equiv-text="base64:JUA="/>.';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testPercentNumberSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
+        $segment_from_UI = 'This string: <ph id="mtc_1" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" equiv-text="base64:JTE0MzQzJEA="/>';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );

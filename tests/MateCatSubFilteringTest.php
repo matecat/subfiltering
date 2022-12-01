@@ -813,4 +813,26 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
+
+    public function testPercentSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string: %@ is a IOS placeholder %@.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" equiv-text="base64:JUA="/>.';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testPercentNumberSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
+        $segment_from_UI = 'This string: <ph id="mtc_1" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" equiv-text="base64:JTE0MzQzJEA="/>';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
 }

@@ -16,6 +16,8 @@ use Matecat\SubFiltering\Filters\LtGtDoubleEncode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
 use Matecat\SubFiltering\Filters\Percentages;
+use Matecat\SubFiltering\Filters\PercentNumberSnail;
+use Matecat\SubFiltering\Filters\PercentSnail;
 use Matecat\SubFiltering\Filters\PlaceBreakingSpacesInXliff;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RemoveDangerousChars;
@@ -154,6 +156,8 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new RubyOnRailsI18n() );
         $channel->addLast( new Snails() );
+        $channel->addLast( new PercentSnail() );
+        $channel->addLast( new PercentNumberSnail() );
         $channel->addLast( new Percentages() );
         $channel->addLast( new SprintfToPH() );
         $channel->addLast( new TwigToPh() );
