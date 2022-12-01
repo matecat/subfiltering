@@ -802,4 +802,15 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
+
+    public function testPercentDoubleCurlyBracketsSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'Save up to ​%{{|discount|}} with these hotels';
+        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
 }
