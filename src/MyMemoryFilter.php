@@ -66,13 +66,13 @@ class MyMemoryFilter extends AbstractFilter {
             $channel->addLast( new SmartCounts() );
         }
 
+        $channel->addLast( new TwigToPh() );
         $channel->addLast( new RubyOnRailsI18n() );
         $channel->addLast( new Snails() );
         $channel->addLast( new PercentSnail() );
         $channel->addLast( new PercentNumberSnail() );
         $channel->addLast( new Percentages() );
         $channel->addLast( new SprintfToPH() );
-        $channel->addLast( new TwigToPh() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 

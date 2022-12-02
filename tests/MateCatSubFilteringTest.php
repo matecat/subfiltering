@@ -835,4 +835,15 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
+
+    public function testWithMixedPercentTags()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string contains all these tags: %-4d %@ %12$@ ​%{{|discount|}} {% if count &lt; 3 %}';
+        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" equiv-text="base64:JUA="/> <ph id="mtc_3" equiv-text="base64:JTEyJEA="/> ​%<ph id="mtc_4" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> <ph id="mtc_5" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/>';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
 }
