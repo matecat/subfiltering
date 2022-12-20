@@ -13,6 +13,8 @@ use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
 use Matecat\SubFiltering\Filters\Percentages;
+use Matecat\SubFiltering\Filters\PercentNumberSnail;
+use Matecat\SubFiltering\Filters\PercentSnail;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
@@ -58,25 +60,21 @@ class MyMemoryFilter extends AbstractFilter {
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
+
         if ( $cid == 'airbnb' ) {
             $channel->addLast( new Variables() );
             $channel->addLast( new SmartCounts() );
         }
 
         $channel->addLast( new TwigToPh() );
+        $channel->addLast( new RubyOnRailsI18n() );
+        $channel->addLast( new Snails() );
+        $channel->addLast( new PercentSnail() );
+        $channel->addLast( new PercentNumberSnail() );
+        $channel->addLast( new Percentages() );
         $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
-
-        if ( $cid == 'skyscanner' ) {
-            $channel->remove( new TwigToPh() );
-            $channel->remove( new SprintfToPH() );
-            $channel->addAfter( new HtmlToPh(), new RubyOnRailsI18n() );
-            $channel->addAfter( new RubyOnRailsI18n(), new Snails() );
-            $channel->addAfter( new Snails(), new Percentages() );
-            $channel->addAfter( new Percentages(), new SprintfToPH() );
-            $channel->addAfter( new SprintfToPH(), new TwigToPh() );
-        }
 
         if ( $cid == 'uber' ) {
             $channel->addAfter( new TwigToPh(), new SingleCurlyBracketsToPh() );

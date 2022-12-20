@@ -757,4 +757,93 @@ class MateCatSubFilteringTest extends TestCase
 
         $this->assertEquals( $back_to_db_segment, $db_segment );
     }
+
+    /**
+     **************************
+     * Skyscanner pipeline
+     * (promoted to global behavior)
+     **************************
+     */
+
+    public function testSingleSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @this is a variable@ is not valid';
+        $segment_from_UI = 'This syntax @this is a variable@ is not valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @this_is_a_variable@ is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QHRoaXNfaXNfYV92YXJpYWJsZUA="/> is valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testDoubleSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @@this is a variable@@ is not valid';
+        $segment_from_UI = 'This syntax @@this is a variable@@ is not valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax @@this_is_a_variable@@ is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testPercentDoubleCurlyBracketsSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'Save up to ​%{{|discount|}} with these hotels';
+        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testPercentSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string: %@ is a IOS placeholder %@.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" equiv-text="base64:JUA="/>.';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testPercentNumberSnailSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
+        $segment_from_UI = 'This string: <ph id="mtc_1" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" equiv-text="base64:JTE0MzQzJEA="/>';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testWithMixedPercentTags()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string contains all these tags: %-4d %@ %12$@ ​%{{|discount|}} {% if count &lt; 3 %}';
+        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" equiv-text="base64:JUA="/> <ph id="mtc_3" equiv-text="base64:JTEyJEA="/> ​%<ph id="mtc_4" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> <ph id="mtc_5" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/>';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
 }

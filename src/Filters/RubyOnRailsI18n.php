@@ -14,6 +14,9 @@ use Matecat\SubFiltering\Commons\Constants;
 
 class RubyOnRailsI18n extends AbstractHandler {
 
+    const DOUBLE_CURLY_BRACKETS_PROTECT_START_TAG = '######__DOUBLE_CURLY_BRACKETS_START__######';
+    const DOUBLE_CURLY_BRACKETS_PROTECT_END_TAG = '######__DOUBLE_CURLY_BRACKETS_END__######';
+
     /**
      * Support for ruby on rails i18n variables
      *
@@ -26,6 +29,7 @@ class RubyOnRailsI18n extends AbstractHandler {
      * @return string
      */
     public function transform( $segment ) {
+
         preg_match_all( '/%{[^<>\s%]+?}/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $pos => $percentage_variable ) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
