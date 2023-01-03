@@ -42,7 +42,7 @@ class SubFilteredPhToHtml extends AbstractHandler {
     private function placeholdXliffTagsInXliff($value)
     {
         $value = preg_replace( '|(&lt;/x&gt;)|si', "", $value );
-        $value = preg_replace( '|&lt;(g\s*id=["\']+.*?["\']+\s*[^&lt;&gt;]*?)&gt;|si', Constants::xliffInXliffStartPlaceHolder . "$1" . Constants::xliffInXliffEndPlaceHolder, $value );
+        $value = preg_replace( '#&lt;(g\s*id=["\']+.*?["\']+\s*(?!&lt;|&gt;)*?)&gt;#si', Constants::xliffInXliffStartPlaceHolder . "$1" . Constants::xliffInXliffEndPlaceHolder, $value );
 
         $value = preg_replace( '|&lt;(/g)&gt;|si', Constants::xliffInXliffStartPlaceHolder . "$1" . Constants::xliffInXliffEndPlaceHolder, $value );
 
@@ -66,10 +66,6 @@ class SubFilteredPhToHtml extends AbstractHandler {
         $value = preg_replace( '|&lt;(mrk\s*.*?)&gt;|si', Constants::xliffInXliffStartPlaceHolder . "$1" . Constants::xliffInXliffEndPlaceHolder, $value );
         $value = preg_replace( '|&lt;(/mrk)&gt;|si', Constants::xliffInXliffStartPlaceHolder . "$1" . Constants::xliffInXliffEndPlaceHolder, $value );
 
-        return preg_replace_callback( '/' . Constants::xliffInXliffStartPlaceHolder . '(.*?)' . Constants::xliffInXliffEndPlaceHolder . '/u',
-                function ( $matches ) {
-                    return Constants::xliffInXliffStartPlaceHolder . $matches[ 1 ] . Constants::xliffInXliffEndPlaceHolder;
-                }, $value
-        );
+        return $value;
     }
 }
