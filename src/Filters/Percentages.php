@@ -26,7 +26,7 @@ class Percentages extends AbstractHandler {
      * @return string
      */
     public function transform( $segment ) {
-        preg_match_all( '/%%[^<>\s%]+?%%|(?<!{)%[^<>\s%]+?%/', $segment, $html, PREG_SET_ORDER );
+        preg_match_all( '/%%[^<>\s%]+?%%/', $segment, $html, PREG_SET_ORDER ); // removed single percentage support '/(?<!{)%[^<>\s%]+?%/'
         foreach ( $html as $pos => $percentage_variable ) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
             if( !strstr($percentage_variable[0], Constants::GTPLACEHOLDER) ){
