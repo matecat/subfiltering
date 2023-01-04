@@ -19,6 +19,7 @@ use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
+use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
@@ -99,6 +100,7 @@ class MyMemoryFilter extends AbstractFilter {
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new RestoreXliffTagsInXliff() );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new LtGtEncode() );

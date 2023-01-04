@@ -118,4 +118,16 @@ class MyMemorySubFilteringTest extends TestCase
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
+
+    public function testDecodeInternalEncodedXliffTags()
+    {
+        $filter = $this->getFilterInstance();
+        $db_segment = '&lt;x id="1"/&gt;&lt;g id="2"&gt;As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
+        $segment_received = '<ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/><ph id="mtc_2" equiv-text="base64:Jmx0O2cgaWQ9IjIiJmd0Ow=="/>As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_received ) );
+        $this->assertEquals( $segment_received, $filter->fromLayer0ToLayer1( $db_segment ) );
+
+    }
+
 }
