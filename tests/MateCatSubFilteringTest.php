@@ -113,6 +113,25 @@ class MateCatSubFilteringTest extends TestCase
     /**
      * @throws \Exception
      */
+    public function testGTagsWithXidAttributes()
+    {
+        $filter = $this->getFilterInstance();
+
+        $segment = 'This is a <g id="43">test</g> (with a <g xid="068cd98d-103c-49fe-92e1-76e863f93bba" id="44">g tag with xid attribute</g>).';
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $string_from_UI = 'This is a <g id="43">test</g> (with a <g xid="068cd98d-103c-49fe-92e1-76e863f93bba" id="44">g tag with xid attribute</g>).';
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testComplexHtmlFilledWithXML() {
 
         $filter = $this->getFilterInstance();

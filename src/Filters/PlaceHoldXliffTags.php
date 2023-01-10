@@ -24,12 +24,13 @@ class PlaceHoldXliffTags extends AbstractHandler {
 
         //$segment=preg_replace('|<(g\s*.*?)>|si', Constants::LTPLACEHOLDER."$1".Constants::GTPLACEHOLDER,$segment);
         $segment = preg_replace( '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(g\s*xid=["\']+.*?["\']+\s*[^<>]*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
 
         $segment = preg_replace( '|<(/g)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
 
         $segment = preg_replace( '|<(x .*?/?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '#<(bx[ ]{0,}/?|bx .*?/?)>#si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '#<(ex[ ]{0,}/?|ex .*?/?)>#si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '#<(ex[ ]{0,}/?   |ex .*?/?)>#si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(bpt\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(/bpt)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(ept\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
