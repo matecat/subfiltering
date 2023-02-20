@@ -778,6 +778,40 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
+     * Test for skyscanner
+     * (promoted to global behavior)
+     *
+     * @throws \Exception
+     */
+    public function testSinglePercentageSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax %this_is_a_variable% is no more valid';
+        $segment_from_UI = 'This syntax %this_is_a_variable% is no more valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    /**
+     * Test for skyscanner
+     * (promoted to global behavior)
+     *
+     * @throws \Exception
+     */
+    public function testDoublePercentageSyntax()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This syntax %%customer.first_name%% is still valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:JSVjdXN0b21lci5maXJzdF9uYW1lJSU="/> is still valid';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    /**
      **************************
      * Skyscanner pipeline
      * (promoted to global behavior)
@@ -796,8 +830,8 @@ class MateCatSubFilteringTest extends TestCase
 
         $filter = $this->getFilterInstance();
 
-        $db_segment      = 'This syntax @this_is_a_variable@ is valid';
-        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QHRoaXNfaXNfYV92YXJpYWJsZUA="/> is valid';
+        $db_segment      = 'This syntax @this_is_a_variable@ is no more valid';
+        $segment_from_UI = 'This syntax @this_is_a_variable@ is no more valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
