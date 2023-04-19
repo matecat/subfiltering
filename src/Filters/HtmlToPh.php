@@ -11,6 +11,7 @@ namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\Html\CallbacksHandler;
 use Matecat\SubFiltering\Filters\Html\HtmlParser;
 
@@ -61,7 +62,7 @@ class HtmlToPh extends AbstractHandler {
      * @return string
      */
     protected function _finalizeTag( $buffer ){
-        return '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+        return '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**

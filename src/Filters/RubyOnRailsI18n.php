@@ -11,11 +11,9 @@ namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class RubyOnRailsI18n extends AbstractHandler {
-
-    const DOUBLE_CURLY_BRACKETS_PROTECT_START_TAG = '######__DOUBLE_CURLY_BRACKETS_START__######';
-    const DOUBLE_CURLY_BRACKETS_PROTECT_END_TAG = '######__DOUBLE_CURLY_BRACKETS_END__######';
 
     /**
      * Support for ruby on rails i18n variables
@@ -37,7 +35,7 @@ class RubyOnRailsI18n extends AbstractHandler {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
                         '/' . preg_quote( $percentage_variable[0], '/' ) . '/',
-                        '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( $percentage_variable[ 0 ] ) . '"/>',
+                        '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="'.CTypeEnum::RUBY_ON_RAILS.'" equiv-text="base64:' . base64_encode( $percentage_variable[ 0 ] ) . '"/>',
                         $segment,
                         1
                 );
