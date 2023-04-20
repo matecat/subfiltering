@@ -14,5 +14,5 @@ class CTypeEnum
     const PERCENT_NUMBER_SNAILS = 'x-percent-number-snails';
     const PERCENTAGES = 'x-percentages';
     const SPRINTF = 'x-sprintf';
-    const AIRBNB_VARIABLE = 'x-airbnb-variable';
+    const PERCENT_VARIABLE = 'x-percent-variable';
 }

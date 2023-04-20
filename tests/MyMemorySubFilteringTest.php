@@ -30,7 +30,7 @@ class MyMemorySubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'Airbnb account.%{\n}%{&lt;br&gt;}%{\n}1) From ';
-        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="'.CTypeEnum::AIRBNB_VARIABLE.'" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="'.CTypeEnum::AIRBNB_VARIABLE.'" equiv-text="base64:JXtcbn0="/>1) From ';
+        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="'.CTypeEnum::PERCENT_VARIABLE.'" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="'.CTypeEnum::PERCENT_VARIABLE.'" equiv-text="base64:JXtcbn0="/>1) From ';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'airbnb' ) );
