@@ -15,7 +15,7 @@ class SubFilteredPhToHtml extends AbstractHandler {
     public function transform( $segment )
     {
         // pipeline for restore PH tag of subfiltering to original encoded HTML
-        preg_match_all( '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-([^"\']+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>|siU', $segment, $html, PREG_SET_ORDER ); // Ungreedy
+        preg_match_all( '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-([0-9a-zA-Z\-]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>|siU', $segment, $html, PREG_SET_ORDER ); // Ungreedy
 
         foreach ( $html as $subfilter_tag ) {
             $value = base64_decode( $subfilter_tag[ 2 ] );

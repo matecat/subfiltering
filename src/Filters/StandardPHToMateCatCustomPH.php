@@ -15,7 +15,6 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 class StandardPHToMateCatCustomPH extends AbstractHandler {
 
     public function transform( $segment ) {
-
         if ( preg_match( '|</ph>|s', $segment ) ) {
             preg_match_all( '|<(ph id=["\'](.*?)["\'].*?)>(.*?)<(/ph)>|', $segment, $phTags, PREG_SET_ORDER );
             foreach ( $phTags as $group ) {

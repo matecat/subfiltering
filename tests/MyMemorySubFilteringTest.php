@@ -2,6 +2,7 @@
 
 namespace Matecat\SubFiltering\Tests;
 
+use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MyMemoryFilter;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\TestCase;
@@ -29,7 +30,7 @@ class MyMemorySubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'Airbnb account.%{\n}%{&lt;br&gt;}%{\n}1) From ';
-        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" equiv-text="base64:JXtcbn0="/>1) From ';
+        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="'.CTypeEnum::AIRBNB_VARIABLE.'" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="'.CTypeEnum::AIRBNB_VARIABLE.'" equiv-text="base64:JXtcbn0="/>1) From ';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'airbnb' ) );
@@ -63,7 +64,7 @@ class MyMemorySubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This syntax %%customer.first_name%% is still valid';
-        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:JSVjdXN0b21lci5maXJzdF9uYW1lJSU="/> is still valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="'.CTypeEnum::PERCENTAGES.'" equiv-text="base64:JSVjdXN0b21lci5maXJzdF9uYW1lJSU="/> is still valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -114,7 +115,7 @@ class MyMemorySubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This syntax @@this_is_a_variable@@ is valid';
-        $segment_from_UI = 'This syntax <ph id="mtc_1" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="'.CTypeEnum::SNAILS.'" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -125,7 +126,7 @@ class MyMemorySubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'Save up to ​%{{|discount|}} with these hotels';
-        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -136,7 +137,7 @@ class MyMemorySubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %@ is a IOS placeholder %@.';
-        $segment_from_UI = 'This string: <ph id="mtc_1" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" equiv-text="base64:JUA="/>.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="'.CTypeEnum::PERCENT_SNAILS.'" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="'.CTypeEnum::PERCENT_SNAILS.'" equiv-text="base64:JUA="/>.';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -147,7 +148,7 @@ class MyMemorySubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
-        $segment_from_UI = 'This string: <ph id="mtc_1" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" equiv-text="base64:JTE0MzQzJEA="/>';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="'.CTypeEnum::PERCENT_NUMBER_SNAILS.'" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="'.CTypeEnum::PERCENT_NUMBER_SNAILS.'" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="'.CTypeEnum::PERCENT_NUMBER_SNAILS.'" equiv-text="base64:JTE0MzQzJEA="/>';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -157,7 +158,7 @@ class MyMemorySubFilteringTest extends TestCase
     {
         $filter = $this->getFilterInstance();
         $db_segment = '&lt;x id="1"/&gt;&lt;g id="2"&gt;As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
-        $segment_received = '<ph id="mtc_1" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/><ph id="mtc_2" equiv-text="base64:Jmx0O2cgaWQ9IjIiJmd0Ow=="/>As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
+        $segment_received = '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/><ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2cgaWQ9IjIiJmd0Ow=="/>As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_received ) );
         $this->assertEquals( $segment_received, $filter->fromLayer0ToLayer1( $db_segment ) );
