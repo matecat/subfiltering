@@ -10,11 +10,11 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class StandardPHToMateCatCustomPH extends AbstractHandler {
 
     public function transform( $segment ) {
-
         if ( preg_match( '|</ph>|s', $segment ) ) {
             preg_match_all( '|<(ph id=["\'](.*?)["\'].*?)>(.*?)<(/ph)>|', $segment, $phTags, PREG_SET_ORDER );
             foreach ( $phTags as $group ) {
@@ -32,7 +32,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler {
         preg_match_all( '/ph id\s*=\s*[\'"]((?!__mtc_).*?)[\'"] equiv-text\s*?=\s*?(["\'])(?!base64:)(.*?)\2/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $tag_attribute ) {
             //replace subsequent elements excluding already encoded
-            $segment = str_replace( $tag_attribute[ 0 ], 'ph id="' . $tag_attribute[ 1 ] . '" equiv-text="base64:' . base64_encode( $tag_attribute[ 3 ] ) . "\"", $segment );
+            $segment = str_replace( $tag_attribute[ 0 ], 'ph id="' . $tag_attribute[ 1 ] . '" ctype="'.CTypeEnum::ORIGINAL_PH.'" equiv-text="base64:' . base64_encode( $tag_attribute[ 3 ] ) . "\"", $segment );
         }
 
         return $segment;

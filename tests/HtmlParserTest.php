@@ -62,7 +62,7 @@ class HtmlParserTest extends TestCase {
         //WARNING the href attribute MUST NOT BE encoded because we want only extract HTML
         //WARNING the text node inside HTML must remain untouched
         $segment = "<p> Airbnb &amp;amp; Co. &amp;lt; <strong>Use professional tools</strong> in your <a href=\"/users/settings?test=123&amp;amp;ciccio=1\" target=\"_blank\">";
-        $expected = "<ph id=\"mtc_1\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> Airbnb &amp;amp; Co. &amp;lt; <ph id=\"mtc_2\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/>Use professional tools<ph id=\"mtc_3\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/> in your <ph id=\"mtc_4\" equiv-text=\"base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs=\"/>";
+        $expected = "<ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> Airbnb &amp;amp; Co. &amp;lt; <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/>Use professional tools<ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/> in your <ph id=\"mtc_4\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs=\"/>";
 
         $pipeline = new Pipeline();
         $pipeline->addLast( new HtmlToPh() );
@@ -85,7 +85,7 @@ class HtmlParserTest extends TestCase {
 h1 {color:blue;}p{color:red;}
 </style>";
 
-        $expected = '<ph id="mtc_1" equiv-text="base64:Jmx0O3N0eWxlJmd0O2JvZHl7YmFja2dyb3VuZC1jb2xvcjpwb3dkZXJibHVlO30gCmgxIHtjb2xvcjpibHVlO31we2NvbG9yOnJlZDt9CiZsdDsvc3R5bGUmZ3Q7"/>';
+        $expected = '<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O3N0eWxlJmd0O2JvZHl7YmFja2dyb3VuZC1jb2xvcjpwb3dkZXJibHVlO30gCmgxIHtjb2xvcjpibHVlO31we2NvbG9yOnJlZDt9CiZsdDsvc3R5bGUmZ3Q7"/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast( new HtmlToPh() );
@@ -118,7 +118,7 @@ h1 {color:blue;}p{color:red;}
 
         $segment  = "<style0>this is a test text inside a custom xml tag similar to a style html tag</style0>";
 
-        $expected = '<ph id="mtc_1" equiv-text="base64:Jmx0O3N0eWxlMCZndDs="/>this is a test text inside a custom xml tag similar to a style html tag<ph id="mtc_2" equiv-text="base64:Jmx0Oy9zdHlsZTAmZ3Q7"/>';
+        $expected = '<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O3N0eWxlMCZndDs="/>this is a test text inside a custom xml tag similar to a style html tag<ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0Oy9zdHlsZTAmZ3Q7"/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast( new HtmlToPh() );
@@ -142,7 +142,7 @@ h1 {color:blue;}p{color:red;}
 let elements = document.getElementsByClassName('note');
 </script>";
 
-        $expected = '<ph id="mtc_1" equiv-text="base64:Jmx0O3NjcmlwdCZndDsKbGV0IGVsZW1lbnRzID0gZG9jdW1lbnQuZ2V0RWxlbWVudHNCeUNsYXNzTmFtZSgnbm90ZScpOwombHQ7L3NjcmlwdCZndDs="/>';
+        $expected = '<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O3NjcmlwdCZndDsKbGV0IGVsZW1lbnRzID0gZG9jdW1lbnQuZ2V0RWxlbWVudHNCeUNsYXNzTmFtZSgnbm90ZScpOwombHQ7L3NjcmlwdCZndDs="/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast( new HtmlToPh() );
@@ -159,7 +159,7 @@ let elements = document.getElementsByClassName('note');
 
         $segment  = "<scripting>let elements = document.getElementsByClassName('note');</scripting>";
 
-        $expected = '<ph id="mtc_1" equiv-text="base64:Jmx0O3NjcmlwdGluZyZndDs="/>let elements = document.getElementsByClassName(\'note\');<ph id="mtc_2" equiv-text="base64:Jmx0Oy9zY3JpcHRpbmcmZ3Q7"/>';
+        $expected = '<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O3NjcmlwdGluZyZndDs="/>let elements = document.getElementsByClassName(\'note\');<ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0Oy9zY3JpcHRpbmcmZ3Q7"/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast( new HtmlToPh() );

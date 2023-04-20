@@ -20,6 +20,7 @@ use Matecat\SubFiltering\Filters\PercentNumberSnail;
 use Matecat\SubFiltering\Filters\PercentSnail;
 use Matecat\SubFiltering\Filters\PlaceBreakingSpacesInXliff;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
+use Matecat\SubFiltering\Filters\RemoveCTypeFromPhTags;
 use Matecat\SubFiltering\Filters\RemoveDangerousChars;
 use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
@@ -194,6 +195,7 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new SplitPlaceholder() );
+        $channel->addLast( new RemoveCTypeFromPhTags() );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer1ToLayer0', $channel );

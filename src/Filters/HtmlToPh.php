@@ -11,6 +11,7 @@ namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\Html\CallbacksHandler;
 use Matecat\SubFiltering\Filters\Html\HtmlParser;
 
@@ -30,7 +31,8 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return mixed
      */
-    protected function _finalizePlainText( $buffer ) {
+    protected function _finalizePlainText( $buffer )
+    {
         return $buffer;
     }
 
@@ -39,14 +41,15 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return string
      */
-    protected function _finalizeHTMLTag( $buffer ){
-
+    protected function _finalizeHTMLTag( $buffer )
+    {
         //decode attributes by locking <,> first
         //because a html tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
         // Ex:
         // incoming string : <a href="/users/settings?test=123&amp;amp;ciccio=1" target="_blank">
         // this should be:   <a href="/users/settings?test=123&amp;ciccio=1" target="_blank"> with only one ampersand encoding
         //
+
         $buffer = str_replace( [ '<', '>' ], [ '#_lt_#', '#_gt_#' ], $buffer );
         $buffer = html_entity_decode( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8' );
         $buffer = str_replace( [ '#_lt_#', '#_gt_#' ], [ '<', '>' ], $buffer );
@@ -60,8 +63,9 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return string
      */
-    protected function _finalizeTag( $buffer ){
-        return '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+    protected function _finalizeTag( $buffer )
+    {
+        return '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**
@@ -69,9 +73,11 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return mixed
      */
-    protected function _fixWrongBuffer( $buffer ){
+    protected function _fixWrongBuffer( $buffer )
+    {
         $buffer = str_replace( "<", "&lt;", $buffer );
         $buffer = str_replace( ">", "&gt;", $buffer );
+
         return $buffer;
     }
 
@@ -80,7 +86,8 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return string
      */
-    protected function _finalizeScriptTag( $buffer ){
+    protected function _finalizeScriptTag( $buffer )
+    {
         return $this->_finalizeTag( $buffer );
     }
 
@@ -131,12 +138,12 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return string
      */
-    public function transform( $segment ) {
-
+    public function transform( $segment )
+    {
         $parser = new HtmlParser($this->pipeline);
         $parser->registerCallbacksHandler( $this );
-        return $parser->transform( $segment );
 
+        return $parser->transform( $segment );
     }
 
 }

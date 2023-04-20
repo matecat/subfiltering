@@ -27,11 +27,13 @@ class HtmlPlainTextDecoder extends HtmlToPh {
      *
      * @return mixed
      */
-    protected function _finalizePlainText( $buffer ) {
+    protected function _finalizePlainText( $buffer )
+    {
         return html_entity_decode( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8' );
     }
 
-    protected function _finalizeTag( $buffer ){
+    protected function _finalizeTag( $buffer )
+    {
         return $buffer;
     }
 
@@ -40,7 +42,8 @@ class HtmlPlainTextDecoder extends HtmlToPh {
      *
      * @return string
      */
-    protected function _finalizeHTMLTag( $buffer ){
+    protected function _finalizeHTMLTag( $buffer )
+    {
         return $this->_finalizeTag( $buffer );
     }
 

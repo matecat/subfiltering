@@ -3,6 +3,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class PercentNumberSnail extends AbstractHandler
 {
@@ -16,7 +17,7 @@ class PercentNumberSnail extends AbstractHandler
 
             $segment = preg_replace(
                     '/' . preg_quote( $percentNumberSnailVariable[0], '/' ) . '/',
-                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( $percentNumberSnailVariable[ 0 ] ) . '"/>',
+                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="'.CTypeEnum::PERCENT_NUMBER_SNAILS.'" equiv-text="base64:' . base64_encode( $percentNumberSnailVariable[ 0 ] ) . '"/>',
                     $segment,
                     1
             );

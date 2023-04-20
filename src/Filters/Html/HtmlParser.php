@@ -73,14 +73,15 @@ class HtmlParser {
      */
     public function __call( $name, $arguments ) {
 
-        //Reflection to allow protected/private methods to be set as callback
-        $reflector = new ReflectionMethod( $this->callbacksHandler, $name );
-        if ( !$reflector->isPublic() ) {
-            $reflector->setAccessible( true );
+        if($this->callbacksHandler !== null){
+            //Reflection to allow protected/private methods to be set as callback
+            $reflector = new ReflectionMethod( $this->callbacksHandler, $name );
+            if ( !$reflector->isPublic() ) {
+                $reflector->setAccessible( true );
+            }
+
+            return $reflector->invoke( $this->callbacksHandler, $arguments[ 0 ] );
         }
-
-        return $reflector->invoke( $this->callbacksHandler, $arguments[ 0 ] );
-
     }
 
     public function transform( $segment ) {
