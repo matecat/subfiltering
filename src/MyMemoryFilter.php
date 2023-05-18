@@ -5,6 +5,9 @@ namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
+use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
+use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
+use Matecat\SubFiltering\Filters\DoubleUnderscore;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\HtmlPlainTextDecoder;
@@ -71,6 +74,9 @@ class MyMemoryFilter extends AbstractFilter {
         $channel->addLast( new TwigToPh() );
         $channel->addLast( new RubyOnRailsI18n() );
         $channel->addLast( new Snails() );
+        $channel->addLast( new DoubleSquareBrackets() );
+        $channel->addLast( new DoubleUnderscore() );
+        $channel->addLast( new DollarCurlyBrackets() );
         $channel->addLast( new PercentSnail() );
         $channel->addLast( new PercentNumberSnail() );
         $channel->addLast( new Percentages() );

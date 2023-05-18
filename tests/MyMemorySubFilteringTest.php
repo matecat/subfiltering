@@ -165,4 +165,44 @@ class MyMemorySubFilteringTest extends TestCase
 
     }
 
+    /**
+     **************************
+     * Lastminute pipeline
+     * (promoted to global behavior)
+     **************************
+     */
+
+    public function testWithDoubleSquareBrackets()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string contains [[placeholder]]';
+        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="'.CTypeEnum::DOUBLE_SQUARE_BRACKETS.'" equiv-text="base64:W1twbGFjZWhvbGRlcl1d"/>';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testWithDoubleUnderscore()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string contains __placeholder_one__';
+        $segment_from_UI      = 'This string contains <ph id="mtc_1" ctype="'.CTypeEnum::DOUBLE_UNDERSCORE.'" equiv-text="base64:X19wbGFjZWhvbGRlcl9vbmVfXw=="/>';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testWithDollarCurlyBrackets()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string contains ${placeholder_one}';
+        $segment_from_UI      = 'This string contains <ph id="mtc_1" ctype="'.CTypeEnum::DOLLAR_CURLY_BRACKETS.'" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
 }
