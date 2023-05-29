@@ -169,4 +169,17 @@ let elements = document.getElementsByClassName('note');
         $this->assertEquals( $expected, $str );
     }
 
+    public function testWithDoublePoints()
+    {
+        $segment  = "<l:style1>test</l:style1>";
+        $expected = '<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O2w6c3R5bGUxJmd0Ow=="/>test<ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0Oy9sOnN0eWxlMSZndDs="/>';
+
+        $pipeline = new Pipeline();
+        $pipeline->addLast( new HtmlToPh() );
+
+        $str = $pipeline->transform( $segment );
+
+        $this->assertEquals( $expected, $str );
+    }
+
 }
