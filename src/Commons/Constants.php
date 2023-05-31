@@ -18,6 +18,6 @@ class Constants {
     const splitPlaceHolder = '##$_SPLIT$##';
 
     const xliffInXliffStartPlaceHolder = '##XLIFFTAGPLACEHOLDER_START##';
-    const xliffInXliffEndPlaceHolder = '##XLIFFTAGPLACEHOLDER_END##';
+    const xliffInXliffEndPlaceHolder   = '##XLIFFTAGPLACEHOLDER_END##';
 
 }

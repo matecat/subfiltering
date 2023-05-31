@@ -6,6 +6,7 @@ namespace Matecat\SubFiltering;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
+use Matecat\SubFiltering\Filters\DoubleSnail;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\DoubleUnderscore;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
@@ -27,14 +28,13 @@ use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
+use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\SubFilteredPhToHtml;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\Filters\Variables;
-use Matecat\SubFiltering\Filters\Snails;
-use Matecat\SubFiltering\Filters\DoubleSnail;
 
 /**
  * Class MyMemoryFilter
@@ -58,8 +58,7 @@ class MyMemoryFilter extends AbstractFilter {
      *
      * @return mixed
      */
-    public function fromLayer0ToLayer1( $segment, $cid = null )
-    {
+    public function fromLayer0ToLayer1( $segment, $cid = null ) {
         $channel = new Pipeline( $this->source, $this->target );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
         $channel->addLast( new PlaceHoldXliffTags() );

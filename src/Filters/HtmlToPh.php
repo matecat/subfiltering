@@ -18,7 +18,7 @@ use Matecat\SubFiltering\Filters\Html\HtmlParser;
 /**
  * Class HtmlToPh
  *
- * @author domenico domenico@translated.net / ostico@gmail.com
+ * @author  domenico domenico@translated.net / ostico@gmail.com
  * @package SubFiltering
  *
  */
@@ -31,8 +31,7 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return mixed
      */
-    protected function _finalizePlainText( $buffer )
-    {
+    protected function _finalizePlainText( $buffer ) {
         return $buffer;
     }
 
@@ -41,8 +40,7 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return string
      */
-    protected function _finalizeHTMLTag( $buffer )
-    {
+    protected function _finalizeHTMLTag( $buffer ) {
         //decode attributes by locking <,> first
         //because a html tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
         // Ex:
@@ -63,9 +61,8 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return string
      */
-    protected function _finalizeTag( $buffer )
-    {
-        return '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+    protected function _finalizeTag( $buffer ) {
+        return '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**
@@ -73,8 +70,7 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return mixed
      */
-    protected function _fixWrongBuffer( $buffer )
-    {
+    protected function _fixWrongBuffer( $buffer ) {
         $buffer = str_replace( "<", "&lt;", $buffer );
         $buffer = str_replace( ">", "&gt;", $buffer );
 
@@ -86,8 +82,7 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return string
      */
-    protected function _finalizeScriptTag( $buffer )
-    {
+    protected function _finalizeScriptTag( $buffer ) {
         return $this->_finalizeTag( $buffer );
     }
 
@@ -112,7 +107,7 @@ class HtmlToPh extends AbstractHandler {
          * - ending with a letter a-zA-Z0-9 or a quote "' or /
          *
          */
-        if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._:]+?(?:\s[:a-z0-9\-\._]+=.+?)?\s*[\/]{0,1}>#is', $buffer ) ){
+        if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._:]+?(?:\s[:a-z0-9\-\._]+=.+?)?\s*[\/]{0,1}>#is', $buffer ) ) {
 //            if( is_numeric( substr( $buffer, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#is', $buffer ) ){ //H tag are an exception
 //                //tag can not end with a number
 //                return false;
@@ -122,7 +117,7 @@ class HtmlToPh extends AbstractHandler {
             //EX:
             //original:  &lt;a href=\"<x id="1">\"&gt;
             //  <a href=\"##LESSTHAN##eCBpZD0iMSIv##GREATERTHAN##\">
-            if( strpos( $buffer, Constants::LTPLACEHOLDER ) !== false || strpos( $buffer, Constants::GTPLACEHOLDER ) !== false ){
+            if ( strpos( $buffer, Constants::LTPLACEHOLDER ) !== false || strpos( $buffer, Constants::GTPLACEHOLDER ) !== false ) {
                 return false;
             }
 
@@ -138,9 +133,8 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return string
      */
-    public function transform( $segment )
-    {
-        $parser = new HtmlParser($this->pipeline);
+    public function transform( $segment ) {
+        $parser = new HtmlParser( $this->pipeline );
         $parser->registerCallbacksHandler( $this );
 
         return $parser->transform( $segment );

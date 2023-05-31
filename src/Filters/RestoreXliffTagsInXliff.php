@@ -10,8 +10,7 @@ class RestoreXliffTagsInXliff extends AbstractHandler {
     /**
      * @inheritDoc
      */
-    public function transform( $segment )
-    {
+    public function transform( $segment ) {
         $segment = str_replace( Constants::xliffInXliffStartPlaceHolder, "&lt;", $segment );
         $segment = str_replace( Constants::xliffInXliffEndPlaceHolder, "&gt;", $segment );
 

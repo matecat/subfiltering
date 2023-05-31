@@ -30,7 +30,7 @@ abstract class AbstractHandler {
      * AbstractHandler constructor.
      */
     public function __construct() {
-        $this->name = get_class($this);
+        $this->name = get_class( $this );
     }
 
     /**
@@ -43,14 +43,14 @@ abstract class AbstractHandler {
     /**
      * @param Pipeline $pipeline
      */
-    public function setPipeline( Pipeline $pipeline ){
+    public function setPipeline( Pipeline $pipeline ) {
         $this->pipeline = $pipeline;
     }
 
     /**
      * @return Pipeline
      */
-    public function getPipeline(){
+    public function getPipeline() {
         return $this->pipeline;
     }
 

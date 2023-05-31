@@ -46,8 +46,7 @@ class HtmlParser {
      *
      * @param Pipeline $pipeline
      */
-    public function __construct(Pipeline $pipeline = null)
-    {
+    public function __construct( Pipeline $pipeline = null ) {
         $this->pipeline = $pipeline;
     }
 
@@ -73,7 +72,7 @@ class HtmlParser {
      */
     public function __call( $name, $arguments ) {
 
-        if($this->callbacksHandler !== null){
+        if ( $this->callbacksHandler !== null ) {
             //Reflection to allow protected/private methods to be set as callback
             $reflector = new ReflectionMethod( $this->callbacksHandler, $name );
             if ( !$reflector->isPublic() ) {
@@ -131,7 +130,7 @@ class HtmlParser {
 
                         // if we found a second less than symbol the first one IS NOT a tag,
                         // treat the html_buffer as plain text and attach to the output
-                        $output .= $this->_fixWrongBuffer( $html_buffer );
+                        $output      .= $this->_fixWrongBuffer( $html_buffer );
                         $html_buffer = $char;
                         break;
 
@@ -158,7 +157,7 @@ class HtmlParser {
                             $output .= $this->_fixWrongBuffer( $html_buffer );
                         }
 
-                        if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                        if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
                             $this->pipeline->setSegmentContainsHtml();
                         }
 
@@ -193,7 +192,7 @@ class HtmlParser {
                             $output      .= $this->_fixWrongBuffer( '< ' );
                             $html_buffer = '';
 
-                            if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                            if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
                                 $this->pipeline->setSegmentContainsHtml();
                             }
 
@@ -206,7 +205,7 @@ class HtmlParser {
                     default:
 
                         // Check the last char
-                        if($idx === (count($originalSplit)-1)){
+                        if ( $idx === ( count( $originalSplit ) - 1 ) ) {
 
                             $html_buffer .= $char;
 
@@ -224,12 +223,12 @@ class HtmlParser {
                             //
                             // is not a valid tag, so it's converted to $plain_text_buffer
                             //
-                            if(!$this->_isTagValid( $html_buffer )){
-                                $state = static::STATE_PLAINTEXT; // but we work in XML text, so encode it
+                            if ( !$this->_isTagValid( $html_buffer ) ) {
+                                $state             = static::STATE_PLAINTEXT; // but we work in XML text, so encode it
                                 $plain_text_buffer .= $this->_fixWrongBuffer( $html_buffer );
-                                $html_buffer = '';
+                                $html_buffer       = '';
 
-                                if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                                if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
                                     $this->pipeline->setSegmentContainsHtml();
                                 }
 
@@ -253,7 +252,7 @@ class HtmlParser {
                             $output      .= $this->_finalizeScriptTag( $html_buffer );
                             $html_buffer = '';
 
-                            if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                            if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
                                 $this->pipeline->setSegmentContainsHtml();
                             }
                         }
@@ -275,7 +274,7 @@ class HtmlParser {
                             $output      .= $this->_finalizeScriptTag( $html_buffer );
                             $html_buffer = '';
 
-                            if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+                            if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
                                 $this->pipeline->setSegmentContainsHtml();
                             }
                         }
@@ -292,7 +291,7 @@ class HtmlParser {
         //HTML Partial, add wrong HTML to preserve string content
         if ( !empty( $html_buffer ) ) {
 
-            if($this->_isTagValid($html_buffer) and null !== $this->pipeline){
+            if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
                 $this->pipeline->setSegmentContainsHtml();
             }
 
@@ -300,7 +299,7 @@ class HtmlParser {
         }
 
         //string ends with plain text, so no state change is triggered at the end of string
-        if ( '' !==  $plain_text_buffer and null !== $plain_text_buffer  ) {
+        if ( '' !== $plain_text_buffer and null !== $plain_text_buffer ) {
             $output .= $this->_finalizePlainText( $plain_text_buffer );
         }
 

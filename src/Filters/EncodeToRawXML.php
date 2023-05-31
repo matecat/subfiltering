@@ -6,8 +6,7 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Commons\Constants;
 use Matecat\SubFiltering\Utils\CatUtils;
 
-class EncodeToRawXML extends AbstractHandler
-{
+class EncodeToRawXML extends AbstractHandler {
     public function transform( $segment ) {
 
         // handling &#10; (line feed)
@@ -19,24 +18,24 @@ class EncodeToRawXML extends AbstractHandler
         $segment = preg_replace( '/&(#13;|#x0D;)|\r/', '##_ent_0D_##', $segment );
 
         //allow double encoding if the segment is HTML
-        if($this->pipeline->segmentContainsHtml()){
+        if ( $this->pipeline->segmentContainsHtml() ) {
             $segment = htmlspecialchars( $segment, ENT_NOQUOTES | ENT_XML1, 'UTF-8', true );
         }
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s',  [ CatUtils::class, 'htmlentitiesFromUnicode' ], $segment );
+        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ CatUtils::class, 'htmlentitiesFromUnicode' ], $segment );
 
         // now convert the real &nbsp;
         $segment = str_replace( Constants::nbspPlaceholder, CatUtils::unicode2chr( 0Xa0 ), $segment );
 
         // handling &#10;
-        if (strpos($segment, '##_ent_0D_##') !== false) {
-            $segment = str_replace('##_ent_0D_##', '&#13;', $segment);
+        if ( strpos( $segment, '##_ent_0D_##' ) !== false ) {
+            $segment = str_replace( '##_ent_0D_##', '&#13;', $segment );
         }
 
         // handling &#13;
-        if (strpos($segment, '##_ent_0A_##') !== false) {
-            $segment = str_replace('##_ent_0A_##', '&#10;', $segment);
+        if ( strpos( $segment, '##_ent_0A_##' ) !== false ) {
+            $segment = str_replace( '##_ent_0A_##', '&#10;', $segment );
         }
 
         //encode all not valid XML entities

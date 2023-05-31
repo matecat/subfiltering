@@ -15,9 +15,10 @@ class PhCounter extends AbstractHandler {
     protected $counter = 0;
 
     protected function _finalizeHTMLTag( $buffer ) {
-        if( strpos( $buffer, '<ph' ) !== false  ){
+        if ( strpos( $buffer, '<ph' ) !== false ) {
             $this->counter++;
         }
+
         return $buffer;
     }
 
@@ -26,7 +27,7 @@ class PhCounter extends AbstractHandler {
     }
 
     protected function _isTagValid( $buffer ) {
-       return true;
+        return true;
     }
 
     protected function _finalizePlainText( $buffer ) {
@@ -37,7 +38,7 @@ class PhCounter extends AbstractHandler {
         return $buffer;
     }
 
-    public function getCount(){
+    public function getCount() {
         return $this->counter;
     }
 
@@ -48,8 +49,9 @@ class PhCounter extends AbstractHandler {
      */
     public function transform( $segment ) {
 
-        $parser = new HtmlParser($this->pipeline);
+        $parser = new HtmlParser( $this->pipeline );
         $parser->registerCallbacksHandler( $this );
+
         return $parser->transform( $segment );
 
     }

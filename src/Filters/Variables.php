@@ -12,8 +12,7 @@ class Variables extends AbstractHandler {
      *
      * @return string
      */
-    public function transform( $segment )
-    {
+    public function transform( $segment ) {
         /*
          * Examples:
          * - %{# }
@@ -27,8 +26,8 @@ class Variables extends AbstractHandler {
         foreach ( $html as $pos => $variable ) {
             //replace subsequent elements excluding already encoded
             $segment = preg_replace(
-                    '/' . preg_quote( $variable[0], '/' ) . '/',
-                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="'.CTypeEnum::PERCENT_VARIABLE.'" equiv-text="base64:' . base64_encode( $variable[ 0 ] ) . "\"/>",
+                    '/' . preg_quote( $variable[ 0 ], '/' ) . '/',
+                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:' . base64_encode( $variable[ 0 ] ) . "\"/>",
                     $segment,
                     1
             );

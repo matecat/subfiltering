@@ -20,7 +20,7 @@ class RemoveDangerousChars extends AbstractHandler {
         $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
 
         //remove binary chars in some xliff files
-        $regexpAscii  = '/[\x{00}-\x{08}\x{0B}\x{0C}\x{0E}-\x{1F}\x{7F}]/u';
+        $regexpAscii = '/[\x{00}-\x{08}\x{0B}\x{0C}\x{0E}-\x{1F}\x{7F}]/u';
 
         $segment = preg_replace( $regexpAscii, '', $segment );
         $segment = preg_replace( $regexpEntity, '', $segment );

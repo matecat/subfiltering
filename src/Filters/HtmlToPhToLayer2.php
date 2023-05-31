@@ -17,7 +17,7 @@ use Matecat\SubFiltering\Filters\Html\CallbacksHandler;
  * Based on the code https://github.com/ericnorris/striptags
  * Rewritten/Improved and Changed for PHP
  *
- * @author domenico domenico@translated.net / ostico@gmail.com
+ * @author  domenico domenico@translated.net / ostico@gmail.com
  * @package SubFiltering
  *
  */
@@ -25,9 +25,10 @@ class HtmlToPhToLayer2 extends HtmlToPh {
 
     use CallbacksHandler;
 
-    protected function _fixWrongBuffer( $buffer ){
+    protected function _fixWrongBuffer( $buffer ) {
         $buffer = str_replace( "<", "&amp;lt;", $buffer );
         $buffer = str_replace( ">", "&amp;gt;", $buffer );
+
         return $buffer;
     }
 

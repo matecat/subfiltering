@@ -17,6 +17,7 @@ class FromViewNBSPToSpaces extends AbstractHandler {
 
         //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
         $segment = preg_replace( '/&nbsp;/', " ", $segment );
+
         return $segment;
 
     }

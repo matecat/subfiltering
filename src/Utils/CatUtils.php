@@ -2,11 +2,10 @@
 
 namespace Matecat\SubFiltering\Utils;
 
-class CatUtils
-{
-    const lfPlaceholder        = '##$_0A$##';
-    const crPlaceholder        = '##$_0D$##';
-    const nbspPlaceholder      = '##$_A0$##';
+class CatUtils {
+    const lfPlaceholder   = '##$_0A$##';
+    const crPlaceholder   = '##$_0D$##';
+    const nbspPlaceholder = '##$_A0$##';
 
     /**
      * Get the char code from a multi byte char
@@ -18,8 +17,7 @@ class CatUtils
      * @return int
      *
      */
-    public static function fastUnicode2ord( $mb_char )
-    {
+    public static function fastUnicode2ord( $mb_char ) {
         switch ( strlen( $mb_char ) ) {
             case 1:
                 return ord( $mb_char );
@@ -49,8 +47,7 @@ class CatUtils
      *
      * @return string
      */
-    public static function htmlentitiesFromUnicode( $str )
-    {
+    public static function htmlentitiesFromUnicode( $str ) {
         return "&#" . self::fastUnicode2ord( $str[ 1 ] ) . ";";
     }
 
@@ -64,8 +61,7 @@ class CatUtils
      *
      * @return string
      */
-    public static function unicode2chr( $o )
-    {
+    public static function unicode2chr( $o ) {
         if ( function_exists( 'mb_convert_encoding' ) ) {
             return mb_convert_encoding( '&#' . intval( $o ) . ';', 'UTF-8', 'HTML-ENTITIES' );
         }

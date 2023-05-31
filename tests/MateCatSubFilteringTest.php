@@ -15,14 +15,12 @@ use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use Matecat\SubFiltering\Utils\CatUtils;
 use PHPUnit\Framework\TestCase;
 
-class MateCatSubFilteringTest extends TestCase
-{
+class MateCatSubFilteringTest extends TestCase {
     /**
      * @return \Matecat\SubFiltering\AbstractFilter
      * @throws Exception
      */
-    private function getFilterInstance()
-    {
+    private function getFilterInstance() {
         MateCatFilter::destroyInstance(); // for isolation test
 
         return MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT' );
@@ -69,7 +67,7 @@ class MateCatSubFilteringTest extends TestCase
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
         //Start test
-        $string_from_UI = '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;lt; <ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3N0cm9uZyZndDs="/>Use professional tools<ph id="mtc_3" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zdHJvbmcmZ3Q7"/> in your <ph id="mtc_4" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
+        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;lt; <ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3N0cm9uZyZndDs="/>Use professional tools<ph id="mtc_3" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9zdHJvbmcmZ3Q7"/> in your <ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
@@ -85,7 +83,7 @@ class MateCatSubFilteringTest extends TestCase
     public function testComplexUrls() {
         $filter = $this->getFilterInstance();
 
-        $fromUi       = '<ph id="mtc_14" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2EgaHJlZj0iaHR0cHM6Ly9hdXRoLnViZXIuY29tL2xvZ2luLz9icmVlemVfbG9jYWxfem9uZT1kY2ExJmFtcDthbXA7bmV4dF91cmw9aHR0cHMlM0ElMkYlMkZkcml2ZXJzLnViZXIuY29tJTJGcDMlMkYmYW1wO2FtcDtzdGF0ZT00MElLeF9YR0N1OXRobEtrSUkxUmRCOFlhUVRVY0g1aE1uVnllWXJCN0lBJTNEIiZndDs="/>Partner Dashboard<ph id="mtc_15" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> to match the payment document you uploaded';
+        $fromUi       = '<ph id="mtc_14" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iaHR0cHM6Ly9hdXRoLnViZXIuY29tL2xvZ2luLz9icmVlemVfbG9jYWxfem9uZT1kY2ExJmFtcDthbXA7bmV4dF91cmw9aHR0cHMlM0ElMkYlMkZkcml2ZXJzLnViZXIuY29tJTJGcDMlMkYmYW1wO2FtcDtzdGF0ZT00MElLeF9YR0N1OXRobEtrSUkxUmRCOFlhUVRVY0g1aE1uVnllWXJCN0lBJTNEIiZndDs="/>Partner Dashboard<ph id="mtc_15" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> to match the payment document you uploaded';
         $expectedToDb = '&lt;a href="https://auth.uber.com/login/?breeze_local_zone=dca1&amp;amp;next_url=https%3A%2F%2Fdrivers.uber.com%2Fp3%2F&amp;amp;state=40IKx_XGCu9thlKkII1RdB8YaQTUcH5hMnVyeYrB7IA%3D"&gt;Partner Dashboard&lt;/a&gt; to match the payment document you uploaded';
         $toDb         = $filter->fromLayer1ToLayer0( $fromUi );
 
@@ -102,7 +100,7 @@ class MateCatSubFilteringTest extends TestCase
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
-        $string_from_UI = '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;amp; <ph id="PlaceHolder1" ctype="'.CTypeEnum::ORIGINAL_PH.'" equiv-text="base64:ezB9"/> &amp;quot; &amp;apos;<ph id="PlaceHolder2" ctype="'.CTypeEnum::ORIGINAL_PH.'" equiv-text="base64:L3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDtjaWNjaW89MQ=="/> <ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
+        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;amp; <ph id="PlaceHolder1" ctype="' . CTypeEnum::ORIGINAL_PH . '" equiv-text="base64:ezB9"/> &amp;quot; &amp;apos;<ph id="PlaceHolder2" ctype="' . CTypeEnum::ORIGINAL_PH . '" equiv-text="base64:L3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDtjaWNjaW89MQ=="/> <ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
@@ -115,11 +113,10 @@ class MateCatSubFilteringTest extends TestCase
     /**
      * @throws Exception
      */
-    public function testGTagsWithXidAttributes()
-    {
+    public function testGTagsWithXidAttributes() {
         $filter = $this->getFilterInstance();
 
-        $segment = 'This is a <g id="43">test</g> (with a <g xid="068cd98d-103c-49fe-92e1-76e863f93bba" id="44">g tag with xid attribute</g>).';
+        $segment   = 'This is a <g id="43">test</g> (with a <g xid="068cd98d-103c-49fe-92e1-76e863f93bba" id="44">g tag with xid attribute</g>).';
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
@@ -252,10 +249,10 @@ class MateCatSubFilteringTest extends TestCase
         $expected_segment = '&lt;b&gt;de %1$s, &lt;/b&gt;que';
 
         //Start test
-        $string_from_UI = '&lt;b&gt;de <ph id="mtc_1" ctype="'.CTypeEnum::SPRINTF.'" equiv-text="base64:JTEkcw=="/>, &lt;/b&gt;que';
+        $string_from_UI = '&lt;b&gt;de <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JTEkcw=="/>, &lt;/b&gt;que';
         $this->assertEquals( $expected_segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
 
-        $string_in_layer1 = '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2ImZ3Q7"/>de <ph id="mtc_2" ctype="'.CTypeEnum::SPRINTF.'" equiv-text="base64:JTEkcw=="/>, <ph id="mtc_3" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9iJmd0Ow=="/>que';
+        $string_in_layer1 = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2ImZ3Q7"/>de <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JTEkcw=="/>, <ph id="mtc_3" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9iJmd0Ow=="/>que';
         $this->assertEquals( $expected_segment, $filter->fromLayer1ToLayer0( $string_in_layer1 ) );
 
     }
@@ -266,8 +263,7 @@ class MateCatSubFilteringTest extends TestCase
      **************************
      */
 
-    public function testSprintf()
-    {
+    public function testSprintf() {
         $channel = new Pipeline( 'hu-HU', 'az-AZ' );
         $channel->addLast( new SprintfToPH() );
 
@@ -301,27 +297,27 @@ class MateCatSubFilteringTest extends TestCase
         $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
 
         $xliffTags = [
-            [
-                'db_segment' => '&lt;g id="1"&gt;',
-                'expected_l1_segment' => '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2cgaWQ9IjEiJmd0Ow=="/>',
-                'expected_l2_segment' => '&lt;ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2cgaWQ9IjEiJmd0Ow=="/&gt;',
-            ],
-            [
-                'db_segment' => '&lt;x id="1"/&gt;',
-                'expected_l1_segment' => '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/>',
-                'expected_l2_segment' => '&lt;ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/&gt;',
-            ],
-            [
-                'db_segment' => '&lt;pc id="1"&gt;',
-                'expected_l1_segment' => '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3BjIGlkPSIxIiZndDs="/>',
-                'expected_l2_segment' => '&lt;ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3BjIGlkPSIxIiZndDs="/&gt;',
-            ],
+                [
+                        'db_segment'          => '&lt;g id="1"&gt;',
+                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2cgaWQ9IjEiJmd0Ow=="/>',
+                        'expected_l2_segment' => '&lt;ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2cgaWQ9IjEiJmd0Ow=="/&gt;',
+                ],
+                [
+                        'db_segment'          => '&lt;x id="1"/&gt;',
+                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/>',
+                        'expected_l2_segment' => '&lt;ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/&gt;',
+                ],
+                [
+                        'db_segment'          => '&lt;pc id="1"&gt;',
+                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3BjIGlkPSIxIiZndDs="/>',
+                        'expected_l2_segment' => '&lt;ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3BjIGlkPSIxIiZndDs="/&gt;',
+                ],
         ];
 
-        foreach ($xliffTags as $xliffTag){
-            $db_segment          = $xliffTag['db_segment'];
-            $expected_l1_segment = $xliffTag['expected_l1_segment'];
-            $expected_l2_segment = $xliffTag['expected_l2_segment'];
+        foreach ( $xliffTags as $xliffTag ) {
+            $db_segment          = $xliffTag[ 'db_segment' ];
+            $expected_l1_segment = $xliffTag[ 'expected_l1_segment' ];
+            $expected_l2_segment = $xliffTag[ 'expected_l2_segment' ];
 
             $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
             $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
@@ -346,8 +342,8 @@ class MateCatSubFilteringTest extends TestCase
         $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
 
         $db_segment          = '{% if count &lt; 3 %}';
-        $expected_l1_segment = '<ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/>';
-        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/&gt;';
+        $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/&gt;';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
@@ -365,8 +361,8 @@ class MateCatSubFilteringTest extends TestCase
         $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
 
         $db_segment          = '{% if count &lt;3 %}';
-        $expected_l1_segment = '<ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmx0OzMgJX0="/>';
-        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmx0OzMgJX0="/&gt;';
+        $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OzMgJX0="/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OzMgJX0="/&gt;';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
@@ -384,8 +380,8 @@ class MateCatSubFilteringTest extends TestCase
         $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
 
         $db_segment          = '{% if count &gt; 3 %}';
-        $expected_l1_segment = '<ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmd0OyAzICV9"/>';
-        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmd0OyAzICV9"/&gt;';
+        $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmd0OyAzICV9"/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmd0OyAzICV9"/&gt;';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
@@ -403,8 +399,8 @@ class MateCatSubFilteringTest extends TestCase
         $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
 
         $db_segment          = '{% if count &lt; 10 and &gt; 3 %}';
-        $expected_l1_segment = '<ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAxMCBhbmQgJmd0OyAzICV9"/>';
-        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAxMCBhbmQgJmd0OyAzICV9"/&gt;';
+        $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAxMCBhbmQgJmd0OyAzICV9"/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAxMCBhbmQgJmd0OyAzICV9"/&gt;';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
@@ -419,7 +415,7 @@ class MateCatSubFilteringTest extends TestCase
 
     public function testTwigFilterWithSingleBrackets() {
         $segment  = 'Hi {this strings would not be escaped}. Instead {{this one}} is a valid twig expression. Also {%%ciao%%} is valid!';
-        $expected = 'Hi {this strings would not be escaped}. Instead <ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:e3t0aGlzIG9uZX19"/> is a valid twig expression. Also <ph id="mtc_2" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUlY2lhbyUlfQ=="/> is valid!';
+        $expected = 'Hi {this strings would not be escaped}. Instead <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t0aGlzIG9uZX19"/> is a valid twig expression. Also <ph id="mtc_2" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUlY2lhbyUlfQ=="/> is valid!';
 
         $channel = new Pipeline();
         $channel->addLast( new TwigToPh() );
@@ -429,7 +425,7 @@ class MateCatSubFilteringTest extends TestCase
 
     public function testTwigUngreedy() {
         $segment  = 'Dear {{customer.first_name}}, This is {{agent.alias}} with Airbnb.';
-        $expected = 'Dear <ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:e3tjdXN0b21lci5maXJzdF9uYW1lfX0="/>, This is <ph id="mtc_2" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:e3thZ2VudC5hbGlhc319"/> with Airbnb.';
+        $expected = 'Dear <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3tjdXN0b21lci5maXJzdF9uYW1lfX0="/>, This is <ph id="mtc_2" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3thZ2VudC5hbGlhc319"/> with Airbnb.';
 
         $channel = new Pipeline();
         $channel->addLast( new TwigToPh() );
@@ -729,8 +725,8 @@ class MateCatSubFilteringTest extends TestCase
 //        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/&gt;&lt;ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2ltZyBzcmM9Imh0dHBzOi8vZmlsZXMtc3RvcmFnZS5lYXN5Z2VuZXJhdG9yLmNvbS9pbWFnZS9hNTljYzcwMi1iNjA5LTQ4M2QtODliZC1kNjUwODRjZGUwZWQucG5nIiBhbHQ9IiIgc3R5bGU9Im1heC13aWR0aDoxMDAlIiZndDs="/&gt;&lt;ph id="mtc_3" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwOHB4OyBoZWlnaHQ6IDM3M3B4OyB0b3A6IDIycHg7IGxlZnQ6IDE1cHg7IiBkYXRhLXRleHQ9IkZ5c2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9ImIwZDAyZmE5LWEwMjItNDI1OC1kMGE5LWI5YjFiNWRlYWNjMCImZ3Q7"/&gt;&lt;ph id="mtc_4" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_5" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MXB4OyBoZWlnaHQ6IDM0MHB4OyB0b3A6IDU1cHg7IGxlZnQ6IDY3NXB4OyIgZGF0YS10ZXh0PSJCZXNtZXR0aW5nIG1ldCBhbGxlcmdlbmVuIiBkYXRhLWlkPSIwNGUxN2Y3My1mODM2LTQ4NWQtZTJjNS0yOTNiMGY0ZWM0ZmYiJmd0Ow=="/&gt;&lt;ph id="mtc_6" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_7" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwMXB4OyBoZWlnaHQ6IDM1N3B4OyB0b3A6IDQ3OXB4OyBsZWZ0OiAyNnB4OyIgZGF0YS10ZXh0PSJNaWNyb2Jpb2xvZ2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjZhZmEzNzY2LTRkOTctNGQwOC1jM2Q1LWNlOTI4MTcyOGQwMSImZ3Q7"/&gt;&lt;ph id="mtc_8" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_9" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MHB4OyBoZWlnaHQ6IDM2MnB4OyB0b3A6IDQ3OHB4OyBsZWZ0OiA2NzlweDsiIGRhdGEtdGV4dD0iQ2hlbWlzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjI5MThlYTE2LWZiNDktNDA5ZS1kMzNkLTRmMmJiY2JkNGQ1MyImZ3Q7"/&gt;&lt;ph id="mtc_10" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_11" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;';
 
         $db_segment          = '&lt;span data-type="hotspot" class="hotspotOnImage" style="position: relative;display: inline-block;max-width: 100%"&gt;';
-        $expected_l1_segment = '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/>';
-        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/&gt;';
+        $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/>';
+        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/&gt;';
 
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
@@ -778,9 +774,9 @@ class MateCatSubFilteringTest extends TestCase
 
         $this->assertEquals( $db_segment, $Filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $Filter->fromLayer0ToLayer1( $db_segment ) );
-        
+
     }
-    
+
     /**
      **************************
      * Uber pipeline
@@ -791,7 +787,7 @@ class MateCatSubFilteringTest extends TestCase
         $Filter = MateCatFilter::getInstance( new FeatureSet( [ new UberFeature() ] ), 'en-EN', 'et-ET', [] );
 
         $db_segment          = 'Ciao questo è una prova {RIDER}. { RIDER } non viene bloccato.';
-        $expected_l1_segment = 'Ciao questo è una prova <ph id="mtc_1" ctype="'.CTypeEnum::CURLY_BRACKETS.'" equiv-text="base64:e1JJREVSfQ=="/>. { RIDER } non viene bloccato.';
+        $expected_l1_segment = 'Ciao questo è una prova <ph id="mtc_1" ctype="' . CTypeEnum::CURLY_BRACKETS . '" equiv-text="base64:e1JJREVSfQ=="/>. { RIDER } non viene bloccato.';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
 
@@ -808,8 +804,7 @@ class MateCatSubFilteringTest extends TestCase
      *
      * @throws Exception
      */
-    public function testSinglePercentageSyntax()
-    {
+    public function testSinglePercentageSyntax() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This syntax %this_is_a_variable% is no more valid';
@@ -825,12 +820,11 @@ class MateCatSubFilteringTest extends TestCase
      *
      * @throws Exception
      */
-    public function testDoublePercentageSyntax()
-    {
+    public function testDoublePercentageSyntax() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This syntax %%customer.first_name%% is still valid';
-        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="'.CTypeEnum::PERCENTAGES.'" equiv-text="base64:JSVjdXN0b21lci5maXJzdF9uYW1lJSU="/> is still valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="' . CTypeEnum::PERCENTAGES . '" equiv-text="base64:JSVjdXN0b21lci5maXJzdF9uYW1lJSU="/> is still valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -843,8 +837,7 @@ class MateCatSubFilteringTest extends TestCase
      **************************
      */
 
-    public function testSingleSnailSyntax()
-    {
+    public function testSingleSnailSyntax() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This syntax @this is a variable@ is not valid';
@@ -862,8 +855,7 @@ class MateCatSubFilteringTest extends TestCase
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
-    public function testDoubleSnailSyntax()
-    {
+    public function testDoubleSnailSyntax() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This syntax @@this is a variable@@ is not valid';
@@ -875,51 +867,47 @@ class MateCatSubFilteringTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This syntax @@this_is_a_variable@@ is valid';
-        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="'.CTypeEnum::SNAILS.'" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="' . CTypeEnum::SNAILS . '" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
-    public function testPercentDoubleCurlyBracketsSyntax()
-    {
+    public function testPercentDoubleCurlyBracketsSyntax() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'Save up to ​%{{|discount|}} with these hotels';
-        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
-    public function testPercentSnailSyntax()
-    {
+    public function testPercentSnailSyntax() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %@ is a IOS placeholder %@.';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="'.CTypeEnum::PERCENT_SNAILS.'" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="'.CTypeEnum::PERCENT_SNAILS.'" equiv-text="base64:JUA="/>.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:JUA="/>.';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
-    public function testPercentNumberSnailSyntax()
-    {
+    public function testPercentNumberSnailSyntax() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="'.CTypeEnum::PERCENT_NUMBER_SNAILS.'" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="'.CTypeEnum::PERCENT_NUMBER_SNAILS.'" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="'.CTypeEnum::PERCENT_NUMBER_SNAILS.'" equiv-text="base64:JTE0MzQzJEA="/>';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTE0MzQzJEA="/>';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
-    public function testWithMixedPercentTags()
-    {
+    public function testWithMixedPercentTags() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string contains all these tags: %-4d %@ %12$@ ​%{{|discount|}} {% if count &lt; 3 %} but not this %placeholder%';
-        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" ctype="'.CTypeEnum::SPRINTF.'" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" ctype="'.CTypeEnum::PERCENT_SNAILS.'" equiv-text="base64:JUA="/> <ph id="mtc_3" ctype="'.CTypeEnum::PERCENT_NUMBER_SNAILS.'" equiv-text="base64:JTEyJEA="/> ​%<ph id="mtc_4" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> <ph id="mtc_5" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/> but not this %placeholder%';
+        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:JUA="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> ​%<ph id="mtc_4" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> <ph id="mtc_5" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/> but not this %placeholder%';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -932,35 +920,32 @@ class MateCatSubFilteringTest extends TestCase
      **************************
      */
 
-    public function testWithDoubleSquareBrackets()
-    {
+    public function testWithDoubleSquareBrackets() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string contains [[placeholder]]';
-        $segment_from_UI      = 'This string contains <ph id="mtc_1" ctype="'.CTypeEnum::DOUBLE_SQUARE_BRACKETS.'" equiv-text="base64:W1twbGFjZWhvbGRlcl1d"/>';
+        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOUBLE_SQUARE_BRACKETS . '" equiv-text="base64:W1twbGFjZWhvbGRlcl1d"/>';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
 
-    public function testWithDoubleUnderscore()
-    {
+    public function testWithDoubleUnderscore() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string contains __placeholder_one__';
-        $segment_from_UI      = 'This string contains <ph id="mtc_1" ctype="'.CTypeEnum::DOUBLE_UNDERSCORE.'" equiv-text="base64:X19wbGFjZWhvbGRlcl9vbmVfXw=="/>';
+        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOUBLE_UNDERSCORE . '" equiv-text="base64:X19wbGFjZWhvbGRlcl9vbmVfXw=="/>';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
-    public function testWithDollarCurlyBrackets()
-    {
+    public function testWithDollarCurlyBrackets() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string contains ${placeholder_one}';
-        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="'.CTypeEnum::DOLLAR_CURLY_BRACKETS.'" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
+        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOLLAR_CURLY_BRACKETS . '" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );

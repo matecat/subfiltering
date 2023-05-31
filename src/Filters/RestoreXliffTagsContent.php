@@ -20,6 +20,7 @@ class RestoreXliffTagsContent extends AbstractHandler {
         $segment = preg_replace_callback( '/' . Constants::LTPLACEHOLDER . '(.*?)' . Constants::GTPLACEHOLDER . '/u',
                 function ( $matches ) {
                     $_match = base64_decode( $matches[ 1 ] );
+
                     return Constants::LTPLACEHOLDER . $_match . Constants::GTPLACEHOLDER;
                 },
                 $segment

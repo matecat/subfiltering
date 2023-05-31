@@ -31,31 +31,30 @@ class Pipeline {
     private $segmentContainsHtml = false;
 
     public function __construct( $source = null, $target = null, $dataRefMap = [] ) {
-        $this->source = $source;
-        $this->target = $target;
+        $this->source     = $source;
+        $this->target     = $target;
         $this->dataRefMap = $dataRefMap;
     }
 
-    public function getNextId(){
+    public function getNextId() {
         $this->id_number++;
+
         return $this->id_number;
     }
 
-    public function resetId(){
+    public function resetId() {
         $this->id_number = -1;
     }
 
     /**
      * @return bool
      */
-    public function segmentContainsHtml()
-    {
+    public function segmentContainsHtml() {
         return $this->segmentContainsHtml;
     }
 
 
-    public function setSegmentContainsHtml()
-    {
+    public function setSegmentContainsHtml() {
         $this->segmentContainsHtml = true;
     }
 
@@ -140,7 +139,7 @@ class Pipeline {
     public function remove( AbstractHandler $handlerToDelete ) {
         foreach ( $this->handlers as $pos => $handler ) {
             if ( $handler->getName() == $handlerToDelete->getName() ) {
-                unset($this->handlers[$pos]);
+                unset( $this->handlers[ $pos ] );
                 break;
             }
         }
@@ -170,17 +169,19 @@ class Pipeline {
         foreach ( $this->handlers as $handler ) {
             $segment = $handler->transform( $segment );
         }
+
         return $this->realignIDs( $segment );
     }
 
-    protected function realignIDs( $segment ){
-        if( $this->id_number > -1 ){
+    protected function realignIDs( $segment ) {
+        if ( $this->id_number > -1 ) {
             preg_match_all( '/"__mtc_[0-9]+"/', $segment, $html, PREG_SET_ORDER );
             foreach ( $html as $pos => $tag_id ) {
                 //replace subsequent elements excluding already encoded
-                $segment = preg_replace( '/' . $tag_id[ 0 ] . '/', '"mtc_' . ( $pos + 1 ). '"', $segment, 1 );
+                $segment = preg_replace( '/' . $tag_id[ 0 ] . '/', '"mtc_' . ( $pos + 1 ) . '"', $segment, 1 );
             }
         }
+
         return $segment;
     }
 

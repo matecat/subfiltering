@@ -17,7 +17,7 @@ class RestoreTabsPlaceholders extends AbstractHandler {
         // | Esempio &#09;test | Test	example     |
         // +-------------------+--------------------+
         //
-        return str_replace( ["&#09;", "	"], Constants::tabPlaceholder, $segment );
+        return str_replace( [ "&#09;", "	" ], Constants::tabPlaceholder, $segment );
     }
 
 }

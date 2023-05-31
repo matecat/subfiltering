@@ -29,15 +29,15 @@ class FromLayer2ToRawXML extends AbstractHandler {
         $segment = $this->placeHoldBrokenHTML( $segment );
 
         $double_encode = false;
-        if( strpos( $segment , Constants::LTPLACEHOLDER ) !== false ){
+        if ( strpos( $segment, Constants::LTPLACEHOLDER ) !== false ) {
 
-            $decXliff = new RestoreXliffTagsContent();
+            $decXliff     = new RestoreXliffTagsContent();
             $test_segment = $decXliff->transform( $segment );
 
-            if( preg_match_all( RestoreSubFilteredPhToHtml::matchPhRegexp, $test_segment, $matches, PREG_SET_ORDER ) ){
+            if ( preg_match_all( RestoreSubFilteredPhToHtml::matchPhRegexp, $test_segment, $matches, PREG_SET_ORDER ) ) {
                 //here we are in a sub-filtered layer with HTML ?? check
-                foreach( $matches as $match ){
-                    if( strpos( base64_decode( $match[ 1 ] ), "&lt;" ) !== false ) {
+                foreach ( $matches as $match ) {
+                    if ( strpos( base64_decode( $match[ 1 ] ), "&lt;" ) !== false ) {
                         $double_encode = true; //yes there is html in ph tags
                         break;
                     }
@@ -65,7 +65,7 @@ class FromLayer2ToRawXML extends AbstractHandler {
                 ], $segment );
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s',  [ CatUtils::class, 'htmlentitiesFromUnicode' ], $segment );
+        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ CatUtils::class, 'htmlentitiesFromUnicode' ], $segment );
 
         // now convert the real &nbsp;
         $segment = str_replace( Constants::nbspPlaceholder, CatUtils::unicode2chr( 0Xa0 ), $segment );
@@ -77,15 +77,15 @@ class FromLayer2ToRawXML extends AbstractHandler {
 
     }
 
-    private function placeHoldBrokenHTML( $segment ){
+    private function placeHoldBrokenHTML( $segment ) {
 
         //Filters BUG, segmentation on HTML, we should never get this at this level ( Should be fixed, anyway we try to cover )
         //    &lt;a href="/help/article/1381?
         $this->brokenHTML = false;
 
         //This is from Layer 2 to Layer 1
-        if( stripos( $segment, '<a href="' ) ){
-            $segment = str_replace( '<a href="', '##__broken_lt__##a href=##__broken_quot__##', $segment );
+        if ( stripos( $segment, '<a href="' ) ) {
+            $segment          = str_replace( '<a href="', '##__broken_lt__##a href=##__broken_quot__##', $segment );
             $this->brokenHTML = true;
         }
 
@@ -93,10 +93,10 @@ class FromLayer2ToRawXML extends AbstractHandler {
 
     }
 
-    private function resetBrokenHTML( $segment ){
+    private function resetBrokenHTML( $segment ) {
 
         // Reset
-        if( $this->brokenHTML ){
+        if ( $this->brokenHTML ) {
             $segment = str_replace( '##__broken_lt__##a href=##__broken_quot__##', '&lt;a href="', $segment );
         }
 

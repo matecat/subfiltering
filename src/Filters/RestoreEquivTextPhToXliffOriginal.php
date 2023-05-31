@@ -20,7 +20,7 @@ class RestoreEquivTextPhToXliffOriginal extends AbstractHandler {
      *
      * @return string
      */
-    public function transform( $segment ){
+    public function transform( $segment ) {
 
         //pipeline to convert back XLIFF PH to the original ones
         preg_match_all( '/' . Constants::LTPLACEHOLDER . 'ph id\s*=\s*[\'"](?!mtc_).*?[\'"] ctype="x-twig" equiv-text\s*=\s*[\'"]base64:([^"\']+?)[\'"]\s*\/' . Constants::GTPLACEHOLDER . '/', $segment, $html, PREG_SET_ORDER ); // Ungreedy

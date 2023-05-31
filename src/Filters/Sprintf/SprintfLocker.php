@@ -36,31 +36,29 @@ class SprintfLocker {
      * @param null $source
      * @param null $target
      */
-    public function __construct($source = null, $target = null)
-    {
-        $this->source = $source;
-        $this->target = $target;
+    public function __construct( $source = null, $target = null ) {
+        $this->source        = $source;
+        $this->target        = $target;
         $this->notAllowedMap = $this->createNotAllowedMap();
     }
 
     /**
      * @return array
      */
-    private function createNotAllowedMap()
-    {
+    private function createNotAllowedMap() {
         $map = [];
 
         $all = include __DIR__ . "/language/all/not_allowed.php";
-        $map = array_merge($map, $all);
+        $map = array_merge( $map, $all );
 
-        if($this->source and file_exists(__DIR__ . "/language/".$this->source."/not_allowed.php")){
-            $source = include __DIR__ . "/language/".$this->source."/not_allowed.php";
-            $map = array_merge($map, $source);
+        if ( $this->source and file_exists( __DIR__ . "/language/" . $this->source . "/not_allowed.php" ) ) {
+            $source = include __DIR__ . "/language/" . $this->source . "/not_allowed.php";
+            $map    = array_merge( $map, $source );
         }
 
-        if($this->target and file_exists(__DIR__ . "/language/".$this->target."/not_allowed.php")){
-            $target = include __DIR__ . "/language/".$this->target."/not_allowed.php";
-            $map = array_merge($map, $target);
+        if ( $this->target and file_exists( __DIR__ . "/language/" . $this->target . "/not_allowed.php" ) ) {
+            $target = include __DIR__ . "/language/" . $this->target . "/not_allowed.php";
+            $map    = array_merge( $map, $target );
         }
 
         return $map;
@@ -71,12 +69,11 @@ class SprintfLocker {
      *
      * @return string
      */
-    public function lock($segment)
-    {
-        $replacementMap = $this->createReplacementMap($segment);
+    public function lock( $segment ) {
+        $replacementMap       = $this->createReplacementMap( $segment );
         $this->replacementMap = $replacementMap;
 
-        return str_replace( array_keys($replacementMap), array_values($replacementMap), $segment );
+        return str_replace( array_keys( $replacementMap ), array_values( $replacementMap ), $segment );
     }
 
     /**
@@ -84,11 +81,10 @@ class SprintfLocker {
      *
      * @return string
      */
-    public function unlock($segment)
-    {
+    public function unlock( $segment ) {
         $replacementMap = $this->replacementMap;
 
-        return str_replace( array_values($replacementMap), array_keys($replacementMap),  $segment );
+        return str_replace( array_values( $replacementMap ), array_keys( $replacementMap ), $segment );
     }
 
     /**
@@ -98,24 +94,23 @@ class SprintfLocker {
      *
      * @return array
      */
-    private function createReplacementMap( $segment)
-    {
+    private function createReplacementMap( $segment ) {
         $replacementMap = [];
 
-        foreach ($this->notAllowedMap as $item => $details){
+        foreach ( $this->notAllowedMap as $item => $details ) {
 
-            $type = $details['type'];
+            $type = $details[ 'type' ];
 
-            switch ($type){
+            switch ( $type ) {
                 case 'exact':
-                    $replacementMap[$item] = self::PRE_LOCK_TAG . $this->maskString($item) . self::POST_LOCK_TAG;
+                    $replacementMap[ $item ] = self::PRE_LOCK_TAG . $this->maskString( $item ) . self::POST_LOCK_TAG;
                     break;
 
                 case 'regex':
-                    preg_match_all('/'.$item.'/', $segment, $matches);
+                    preg_match_all( '/' . $item . '/', $segment, $matches );
 
-                    foreach ($matches[0] as $match){
-                        $replacementMap[$match] = self::PRE_LOCK_TAG . $this->maskString($match) . self::POST_LOCK_TAG;
+                    foreach ( $matches[ 0 ] as $match ) {
+                        $replacementMap[ $match ] = self::PRE_LOCK_TAG . $this->maskString( $match ) . self::POST_LOCK_TAG;
                     }
                     break;
             }
@@ -129,8 +124,7 @@ class SprintfLocker {
      *
      * @return string
      */
-    private function maskString($string)
-    {
-        return str_replace(['%','-','_'],'', $string);
+    private function maskString( $string ) {
+        return str_replace( [ '%', '-', '_' ], '', $string );
     }
 }

@@ -12,16 +12,15 @@ class SubFilteredPhToHtml extends AbstractHandler {
      *
      * @return string
      */
-    public function transform( $segment )
-    {
+    public function transform( $segment ) {
         // pipeline for restore PH tag of subfiltering to original encoded HTML
         preg_match_all( '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-([0-9a-zA-Z\-]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>|siU', $segment, $html, PREG_SET_ORDER ); // Ungreedy
 
         foreach ( $html as $subfilter_tag ) {
-            $value = base64_decode( $subfilter_tag[ 2 ] );
-            $value = $this->placeholdXliffTagsInXliff($value);
-            $value = html_entity_decode( $value, ENT_NOQUOTES | ENT_XML1 );
-            $segment = str_replace( $subfilter_tag[0], $value, $segment );
+            $value   = base64_decode( $subfilter_tag[ 2 ] );
+            $value   = $this->placeholdXliffTagsInXliff( $value );
+            $value   = html_entity_decode( $value, ENT_NOQUOTES | ENT_XML1 );
+            $segment = str_replace( $subfilter_tag[ 0 ], $value, $segment );
 
         }
 
@@ -40,8 +39,7 @@ class SubFilteredPhToHtml extends AbstractHandler {
      *
      * @return mixed
      */
-    private function placeholdXliffTagsInXliff($value)
-    {
+    private function placeholdXliffTagsInXliff( $value ) {
         $value = preg_replace( '|(&lt;/x&gt;)|si', "", $value );
         $value = preg_replace( '#&lt;(g\s*id=["\']+.*?["\']+\s*(?!&lt;|&gt;)*?)&gt;#si', Constants::xliffInXliffStartPlaceHolder . "$1" . Constants::xliffInXliffEndPlaceHolder, $value );
 

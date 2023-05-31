@@ -4,8 +4,7 @@ namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 
-abstract class AbstractFilter
-{
+abstract class AbstractFilter {
     /**
      * @var AbstractFilter
      */
@@ -36,40 +35,35 @@ abstract class AbstractFilter
      *
      * @param FeatureSetInterface $featureSet
      */
-    protected function setFeatureSet( FeatureSetInterface $featureSet )
-    {
+    protected function setFeatureSet( FeatureSetInterface $featureSet ) {
         $this->featureSet = $featureSet;
     }
 
     /**
      * @param array $dataRefMap
      */
-    protected function setDataRefMap(array $dataRefMap = [])
-    {
+    protected function setDataRefMap( array $dataRefMap = [] ) {
         $this->dataRefMap = $dataRefMap;
     }
 
     /**
      * @param string $source
      */
-    protected function setSource( $source )
-    {
+    protected function setSource( $source ) {
         $this->source = $source;
     }
 
     /**
      * @param string $target
      */
-    protected function setTarget( $target )
-    {
+    protected function setTarget( $target ) {
         $this->target = $target;
     }
 
     /**
      * Destroy the singleton
      */
-    public static function destroyInstance()
-    {
+    public static function destroyInstance() {
         static::$_INSTANCE = null;
     }
 
@@ -82,15 +76,14 @@ abstract class AbstractFilter
      * @return AbstractFilter
      * @throws \Exception
      */
-    public static function getInstance( FeatureSetInterface $featureSet, $source = null, $target = null, array $dataRefMap = [] )
-    {
+    public static function getInstance( FeatureSetInterface $featureSet, $source = null, $target = null, array $dataRefMap = [] ) {
         if ( static::$_INSTANCE === null ) {
             static::$_INSTANCE = new static();
         }
 
-        static::$_INSTANCE->setSource($source);
-        static::$_INSTANCE->setTarget($target);
-        static::$_INSTANCE->setDataRefMap($dataRefMap);
+        static::$_INSTANCE->setSource( $source );
+        static::$_INSTANCE->setTarget( $target );
+        static::$_INSTANCE->setDataRefMap( $dataRefMap );
         static::$_INSTANCE->setFeatureSet( $featureSet );
 
         return static::$_INSTANCE;
@@ -103,7 +96,7 @@ abstract class AbstractFilter
      *
      * @return mixed
      */
-    abstract public function fromLayer0ToLayer1($segment);
+    abstract public function fromLayer0ToLayer1( $segment );
 
     /**
      * Used to transform external server raw xml content ( Ex: TM/MT ) to allow them to be stored in database ( Layer 0 ), used for server to server communications ( Layer 1 )
@@ -112,5 +105,5 @@ abstract class AbstractFilter
      *
      * @return mixed
      */
-    abstract public function fromLayer1ToLayer0($segment);
+    abstract public function fromLayer1ToLayer0( $segment );
 }

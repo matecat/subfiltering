@@ -2,8 +2,7 @@
 
 namespace Matecat\SubFiltering\Contracts;
 
-interface FeatureSetInterface
-{
+interface FeatureSetInterface {
     /**
      * Returns the filtered subject variable passed to all enabled features.
      *
