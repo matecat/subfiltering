@@ -2,12 +2,14 @@
 
 namespace Matecat\SubFiltering\Tests;
 
+use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Tests\Mocks\Features\AirbnbFeature;
 use Matecat\SubFiltering\Tests\Mocks\Features\UberFeature;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use Matecat\SubFiltering\Utils\CatUtils;
@@ -17,7 +19,7 @@ class MateCatSubFilteringTest extends TestCase
 {
     /**
      * @return \Matecat\SubFiltering\AbstractFilter
-     * @throws \Exception
+     * @throws Exception
      */
     private function getFilterInstance()
     {
@@ -27,7 +29,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSimpleString() {
         $filter = $this->getFilterInstance();
@@ -45,7 +47,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testHtmlInXML() {
         $filter = $this->getFilterInstance();
@@ -57,7 +59,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testUIHtmlInXML() {
         $filter = $this->getFilterInstance();
@@ -78,7 +80,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testComplexUrls() {
         $filter = $this->getFilterInstance();
@@ -91,7 +93,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testComplexXML() {
         $filter = $this->getFilterInstance();
@@ -111,7 +113,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testGTagsWithXidAttributes()
     {
@@ -130,7 +132,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testComplexHtmlFilledWithXML() {
 
@@ -150,7 +152,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testPlainTextInXMLWithNewLineFeed() {
         $filter = $this->getFilterInstance();
@@ -183,7 +185,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testPlainTextInXMLWithCarriageReturn() {
         $filter = $this->getFilterInstance();
@@ -207,7 +209,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_2_HtmlInXML() {
         $filter = $this->getFilterInstance();
@@ -243,7 +245,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testHTMLFromLayer2() {
         $filter           = $this->getFilterInstance();
@@ -463,7 +465,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testsPHPlaceholderWithDataRefForAirbnb() {
         $data_ref_map = [
@@ -501,7 +503,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testPHPlaceholderWithDataRef() {
         $data_ref_map = [
@@ -640,7 +642,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testDoublePCPlaceholderWithDataRef() {
         $data_ref_map = [
@@ -675,7 +677,7 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function testWithPCTagsWithAndWithoutDataRefInTheSameSegment() {
 
@@ -761,6 +763,25 @@ class MateCatSubFilteringTest extends TestCase
     }
 
     /**
+     * Test for airbnb
+     *
+     * @throws Exception
+     */
+    public function testSmartCount() {
+
+        $Filter = MateCatFilter::getInstance( new FeatureSet( [ new AirbnbFeature() ] ), 'en-EN', 'et-ET', [] );
+
+        $db_segment      = '%{smart_count} discount||||%{smart_count} discounts';
+        $segment_from_UI = '<ph id="mtc_1" ctype="x-percent-variable" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discount<ph id="mtc_2" ctype="x-smart-count" equiv-text="base64:fHx8fA=="/><ph id="mtc_3" ctype="x-percent-variable" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discounts';
+
+        $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
+
+        $this->assertEquals( $db_segment, $Filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $Filter->fromLayer0ToLayer1( $db_segment ) );
+        
+    }
+    
+    /**
      **************************
      * Uber pipeline
      **************************
@@ -785,7 +806,7 @@ class MateCatSubFilteringTest extends TestCase
      * Test for skyscanner
      * (promoted to global behavior)
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSinglePercentageSyntax()
     {
@@ -802,7 +823,7 @@ class MateCatSubFilteringTest extends TestCase
      * Test for skyscanner
      * (promoted to global behavior)
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function testDoublePercentageSyntax()
     {

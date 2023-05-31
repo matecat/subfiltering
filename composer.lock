@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.90",
+            "version": "v1.0.102",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "8b543008138e5e84f480ec575f89391fce7e1286"
+                "reference": "9f0943a5ff56346b77bb400df498b206b3a1f392"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/8b543008138e5e84f480ec575f89391fce7e1286",
-                "reference": "8b543008138e5e84f480ec575f89391fce7e1286",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/9f0943a5ff56346b77bb400df498b206b3a1f392",
+                "reference": "9f0943a5ff56346b77bb400df498b206b3a1f392",
                 "shasum": ""
             },
             "require": {
@@ -53,9 +53,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.90"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.102"
             },
-            "time": "2022-01-18T09:32:01+00:00"
+            "time": "2022-11-23T13:30:28+00:00"
         }
     ],
     "packages-dev": [
@@ -1404,12 +1404,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Ctype\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Ctype\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
