@@ -3,16 +3,15 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 
-class SmartCounts extends AbstractHandler
-{
+class SmartCounts extends AbstractHandler {
     /**
      * @param $segment
      *
      * @return string
      */
-    public function transform( $segment )
-    {
+    public function transform( $segment ) {
         /*
          * Examples:
          * - [AIRBNB] Reminder: Reply to %{guest}’s inquiry. |||| [AIRBNB] Reminder: Reply to %{guest}’s inquiry.
@@ -21,8 +20,8 @@ class SmartCounts extends AbstractHandler
         foreach ( $html as $pos => $variable ) {
             //replace subsequent elements excluding already encoded
             $segment = preg_replace(
-                    '/' . preg_quote( $variable[0], '/' ) . '/',
-                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( $variable[ 0 ] ) . "\"/>",
+                    '/' . preg_quote( $variable[ 0 ], '/' ) . '/',
+                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::SMART_COUNT . '" equiv-text="base64:' . base64_encode( $variable[ 0 ] ) . "\"/>",
                     $segment,
                     1
             );
