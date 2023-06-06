@@ -162,7 +162,7 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new RubyOnRailsI18n() );
         $channel->addLast( new Snails() );
         $channel->addLast( new DoubleSquareBrackets() );
-        $channel->addLast( new DoubleUnderscore() );
+        //$channel->addLast( new DoubleUnderscore() );
         $channel->addLast( new DollarCurlyBrackets() );
         $channel->addLast( new PercentSnail() );
         $channel->addLast( new PercentNumberSnail() );
