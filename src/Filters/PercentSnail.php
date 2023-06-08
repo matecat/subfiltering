@@ -4,12 +4,19 @@ namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
+use Matecat\SubFiltering\Filters\Sprintf\SprintfLocker;
 
 class PercentSnail extends AbstractHandler {
     /**
      * @inheritDoc
      */
     public function transform( $segment ) {
+
+        $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
+
+        //placeholding
+        $segment = $sprintfLocker->lock( $segment );
+
         preg_match_all( '/%@/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $pos => $percentSnailVariable ) {
 
@@ -20,6 +27,8 @@ class PercentSnail extends AbstractHandler {
                     1
             );
         }
+
+        $segment = $sprintfLocker->unlock( $segment );
 
         return $segment;
     }
