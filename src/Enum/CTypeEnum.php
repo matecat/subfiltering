@@ -18,4 +18,5 @@ class CTypeEnum {
     const DOUBLE_SQUARE_BRACKETS = 'x-double-square-brackets';
     const DOLLAR_CURLY_BRACKETS  = 'x-dollar-curly-brackets';
     const DOUBLE_UNDERSCORE      = 'x-double-underscore';
+    const SQUARE_SPRINTF         = 'x-square-sprintf';
 }
