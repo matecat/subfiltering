@@ -205,4 +205,13 @@ class MyMemorySubFilteringTest extends TestCase
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
+    public function testWithSquareSprintf() {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'This string contains [%s]';
+        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:WyVzXQ=="/>';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
 }

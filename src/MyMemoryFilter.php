@@ -31,6 +31,7 @@ use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
+use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\SubFilteredPhToHtml;
 use Matecat\SubFiltering\Filters\TwigToPh;
@@ -76,9 +77,11 @@ class MyMemoryFilter extends AbstractFilter {
         $channel->addLast( new DoubleSquareBrackets() );
         //$channel->addLast( new DoubleUnderscore() );
         $channel->addLast( new DollarCurlyBrackets() );
+
         $channel->addLast( new PercentSnail() );
         $channel->addLast( new PercentNumberSnail() );
         $channel->addLast( new Percentages() );
+        $channel->addLast( new SquareSprintf() );
         $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
