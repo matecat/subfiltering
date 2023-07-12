@@ -13,20 +13,21 @@ class SquareSprintf extends AbstractHandler {
 
         $tags = [
             '\[%s\]',
-            '\[%1$s\]',
+            '\[%1\$s\]',
             '\[%s:name\]',
             '\[%i\]',
-            '\[%1$i\]',
+            '\[%1\$i\]',
             '\[%i:name\]',
             '\[%f\]',
             '\[%.2f\]',
-            '\[%1$.2f\]',
+            '\[%1\$.2f\]',
             '\[%.2f:name\]',
         ];
 
-        $regex = '/'.implode("|", $tags).'/';
+        $regex = '/'.implode("|", $tags).'/iu';
 
         preg_match_all( $regex, $segment, $html, PREG_SET_ORDER );
+
         foreach ( $html as $pos => $percentSnailVariable ) {
 
             $segment = preg_replace(
