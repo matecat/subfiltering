@@ -954,11 +954,26 @@ class MateCatSubFilteringTest extends TestCase {
     public function testWithSquareSprintf() {
         $filter = $this->getFilterInstance();
 
-        $db_segment      = 'This string contains [%s]';
-        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:WyVzXQ=="/>';
+        $tags = [
+            '[%s]',
+            '[%1$s]',
+            '[%s:name]',
+            '[%i]',
+            '[%1$i]',
+            '[%i:name]',
+            '[%f]',
+            '[%.2f]',
+            '[%1$.2f]',
+            '[%.2f:name]',
+        ];
 
-        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
-        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+        foreach ($tags as $tag){
+            $db_segment      = 'Ciao ' . $tag;
+            $segment_from_UI = 'Ciao <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:'.base64_encode($tag).'"/>';
+
+            $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+            $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+        }
     }
 
 }
