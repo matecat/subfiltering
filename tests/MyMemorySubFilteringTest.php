@@ -208,10 +208,39 @@ class MyMemorySubFilteringTest extends TestCase
     public function testWithSquareSprintf() {
         $filter = $this->getFilterInstance();
 
-        $db_segment      = 'This string contains [%s]';
-        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:WyVzXQ=="/>';
+        $tags = [
+            '[%s]',
+            '[%1$s]',
+            '[%222$s]',
+            '[%s:name]',
+            '[%s:placeholder]',
+            '[%s:place_holder]',
+            '[%i]',
+            '[%1$i]',
+            '[%222$i]',
+            '[%i:name]',
+            '[%i:placeholder]',
+            '[%i:place_holder]',
+            '[%f]',
+            '[%.2f]',
+            '[%.2332f]',
+            '[%1$.2f]',
+            '[%23$.24343f]',
+            '[%.222f:name]',
+            '[%.2f:placeholder]',
+            '[%.2f:place_holder]',
+            '[%key_id:key_id%]',
+            '[%key_id:1234%]',
+            '[%test:1234%]',
+            '[%test:test%]',
+        ];
 
-        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
-        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+        foreach ($tags as $tag){
+            $db_segment      = 'Ciao ' . $tag;
+            $segment_from_UI = 'Ciao <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:'.base64_encode($tag).'"/>';
+
+            $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+            $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+        }
     }
 }
