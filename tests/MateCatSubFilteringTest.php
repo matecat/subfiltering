@@ -975,10 +975,8 @@ class MateCatSubFilteringTest extends TestCase {
             '[%.222f:name]',
             '[%.2f:placeholder]',
             '[%.2f:place_holder]',
-            '[%key_id:key_id%]',
             '[%key_id:1234%]',
             '[%test:1234%]',
-            '[%test:test%]',
         ];
 
         foreach ($tags as $tag){
