@@ -22,7 +22,7 @@ class SquareSprintf extends AbstractHandler {
             '\[%.\d+f\]',
             '\[%\d+\$.\d+f\]',
             '\[%.\d+f:[a-z_]+\]',
-            '\[%[a-z_]+:([a-z_]+|\d+)%\]',
+            '\[%[a-z_]+:\d+%\]',
         ];
 
         $regex = '/'.implode("|", $tags).'/iu';
