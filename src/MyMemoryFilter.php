@@ -26,7 +26,6 @@ use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
-use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
@@ -85,10 +84,6 @@ class MyMemoryFilter extends AbstractFilter {
         $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
-
-        if ( $cid == 'uber' ) {
-            $channel->addAfter( new TwigToPh(), new SingleCurlyBracketsToPh() );
-        }
 
         return $channel->transform( $segment );
 
