@@ -64,19 +64,17 @@ class MyMemoryFilter extends AbstractFilter {
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
+        $channel->addLast( new TwigToPh() );
+        $channel->addLast( new Variables() );
 
         if ( $cid == 'airbnb' ) {
-            $channel->addLast( new Variables() );
             $channel->addLast( new SmartCounts() );
         }
 
-        $channel->addLast( new TwigToPh() );
         $channel->addLast( new RubyOnRailsI18n() );
         $channel->addLast( new Snails() );
         $channel->addLast( new DoubleSquareBrackets() );
-        //$channel->addLast( new DoubleUnderscore() );
         $channel->addLast( new DollarCurlyBrackets() );
-
         $channel->addLast( new PercentSnail() );
         $channel->addLast( new PercentNumberSnail() );
         $channel->addLast( new Percentages() );

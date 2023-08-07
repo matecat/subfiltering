@@ -40,6 +40,7 @@ use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\SubFilteredPhToHtml;
 use Matecat\SubFiltering\Filters\TwigToPh;
+use Matecat\SubFiltering\Filters\Variables;
 
 /**
  * Class Filter
@@ -160,12 +161,11 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
         $channel->addLast( new TwigToPh() );
+        $channel->addLast( new Variables() );
         $channel->addLast( new RubyOnRailsI18n() );
         $channel->addLast( new Snails() );
         $channel->addLast( new DoubleSquareBrackets() );
-        //$channel->addLast( new DoubleUnderscore() );
         $channel->addLast( new DollarCurlyBrackets() );
-        $channel->addLast( new PercentSnail() );
         $channel->addLast( new PercentNumberSnail() );
         $channel->addLast( new Percentages() );
         $channel->addLast( new SquareSprintf() );

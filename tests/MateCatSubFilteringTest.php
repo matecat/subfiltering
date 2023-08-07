@@ -871,7 +871,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %@ is a IOS placeholder %@.';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:JUA="/>.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JUA="/>.';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -891,7 +891,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string contains all these tags: %-4d %@ %12$@ ​%{{|discount|}} {% if count &lt; 3 %} but not this %placeholder%';
-        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:JUA="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> ​%<ph id="mtc_4" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> <ph id="mtc_5" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/> but not this %placeholder%';
+        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JUA="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> ​%<ph id="mtc_4" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> <ph id="mtc_5" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/> but not this %placeholder%';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
