@@ -33,6 +33,12 @@ class SprintfToPH extends AbstractHandler {
      * 20%-zar - ignored
      *</code>
      *
+     * @see
+     * - https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html#//apple_ref/doc/uid/TP40004265-SW1
+     * - https://en.cppreference.com/w/c/io/fprintf
+     * - https://www.php.net/manual/en/function.sprintf.php
+     * - https://www.w3resource.com/c-programming/stdio/c_library_method_sprintf.php
+     *
      * @param $segment
      *
      * @return string
@@ -41,12 +47,14 @@ class SprintfToPH extends AbstractHandler {
 
         $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
 
-        //placeholding
+        // placeholding
         $segment = $sprintfLocker->lock( $segment );
 
         // Octal parsing is disabled due to Hungarian percentages 20%-os
-        // preg_match_all( '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?(?:[b-fiosuxX]))/', $segment, $vars, PREG_SET_ORDER );
-        preg_match_all( '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:-)?(?:0|\'[^$])?(?:\d+)?(?:\.(?:\d+))?(?:[b-fiosuxX]))/', $segment, $vars, PREG_SET_ORDER );
+        $regex = '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|[+-]?\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?((?:[hjlqtzL]{0,2}[ac-giopsuxAC-GOSUX]{1})(?![\d\w])|(?:#@[\w]+@)|(?:@)))/';
+
+
+        preg_match_all( $regex, $segment, $vars, PREG_SET_ORDER );
         foreach ( $vars as $pos => $variable ) {
 
             //replace subsequent elements excluding already encoded

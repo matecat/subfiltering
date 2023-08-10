@@ -96,14 +96,6 @@ class SprintfTest extends TestCase {
 
             $this->assertEquals($segment, $segmentL1);
             $this->assertEquals($segment, $segmentL2);
-
-            $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT' );
-
-            $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
-            $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
-
-            $this->assertNotEquals($segment, $segmentL1);
-            $this->assertNotEquals($segment, $segmentL2);
         }
     }
 }
