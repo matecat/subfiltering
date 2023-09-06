@@ -9,9 +9,8 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class PlaceHoldXliffTags extends AbstractHandler {
 
@@ -22,35 +21,35 @@ class PlaceHoldXliffTags extends AbstractHandler {
         //remove not existent </x> tags
         $segment = preg_replace( '|(</x>)|si', "", $segment );
 
-        //$segment=preg_replace('|<(g\s*.*?)>|si', Constants::LTPLACEHOLDER."$1".Constants::GTPLACEHOLDER,$segment);
-        $segment = preg_replace( '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(g\s*xid=["\']+.*?["\']+\s*[^<>]*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        //$segment=preg_replace('|<(g\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER."$1".ConstantEnum::GTPLACEHOLDER,$segment);
+        $segment = preg_replace( '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(g\s*xid=["\']+.*?["\']+\s*[^<>]*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
 
-        $segment = preg_replace( '|<(/g)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/g)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
 
-        $segment = preg_replace( '|<(x .*?/?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '#<(bx[ ]{0,}/?|bx .*?/?)>#si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '#<(ex[ ]{0,}/?   |ex .*?/?)>#si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(bpt\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(/bpt)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(ept\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(/ept)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(ph .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(/ph)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(ec .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(/ec)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(sc .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(/sc)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(pc .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(/pc)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(it .*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(/it)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(mrk\s*.*?)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(/mrk)>|si', Constants::LTPLACEHOLDER . "$1" . Constants::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(x .*?/?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '#<(bx[ ]{0,}/?|bx .*?/?)>#si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '#<(ex[ ]{0,}/?   |ex .*?/?)>#si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(bpt\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/bpt)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(ept\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/ept)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(ph .*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/ph)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(ec .*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/ec)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(sc .*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/sc)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(pc .*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/pc)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(it .*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/it)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(mrk\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '|<(/mrk)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
 
-        return preg_replace_callback( '/' . Constants::LTPLACEHOLDER . '(.*?)' . Constants::GTPLACEHOLDER . '/u',
+        return preg_replace_callback( '/' . ConstantEnum::LTPLACEHOLDER . '(.*?)' . ConstantEnum::GTPLACEHOLDER . '/u',
                 function ( $matches ) {
-                    return Constants::LTPLACEHOLDER . base64_encode( $matches[ 1 ] ) . Constants::GTPLACEHOLDER;
+                    return ConstantEnum::LTPLACEHOLDER . base64_encode( $matches[ 1 ] ) . ConstantEnum::GTPLACEHOLDER;
                 }, $segment
         ); //base64 of the tag content to avoid unwanted manipulation
     }

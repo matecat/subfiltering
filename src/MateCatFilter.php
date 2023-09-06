@@ -8,7 +8,6 @@ use Matecat\SubFiltering\Filters\DataRefReplace;
 use Matecat\SubFiltering\Filters\DataRefRestore;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
-use Matecat\SubFiltering\Filters\DoubleUnderscore;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\FromLayer2ToRawXML;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -20,12 +19,13 @@ use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
 use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
-use Matecat\SubFiltering\Filters\PercentSnail;
 use Matecat\SubFiltering\Filters\PlaceBreakingSpacesInXliff;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RemoveCTypeFromPhTags;
 use Matecat\SubFiltering\Filters\RemoveDangerousChars;
+use Matecat\SubFiltering\Filters\RemoveNBSPPlaceholder;
 use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
+use Matecat\SubFiltering\Filters\RestoreNBSPPlaceholders;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreTabsPlaceholders;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
@@ -93,6 +93,7 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new SpacesToNBSPForView() );
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new RestoreTabsPlaceholders() );
+        $channel->addLast( new RestoreNBSPPlaceholders() );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
@@ -190,6 +191,7 @@ class MateCatFilter extends AbstractFilter {
     public function fromLayer1ToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new DataRefRestore() );
+        $channel->addLast( new RemoveNBSPPlaceholder() );
         $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );

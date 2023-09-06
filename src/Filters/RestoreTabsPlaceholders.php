@@ -3,7 +3,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class RestoreTabsPlaceholders extends AbstractHandler {
 
@@ -17,7 +17,7 @@ class RestoreTabsPlaceholders extends AbstractHandler {
         // | Esempio &#09;test | Test	example     |
         // +-------------------+--------------------+
         //
-        return str_replace( [ "&#09;", "	" ], Constants::tabPlaceholder, $segment );
+        return str_replace( [ "&#09;", "	" ], ConstantEnum::tabPlaceholder, $segment );
     }
 
 }

@@ -10,7 +10,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class TwigToPh extends AbstractHandler {
@@ -36,7 +36,7 @@ class TwigToPh extends AbstractHandler {
         preg_match_all( '/{{[^<>]+?}}|{%[^<>]+?%}|{#[^<>]+?#}/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $pos => $twig_variable ) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
-            if ( !strstr( $twig_variable[ 0 ], Constants::GTPLACEHOLDER ) ) {
+            if ( !strstr( $twig_variable[ 0 ], ConstantEnum::GTPLACEHOLDER ) ) {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
                         '/' . preg_quote( $twig_variable[ 0 ], '/' ) . '/',

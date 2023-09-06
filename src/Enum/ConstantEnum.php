@@ -1,9 +1,9 @@
 <?php
 
-namespace Matecat\SubFiltering\Commons;
+namespace Matecat\SubFiltering\Enum;
 
 
-class Constants {
+class ConstantEnum {
 
     const LTPLACEHOLDER  = "##LESSTHAN##";
     const GTPLACEHOLDER  = "##GREATERTHAN##";

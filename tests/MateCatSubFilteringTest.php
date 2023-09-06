@@ -4,6 +4,7 @@ namespace Matecat\SubFiltering\Tests;
 
 use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\SprintfToPH;
@@ -255,6 +256,22 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $expected_segment, $filter->fromLayer1ToLayer0( $string_in_layer1 ) );
 
     }
+
+    /**
+     **************************
+     * NBSP
+     **************************
+     */
+
+    public function testNbsp() {
+        $filter           = $this->getFilterInstance();
+        $expected_segment = '   Test';
+        $string_from_UI   = ConstantEnum::nbspPlaceholder.ConstantEnum::nbspPlaceholder.ConstantEnum::nbspPlaceholder.'Test';
+
+        $this->assertEquals( $expected_segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $string_from_UI, $filter->fromLayer0ToLayer2( $expected_segment ) );
+    }
+
 
     /**
      **************************

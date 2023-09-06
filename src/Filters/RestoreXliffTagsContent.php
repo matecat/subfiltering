@@ -11,17 +11,17 @@ namespace Matecat\SubFiltering\Filters;
 
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class RestoreXliffTagsContent extends AbstractHandler {
 
     public function transform( $segment ) {
 
-        $segment = preg_replace_callback( '/' . Constants::LTPLACEHOLDER . '(.*?)' . Constants::GTPLACEHOLDER . '/u',
+        $segment = preg_replace_callback( '/' . ConstantEnum::LTPLACEHOLDER . '(.*?)' . ConstantEnum::GTPLACEHOLDER . '/u',
                 function ( $matches ) {
                     $_match = base64_decode( $matches[ 1 ] );
 
-                    return Constants::LTPLACEHOLDER . $_match . Constants::GTPLACEHOLDER;
+                    return ConstantEnum::LTPLACEHOLDER . $_match . ConstantEnum::GTPLACEHOLDER;
                 },
                 $segment
         ); //base64 decode of the tag content to avoid unwanted manipulation

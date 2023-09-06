@@ -3,7 +3,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class RestoreXliffTagsInXliff extends AbstractHandler {
 
@@ -11,8 +11,8 @@ class RestoreXliffTagsInXliff extends AbstractHandler {
      * @inheritDoc
      */
     public function transform( $segment ) {
-        $segment = str_replace( Constants::xliffInXliffStartPlaceHolder, "&lt;", $segment );
-        $segment = str_replace( Constants::xliffInXliffEndPlaceHolder, "&gt;", $segment );
+        $segment = str_replace( ConstantEnum::xliffInXliffStartPlaceHolder, "&lt;", $segment );
+        $segment = str_replace( ConstantEnum::xliffInXliffEndPlaceHolder, "&gt;", $segment );
 
         return $segment;
     }

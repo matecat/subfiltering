@@ -9,11 +9,11 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class SplitPlaceholder extends AbstractHandler {
     public function transform( $segment ) {
-        $segment = str_replace( Constants::splitPlaceHolder, "", $segment );
+        $segment = str_replace( ConstantEnum::splitPlaceHolder, "", $segment );
 
         return $segment;
     }

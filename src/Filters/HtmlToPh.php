@@ -10,7 +10,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\Html\CallbacksHandler;
 use Matecat\SubFiltering\Filters\Html\HtmlParser;
@@ -117,7 +117,7 @@ class HtmlToPh extends AbstractHandler {
             //EX:
             //original:  &lt;a href=\"<x id="1">\"&gt;
             //  <a href=\"##LESSTHAN##eCBpZD0iMSIv##GREATERTHAN##\">
-            if ( strpos( $buffer, Constants::LTPLACEHOLDER ) !== false || strpos( $buffer, Constants::GTPLACEHOLDER ) !== false ) {
+            if ( strpos( $buffer, ConstantEnum::LTPLACEHOLDER ) !== false || strpos( $buffer, ConstantEnum::GTPLACEHOLDER ) !== false ) {
                 return false;
             }
 
