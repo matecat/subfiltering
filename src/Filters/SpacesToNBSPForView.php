@@ -10,7 +10,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Utils\CatUtils;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class SpacesToNBSPForView extends AbstractHandler {
 
@@ -23,15 +23,16 @@ class SpacesToNBSPForView extends AbstractHandler {
         $segment = str_ireplace(
                 [
                         '&#10;', '&#13;', ' ' /* NBSP in ascii value */,
-                        '&#0A;', '&#0C;', '&#nbsp;'
+                        '&#0A;', '&#0C;', '&nbsp;', '&#160;',
                 ],
                 [
-                        CatUtils::lfPlaceholder,
-                        CatUtils::crPlaceholder,
-                        CatUtils::nbspPlaceholder,
-                        CatUtils::lfPlaceholder,
-                        CatUtils::crPlaceholder,
-                        CatUtils::nbspPlaceholder
+                    ConstantEnum::lfPlaceholder,
+                    ConstantEnum::crPlaceholder,
+                    ConstantEnum::nbspPlaceholder,
+                    ConstantEnum::lfPlaceholder,
+                    ConstantEnum::crPlaceholder,
+                    ConstantEnum::nbspPlaceholder,
+                    ConstantEnum::nbspPlaceholder
                 ], $segment );
 
         return $segment;

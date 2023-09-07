@@ -265,13 +265,13 @@ class MateCatSubFilteringTest extends TestCase {
 
     public function testNbsp() {
         $filter           = $this->getFilterInstance();
+
         $expected_segment = '   Test';
         $string_from_UI   = ConstantEnum::nbspPlaceholder.ConstantEnum::nbspPlaceholder.ConstantEnum::nbspPlaceholder.'Test';
 
         $this->assertEquals( $expected_segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
         $this->assertEquals( $string_from_UI, $filter->fromLayer0ToLayer2( $expected_segment ) );
     }
-
 
     /**
      **************************
