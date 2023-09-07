@@ -10,11 +10,11 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class RestoreSubFilteredPhToHtml extends AbstractHandler {
 
-    const matchPhRegexp = '|' . Constants::LTPLACEHOLDER . 'ph id\s*=\s*["\']mtc_[0-9]+["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/' . Constants::GTPLACEHOLDER . '|siU';
+    const matchPhRegexp = '|' . ConstantEnum::LTPLACEHOLDER . 'ph id\s*=\s*["\']mtc_[0-9]+["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/' . ConstantEnum::GTPLACEHOLDER . '|siU';
 
     /**
      * @param $segment

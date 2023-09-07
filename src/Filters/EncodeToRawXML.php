@@ -3,7 +3,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Utils\CatUtils;
 
 class EncodeToRawXML extends AbstractHandler {
@@ -26,7 +26,7 @@ class EncodeToRawXML extends AbstractHandler {
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ CatUtils::class, 'htmlentitiesFromUnicode' ], $segment );
 
         // now convert the real &nbsp;
-        $segment = str_replace( Constants::nbspPlaceholder, CatUtils::unicode2chr( 0Xa0 ), $segment );
+        $segment = str_replace( ConstantEnum::nbspPlaceholder, CatUtils::unicode2chr( 0Xa0 ), $segment );
 
         // handling &#10;
         if ( strpos( $segment, '##_ent_0D_##' ) !== false ) {

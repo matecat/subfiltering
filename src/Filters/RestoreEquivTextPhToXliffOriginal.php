@@ -11,7 +11,7 @@ namespace Matecat\SubFiltering\Filters;
 
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class RestoreEquivTextPhToXliffOriginal extends AbstractHandler {
 
@@ -23,7 +23,7 @@ class RestoreEquivTextPhToXliffOriginal extends AbstractHandler {
     public function transform( $segment ) {
 
         //pipeline to convert back XLIFF PH to the original ones
-        preg_match_all( '/' . Constants::LTPLACEHOLDER . 'ph id\s*=\s*[\'"](?!mtc_).*?[\'"] ctype="x-twig" equiv-text\s*=\s*[\'"]base64:([^"\']+?)[\'"]\s*\/' . Constants::GTPLACEHOLDER . '/', $segment, $html, PREG_SET_ORDER ); // Ungreedy
+        preg_match_all( '/' . ConstantEnum::LTPLACEHOLDER . 'ph id\s*=\s*[\'"](?!mtc_).*?[\'"] ctype="x-twig" equiv-text\s*=\s*[\'"]base64:([^"\']+?)[\'"]\s*\/' . ConstantEnum::GTPLACEHOLDER . '/', $segment, $html, PREG_SET_ORDER ); // Ungreedy
         foreach ( $html as $tag_attribute ) {
             $segment = str_replace( "base64:" . $tag_attribute[ 1 ], base64_decode( $tag_attribute[ 1 ] ), $segment );
         }

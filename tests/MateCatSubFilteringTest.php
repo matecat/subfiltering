@@ -4,6 +4,7 @@ namespace Matecat\SubFiltering\Tests;
 
 use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\SprintfToPH;
@@ -225,7 +226,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $segment       = $expectedL1 = '5 tips for creating a great   guide';
-        $segment_to_UI = $string_from_UI = '5 tips for creating a great ' . CatUtils::nbspPlaceholder . ' guide';
+        $segment_to_UI = $string_from_UI = '5 tips for creating a great ' . ConstantEnum::nbspPlaceholder . ' guide';
 
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
@@ -254,6 +255,22 @@ class MateCatSubFilteringTest extends TestCase {
         $string_in_layer1 = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2ImZ3Q7"/>de <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JTEkcw=="/>, <ph id="mtc_3" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9iJmd0Ow=="/>que';
         $this->assertEquals( $expected_segment, $filter->fromLayer1ToLayer0( $string_in_layer1 ) );
 
+    }
+
+    /**
+     **************************
+     * NBSP
+     **************************
+     */
+
+    public function testNbsp() {
+        $filter           = $this->getFilterInstance();
+
+        $expected_segment = '   Test';
+        $string_from_UI   = ConstantEnum::nbspPlaceholder.ConstantEnum::nbspPlaceholder.ConstantEnum::nbspPlaceholder.'Test';
+
+        $this->assertEquals( $expected_segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $string_from_UI, $filter->fromLayer0ToLayer2( $expected_segment ) );
     }
 
     /**

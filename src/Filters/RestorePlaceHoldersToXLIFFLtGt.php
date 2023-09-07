@@ -11,13 +11,13 @@ namespace Matecat\SubFiltering\Filters;
 
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler {
 
     public function transform( $segment ) {
-        $segment = str_replace( Constants::LTPLACEHOLDER, "<", $segment );
-        $segment = str_replace( Constants::GTPLACEHOLDER, ">", $segment );
+        $segment = str_replace( ConstantEnum::LTPLACEHOLDER, "<", $segment );
+        $segment = str_replace( ConstantEnum::GTPLACEHOLDER, ">", $segment );
 
         return $segment;
 

@@ -10,7 +10,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Commons\Constants;
+use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Utils\CatUtils;
 
 /**
@@ -29,7 +29,7 @@ class FromLayer2ToRawXML extends AbstractHandler {
         $segment = $this->placeHoldBrokenHTML( $segment );
 
         $double_encode = false;
-        if ( strpos( $segment, Constants::LTPLACEHOLDER ) !== false ) {
+        if ( strpos( $segment, ConstantEnum::LTPLACEHOLDER ) !== false ) {
 
             $decXliff     = new RestoreXliffTagsContent();
             $test_segment = $decXliff->transform( $segment );
@@ -68,7 +68,7 @@ class FromLayer2ToRawXML extends AbstractHandler {
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ CatUtils::class, 'htmlentitiesFromUnicode' ], $segment );
 
         // now convert the real &nbsp;
-        $segment = str_replace( Constants::nbspPlaceholder, CatUtils::unicode2chr( 0Xa0 ), $segment );
+        $segment = str_replace( ConstantEnum::nbspPlaceholder, CatUtils::unicode2chr( 0Xa0 ), $segment );
 
         // Filters BUG, segmentation on HTML, we should never get this at this level ( Should be fixed, anyway we try to cover )
         $segment = $this->resetBrokenHTML( $segment );

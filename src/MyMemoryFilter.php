@@ -8,7 +8,6 @@ use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoubleSnail;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
-use Matecat\SubFiltering\Filters\DoubleUnderscore;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\HtmlPlainTextDecoder;
