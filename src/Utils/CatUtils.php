@@ -3,9 +3,6 @@
 namespace Matecat\SubFiltering\Utils;
 
 class CatUtils {
-    const lfPlaceholder   = '##$_0A$##';
-    const crPlaceholder   = '##$_0D$##';
-    const nbspPlaceholder = '##$_A0$##';
 
     /**
      * Get the char code from a multi byte char

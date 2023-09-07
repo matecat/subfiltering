@@ -226,7 +226,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $segment       = $expectedL1 = '5 tips for creating a great   guide';
-        $segment_to_UI = $string_from_UI = '5 tips for creating a great ' . CatUtils::nbspPlaceholder . ' guide';
+        $segment_to_UI = $string_from_UI = '5 tips for creating a great ' . ConstantEnum::nbspPlaceholder . ' guide';
 
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
