@@ -273,6 +273,16 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $string_from_UI, $filter->fromLayer0ToLayer2( $expected_segment ) );
     }
 
+    public function testNbspAsString() {
+        $filter = $this->getFilterInstance();
+
+        $expected_segment = '&amp;nbsp; Text';
+        $string_from_UI = '&amp;nbsp; Text';
+
+        $this->assertEquals( $expected_segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $string_from_UI, $filter->fromLayer0ToLayer2( $expected_segment ) );
+    }
+
     /**
      **************************
      * Sprintf
