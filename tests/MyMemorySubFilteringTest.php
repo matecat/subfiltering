@@ -125,8 +125,8 @@ class MyMemorySubFilteringTest extends TestCase
     {
         $filter = $this->getFilterInstance();
 
-        $db_segment      = 'Save up to ​%{{|discount|}} with these hotels';
-        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" ctype="'.CTypeEnum::TWIG.'" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+        $db_segment      = 'Save up to {{|discount|}} with these hotels';
+        $segment_from_UI = 'Save up to <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );

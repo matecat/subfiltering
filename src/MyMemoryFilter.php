@@ -63,8 +63,8 @@ class MyMemoryFilter extends AbstractFilter {
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
-        $channel->addLast( new TwigToPh() );
         $channel->addLast( new Variables() );
+        $channel->addLast( new TwigToPh() );
 
         if ( $cid == 'airbnb' ) {
             $channel->addLast( new SmartCounts() );
