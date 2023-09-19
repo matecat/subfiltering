@@ -887,8 +887,18 @@ class MateCatSubFilteringTest extends TestCase {
     public function testPercentDoubleCurlyBracketsSyntax() {
         $filter = $this->getFilterInstance();
 
-        $db_segment      = 'Save up to ​%{{|discount|}} with these hotels';
-        $segment_from_UI = 'Save up to ​%<ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+        $db_segment      = 'Save up to {{|discount|}} with these hotels';
+        $segment_from_UI = 'Save up to <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
+        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
+    }
+
+    public function testVariablesSyntax() {
+        $filter = $this->getFilterInstance();
+
+        $db_segment      = 'Save up to %{{|discount|}} with these hotels';
+        $segment_from_UI = 'Save up to <ph id="mtc_1" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:JXt7fGRpc2NvdW50fH19"/> with these hotels';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -918,7 +928,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string contains all these tags: %-4d %@ %12$@ ​%{{|discount|}} {% if count &lt; 3 %} but not this %placeholder%';
-        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JUA="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> ​%<ph id="mtc_4" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> <ph id="mtc_5" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/> but not this %placeholder%';
+        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JUA="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> ​<ph id="mtc_4" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:JXt7fGRpc2NvdW50fH19"/> <ph id="mtc_5" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/> but not this %placeholder%';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
