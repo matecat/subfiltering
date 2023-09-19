@@ -16,10 +16,6 @@ class SpacesToNBSPForView extends AbstractHandler {
 
     public function transform( $segment ) {
 
-        //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
-        $segment = preg_replace( '/[ ]{2}/', "&nbsp; ", $segment );
-        $segment = preg_replace( '/[ ]$/', "&nbsp;", $segment );
-
         $segment = str_ireplace(
                 [
                         '&#10;', '&#13;', ' ' /* NBSP in ascii value */,
@@ -34,6 +30,9 @@ class SpacesToNBSPForView extends AbstractHandler {
                     ConstantEnum::nbspPlaceholder,
                     ConstantEnum::nbspPlaceholder
                 ], $segment );
+
+        //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
+        $segment = preg_replace( '/ {2}/', "&nbsp; ", $segment );
 
         return $segment;
 
