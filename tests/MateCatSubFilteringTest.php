@@ -12,7 +12,6 @@ use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Tests\Mocks\Features\AirbnbFeature;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
-use Matecat\SubFiltering\Utils\CatUtils;
 use PHPUnit\Framework\TestCase;
 
 class MateCatSubFilteringTest extends TestCase {
@@ -42,6 +41,16 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $tmpLayer2 ) );
         $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
         $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $tmpLayer2 ) );
+    }
+
+    public function testHTMLStringWithApostrophe()
+    {
+        $filter = $this->getFilterInstance();
+
+        $segment   = "&lt;Value&gt; &lt;![CDATA[Visitez Singapour et détendez-vous sur l'île de Langkawi]]&gt; &lt;/Value&gt;";
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
     }
 
     /**
