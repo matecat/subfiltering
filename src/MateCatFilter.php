@@ -31,7 +31,7 @@ use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\Snails;
-use Matecat\SubFiltering\Filters\SpacesToNBSPForView;
+use Matecat\SubFiltering\Filters\SpecialEntitiesToPlaceholdersForView;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
@@ -88,7 +88,7 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromLayer1ToLayer2( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new SpacesToNBSPForView() );
+        $channel->addLast( new SpecialEntitiesToPlaceholdersForView() );
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new RestoreTabsPlaceholders() );
         $channel->addLast( new HtmlPlainTextDecoder() );

@@ -12,7 +12,7 @@ namespace Matecat\SubFiltering\Filters;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 
-class SpacesToNBSPForView extends AbstractHandler {
+class SpecialEntitiesToPlaceholdersForView extends AbstractHandler {
 
     public function transform( $segment ) {
 
