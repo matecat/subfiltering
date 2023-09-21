@@ -17,7 +17,6 @@ use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtDoubleEncode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
-use Matecat\SubFiltering\Filters\NBSPDoubleEncode;
 use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
 use Matecat\SubFiltering\Filters\PlaceBreakingSpacesInXliff;
@@ -94,7 +93,6 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new RestoreTabsPlaceholders() );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new LtGtDoubleEncode() );
-        $channel->addLast( new NBSPDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
         $channel->addLast( new DataRefReplace() );
 

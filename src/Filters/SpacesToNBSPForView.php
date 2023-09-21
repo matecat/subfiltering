@@ -19,20 +19,16 @@ class SpacesToNBSPForView extends AbstractHandler {
         $segment = str_ireplace(
                 [
                         '&#10;', '&#13;', ' ' /* NBSP in ascii value */,
-                        '&#0A;', '&#0C;', '&nbsp;', '&#160;',
+                        '&#0A;', '&#0C;', '&#160;',
                 ],
                 [
-                    ConstantEnum::lfPlaceholder,
-                    ConstantEnum::crPlaceholder,
-                    ConstantEnum::nbspPlaceholder,
-                    ConstantEnum::lfPlaceholder,
-                    ConstantEnum::crPlaceholder,
-                    ConstantEnum::nbspPlaceholder,
-                    ConstantEnum::nbspPlaceholder
+                        ConstantEnum::lfPlaceholder,
+                        ConstantEnum::crPlaceholder,
+                        ConstantEnum::nbspPlaceholder,
+                        ConstantEnum::lfPlaceholder,
+                        ConstantEnum::crPlaceholder,
+                        ConstantEnum::nbspPlaceholder
                 ], $segment );
-
-        //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
-        $segment = preg_replace( '/ {2}/', "&nbsp; ", $segment );
 
         return $segment;
 
