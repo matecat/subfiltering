@@ -53,14 +53,14 @@ class DataRefReplace extends AbstractHandler {
      *
      * is transformed to:
      *
-     * We can control who sees content when with &lt;ph id="mtc_ph_u_1" equiv-text="base64:Jmx0O3BoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8mZ3Q7"/&gt;Visibility Constraints.
+     * We can control who sees content when with &lt;ph id="mtc_ph_u_1" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/&gt;Visibility Constraints.
      *
      * @param $segment
      *
      * @return string|string[]
      */
     private function replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
-        preg_match_all( '/&lt;(ph .*?)&gt;/iu', $segment, $phTags );
+        preg_match_all( '/<(ph .*?)>/iu', $segment, $phTags );
 
         if ( count( $phTags[ 0 ] ) === 0 ) {
             return $segment;
@@ -71,7 +71,7 @@ class DataRefReplace extends AbstractHandler {
         foreach ( $phTags[ 0 ] as $phTag ) {
             // check if phTag has not any correspondence on dataRef map
             if ( $this->isAPhTagWithNoDataRefCorrespondence( $phTag ) ) {
-                $phMatecat = '&lt;ph id="mtc_ph_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $phTag ) . '"/&gt;';
+                $phMatecat = '<ph id="mtc_ph_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $phTag ) . '"/>';
                 $segment   = str_replace( $phTag, $phMatecat, $segment );
                 $phIndex++;
             }
@@ -127,8 +127,8 @@ class DataRefReplace extends AbstractHandler {
      */
     private function replaceXliffPcTagsToMatecatPhTags( $segment ) {
 
-        preg_match_all( '/&lt;(pc .*?)&gt;/iu', $segment, $openingPcTags );
-        preg_match_all( '/&lt;(\/pc)&gt;/iu', $segment, $closingPcTags );
+        preg_match_all( '/<(pc .*?)>/iu', $segment, $openingPcTags );
+        preg_match_all( '/<(\/pc)>/iu', $segment, $closingPcTags );
 
         if ( count( $openingPcTags[ 0 ] ) === 0 ) {
             return $segment;
@@ -137,13 +137,13 @@ class DataRefReplace extends AbstractHandler {
         $phIndex = 1;
 
         foreach ( $openingPcTags[ 0 ] as $openingPcTag ) {
-            $phMatecat = '&lt;ph id="mtc_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $openingPcTag ) . '"/&gt;';
+            $phMatecat = '<ph id="mtc_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $openingPcTag ) . '"/>';
             $segment   = str_replace( $openingPcTag, $phMatecat, $segment );
             $phIndex++;
         }
 
         foreach ( $closingPcTags[ 0 ] as $closingPcTag ) {
-            $phMatecat = '&lt;ph id="mtc_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $closingPcTag ) . '"/&gt;';
+            $phMatecat = '<ph id="mtc_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $closingPcTag ) . '"/>';
             $segment   = str_replace( $closingPcTag, $phMatecat, $segment );
             $phIndex++;
         }

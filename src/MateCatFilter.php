@@ -10,24 +10,18 @@ use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\FromLayer2ToRawXML;
-use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
-use Matecat\SubFiltering\Filters\HtmlPlainTextDecoder;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
-use Matecat\SubFiltering\Filters\LtGtDoubleEncode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
 use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
-use Matecat\SubFiltering\Filters\PlaceBreakingSpacesInXliff;
+use Matecat\SubFiltering\Filters\EncodeControlCharsInXliff;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
-use Matecat\SubFiltering\Filters\RemoveCTypeFromPhTags;
+use Matecat\SubFiltering\Filters\RemoveCTypeFromOriginalPhTags;
 use Matecat\SubFiltering\Filters\RemoveDangerousChars;
-use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
-use Matecat\SubFiltering\Filters\RestoreTabsPlaceholders;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
-use Matecat\SubFiltering\Filters\RestoreXliffTagsForView;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\Snails;
@@ -89,11 +83,6 @@ class MateCatFilter extends AbstractFilter {
     public function fromLayer1ToLayer2( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new SpecialEntitiesToPlaceholdersForView() );
-        $channel->addLast( new RestoreXliffTagsForView() );
-        $channel->addLast( new RestoreTabsPlaceholders() );
-        $channel->addLast( new HtmlPlainTextDecoder() );
-        $channel->addLast( new LtGtDoubleEncode() );
-        $channel->addLast( new LtGtEncode() );
         $channel->addLast( new DataRefReplace() );
 
         /** @var $channel Pipeline */
@@ -112,10 +101,8 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromLayer2ToLayer1( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new FromLayer2TorawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
@@ -188,20 +175,16 @@ class MateCatFilter extends AbstractFilter {
     public function fromLayer1ToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new DataRefRestore() );
-        $channel->addLast( new FromViewNBSPToSpaces() );
-        $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
+        $channel->addLast( new RemoveCTypeFromOriginalPhTags() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new RestoreXliffTagsInXliff() );
-        $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new LtGtEncode() );
         $channel->addLast( new RestoreXliffTagsContent() );
-        $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new SplitPlaceholder() );
-        $channel->addLast( new RemoveCTypeFromPhTags() );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer1ToLayer0', $channel );
@@ -219,8 +202,9 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromRawXliffToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
+        $channel->addLast( new RemoveDangerousChars() );
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new PlaceBreakingSpacesInXliff() );
+        $channel->addLast( new EncodeControlCharsInXliff() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
 

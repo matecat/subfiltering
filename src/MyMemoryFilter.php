@@ -4,13 +4,10 @@ namespace Matecat\SubFiltering;
 
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoubleSnail;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
-use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
-use Matecat\SubFiltering\Filters\HtmlPlainTextDecoder;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
@@ -19,8 +16,7 @@ use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
 use Matecat\SubFiltering\Filters\PercentSnail;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
-use Matecat\SubFiltering\Filters\RemoveCTypeFromPhTags;
-use Matecat\SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
+use Matecat\SubFiltering\Filters\RemoveCTypeFromOriginalPhTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
@@ -96,20 +92,16 @@ class MyMemoryFilter extends AbstractFilter {
      */
     public function fromLayer1ToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new FromViewNBSPToSpaces() );
-        $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
+        $channel->addLast( new RemoveCTypeFromOriginalPhTags() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new RestoreXliffTagsInXliff() );
-        $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new LtGtEncode() );
         $channel->addLast( new RestoreXliffTagsContent() );
-        $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new SplitPlaceholder() );
-        $channel->addLast( new RemoveCTypeFromPhTags() );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer1ToLayer0', $channel );

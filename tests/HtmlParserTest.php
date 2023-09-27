@@ -10,47 +10,10 @@
 namespace Matecat\SubFiltering\Tests;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\HtmlPlainTextDecoder;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use PHPUnit\Framework\TestCase;
 
 class HtmlParserTest extends TestCase {
-
-    /**
-     * @throws \Exception
-     */
-    public function test1() {
-
-        //this segment comes from the previous layers ( and it is valid despite the double encoding in the ampersands )
-        //we must ignore tags and encode the text to remove the double encoding
-        //WARNING the href attribute must NOT decoded
-        $segment = "<p> Airbnb &amp;amp; Co. &amp;lt; <strong>Use professional tools</strong> in your <a href=\"/users/settings?test=123&amp;amp;ciccio=1\" target=\"_blank\">";
-        $expected = "<p> Airbnb &amp; Co. &lt; <strong>Use professional tools</strong> in your <a href=\"/users/settings?test=123&amp;amp;ciccio=1\" target=\"_blank\">";
-
-        $decoder = new HtmlPlainTextDecoder();
-        $str     = $decoder->transform( $segment );
-
-        $this->assertEquals( $expected, $str );
-
-    }
-
-    public function test2() {
-        $segment  = "Airbnb &amp;amp; Co. &amp;lt;<p>";
-        $expected = "Airbnb &amp; Co. &lt;<p>";
-        $decoder = new HtmlPlainTextDecoder();
-        $str     = $decoder->transform( $segment );
-
-        $this->assertEquals( $expected, $str );
-    }
-
-    public function test3() {
-        $segment  = "<p>Airbnb &amp;amp; Co. &amp;lt;";
-        $expected = "<p>Airbnb &amp; Co. &lt;";
-        $decoder = new HtmlPlainTextDecoder();
-        $str     = $decoder->transform( $segment );
-
-        $this->assertEquals( $expected, $str );
-    }
 
     /**
      * @throws \Exception

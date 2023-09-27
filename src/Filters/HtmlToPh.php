@@ -134,7 +134,7 @@ class HtmlToPh extends AbstractHandler {
      * @return string
      */
     public function transform( $segment ) {
-        $parser = new HtmlParser( $this->pipeline );
+        $parser = new HtmlParser();
         $parser->registerCallbacksHandler( $this );
 
         return $parser->transform( $segment );

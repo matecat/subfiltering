@@ -21,4 +21,8 @@ trait CallbacksHandler {
 
     abstract protected function _finalizeScriptTag( $buffer );
 
+    protected function _setSegmentContainsHtml() {
+        $this->pipeline->setSegmentContainsHtml();
+    }
+
 }

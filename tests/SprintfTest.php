@@ -9,10 +9,7 @@
 
 namespace Matecat\SubFiltering\Tests;
 
-use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\SubFiltering\Filters\HtmlPlainTextDecoder;
-use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\TestCase;

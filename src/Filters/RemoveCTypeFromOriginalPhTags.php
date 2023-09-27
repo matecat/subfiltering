@@ -11,7 +11,7 @@ namespace Matecat\SubFiltering\Filters;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
-class RemoveCTypeFromPhTags extends AbstractHandler {
+class RemoveCTypeFromOriginalPhTags extends AbstractHandler {
 
     public function transform( $segment ) {
         preg_match_all( '|<ph id\s*=\s*["\'][a-zA-Z0-9]+["\'] ctype\s*=\s*["\']([^"\']+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>|siU', $segment, $html, PREG_SET_ORDER );

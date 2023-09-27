@@ -28,6 +28,7 @@ use RuntimeException;
  * @method _fixWrongBuffer( string $buffer )
  * @method _finalizeScriptTag( string $buffer )
  * @method _finalizePlainText( string $plain_text_buffer )
+ * @method _setSegmentContainsHtml()
  */
 class HtmlParser {
 
@@ -158,7 +159,7 @@ class HtmlParser {
                         }
 
                         if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                            $this->pipeline->setSegmentContainsHtml();
+                            $this->_setSegmentContainsHtml();
                         }
 
                         $html_buffer = '';
@@ -193,7 +194,7 @@ class HtmlParser {
                             $html_buffer = '';
 
                             if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                                $this->pipeline->setSegmentContainsHtml();
+                                $this->_setSegmentContainsHtml();
                             }
 
                             break;
@@ -229,7 +230,7 @@ class HtmlParser {
                                 $html_buffer       = '';
 
                                 if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                                    $this->pipeline->setSegmentContainsHtml();
+                                    $this->_setSegmentContainsHtml();
                                 }
 
                                 break;
@@ -253,7 +254,7 @@ class HtmlParser {
                             $html_buffer = '';
 
                             if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                                $this->pipeline->setSegmentContainsHtml();
+                                $this->_setSegmentContainsHtml();
                             }
                         }
 
@@ -275,7 +276,7 @@ class HtmlParser {
                             $html_buffer = '';
 
                             if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                                $this->pipeline->setSegmentContainsHtml();
+                                $this->_setSegmentContainsHtml();
                             }
                         }
 
@@ -292,7 +293,7 @@ class HtmlParser {
         if ( !empty( $html_buffer ) ) {
 
             if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                $this->pipeline->setSegmentContainsHtml();
+                $this->_setSegmentContainsHtml();
             }
 
             $output .= $this->_fixWrongBuffer( $html_buffer );
