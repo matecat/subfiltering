@@ -204,4 +204,54 @@ class SpecialHtmlEntitiesTest extends TestCase {
 
     }
 
+    /**
+     * @throws Exception
+     */
+    public function testSomeMultipleEncodings() {
+
+        /**
+         * @var $filter MateCatFilter
+         */
+        $filter = $this->getFilterInstance();
+
+        // "This is a blog page, but we are in xml ( double encode ) and we want to have a lesson about html"
+        $segment          = "&lt;h1&gt;This is a title&lt;/h1&gt; &lt;p&gt;<ph id='123'/>This is a snippet of &lt;code&gt; &amp;lt;div&amp;gt;Snippet&amp;lt;/div&amp;gt; &lt;/p&gt;";
+        $database_segment = $filter->fromRawXliffToLayer0( $segment );
+        $this->assertEquals( $segment, $database_segment );
+
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testFoolishEncodingLevels() {
+
+        /**
+         * @var $filter MateCatFilter
+         */
+        $filter = $this->getFilterInstance();
+
+        // "This is a blog page, but we are in xml ( double encode ) and we want to have a lesson about html"
+        $segment          = "&amp;amp;amp;amp;lt;p&amp;amp;amp;amp;gt; &amp;amp;nbsp; &apos; '  ";
+        $database_segment = $filter->fromRawXliffToLayer0( $segment );
+        $this->assertEquals( $segment, $database_segment );
+
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
+    }
+
 }

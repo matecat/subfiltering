@@ -474,7 +474,7 @@ class MateCatSubFilteringTest extends TestCase {
         // Persistance test
         $from_UI              = 'Saame nähtavuse piirangutega kontrollida, <ph id="mtc_1" ctype="x-sprintf" equiv-text="base64:JXM="/> kes sisu näeb .<ph id="mtc_ph_u_1" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>';
         $exptected_db_segment = 'Saame nähtavuse piirangutega kontrollida, %s kes sisu näeb .<ph id="source1" dataRef="source1"/>';
-        $back_to_db_segment   = $Filter->fromLayer1ToLayer0( $from_UI );
+        $back_to_db_segment   = $Filter->fromLayer2ToLayer0( $from_UI );
 
         $this->assertEquals( $back_to_db_segment, $exptected_db_segment );
     }
@@ -601,7 +601,7 @@ class MateCatSubFilteringTest extends TestCase {
 
         $this->assertEquals( $back_to_db_segment_from_l1, $db_segment );
 
-        $back_to_db_segment_from_l2 = $Filter->fromLayer1ToLayer0( $l2_segment );
+        $back_to_db_segment_from_l2 = $Filter->fromLayer2ToLayer0( $l2_segment );
         $this->assertEquals( $back_to_db_segment_from_l2, $db_segment );
 
     }

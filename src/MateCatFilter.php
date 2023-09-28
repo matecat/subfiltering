@@ -106,6 +106,7 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new FromLayer2TorawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        $channel->addLast( new DataRefRestore() );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer2ToLayer1', $channel );
@@ -174,7 +175,6 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromLayer1ToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new DataRefRestore() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new RemoveCTypeFromOriginalPhTags() );
