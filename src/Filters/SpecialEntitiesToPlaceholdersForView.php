@@ -19,7 +19,9 @@ class SpecialEntitiesToPlaceholdersForView extends AbstractHandler {
         $segment = str_ireplace(
                 [
                         '&#10;', '&#13;', ' ' /* NBSP in ascii value */,
-                        '&#0A;', '&#0C;', '&#160;', '&#09;'
+                        '&#x0A;', '&#x0C;',
+                        '&#160;', '&#xA0;',
+                        '&#09;', '&#9;', '&#x09;'
                 ],
                 [
                         ConstantEnum::lfPlaceholder,
@@ -28,7 +30,10 @@ class SpecialEntitiesToPlaceholdersForView extends AbstractHandler {
                         ConstantEnum::lfPlaceholder,
                         ConstantEnum::crPlaceholder,
                         ConstantEnum::nbspPlaceholder,
-                        ConstantEnum::tabPlaceholder
+                        ConstantEnum::nbspPlaceholder,
+                        ConstantEnum::tabPlaceholder,
+                        ConstantEnum::tabPlaceholder,
+                        ConstantEnum::tabPlaceholder,
                 ], $segment );
 
         return $segment;
