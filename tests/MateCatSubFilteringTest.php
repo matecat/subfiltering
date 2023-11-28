@@ -41,6 +41,16 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
     }
 
+    public function testHTMLStringWithApostrophe()
+    {
+        $filter = $this->getFilterInstance();
+
+        $segment   = "&lt;Value&gt; &lt;![CDATA[Visitez Singapour et détendez-vous sur l'île de Langkawi]]&gt; &lt;/Value&gt;";
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+    }
+
     /**
      * @throws Exception
      */
