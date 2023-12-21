@@ -124,10 +124,12 @@ class HtmlParser {
             } elseif ( $state == static::STATE_HTML ) {
                 switch ( $char ) {
                     case '<':
-                        // ignore '<' if inside a quote
-                        if ( $in_quote_char ) {
-                            break;
-                        }
+                        // is not possible to have angle brackets inside a tag, this case can not happen
+                        // this code would ignore '>' if inside a quote, useless
+                        // for more info see https://www.w3.org/TR/xml/#charsets
+//                        if ( $in_quote_char ) {
+//                            break;
+//                        }
 
                         // if we found a second less than symbol the first one IS NOT a tag,
                         // treat the html_buffer as plain text and attach to the output
@@ -136,10 +138,12 @@ class HtmlParser {
                         break;
 
                     case '>':
-                        // ignore '>' if inside a quote
-                        if ( $in_quote_char ) {
-                            break;
-                        }
+                        // is not possible to have angle brackets inside a tag, this case can not happen
+                        // this code would ignore '>' if inside a quote, useless
+                        // for more info see https://www.w3.org/TR/xml/#charsets
+//                        if ( $in_quote_char ) {
+//                            break;
+//                        }
 
                         if ( in_array( substr( $html_buffer, 0, 8 ), [ '<script ', '<style', '<script', '<style ' ] ) ) {
                             $html_buffer .= $char;
