@@ -8,7 +8,9 @@ use Matecat\SubFiltering\Filters\DataRefReplace;
 use Matecat\SubFiltering\Filters\DataRefRestore;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
+use Matecat\SubFiltering\Filters\EmojiToEntity;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
+use Matecat\SubFiltering\Filters\EntityToEmoji;
 use Matecat\SubFiltering\Filters\FromLayer2ToRawXML;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
@@ -83,6 +85,7 @@ class MateCatFilter extends AbstractFilter {
     public function fromLayer1ToLayer2( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new SpecialEntitiesToPlaceholdersForView() );
+        $channel->addLast( new EntityToEmoji() );
         $channel->addLast( new DataRefReplace() );
 
         /** @var $channel Pipeline */
@@ -104,6 +107,7 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new FromLayer2TorawXML() );
+        $channel->addLast( new EmojiToEntity() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new DataRefRestore() );

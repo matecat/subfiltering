@@ -12,6 +12,7 @@ namespace Matecat\SubFiltering\Filters;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Utils\CatUtils;
+use Matecat\XliffParser\Utils\Emoji;
 
 /**
  * Class FromLayer2ToRawXML

@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "matecat/xliff-parser",
-            "version": "v2.0.0",
+            "version": "v2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "e8c8e2b2d191c7d41cbb09013965fbbd68259dea"
+                "reference": "46e9b7e00a769dc0e242a20cd61561f7a503d410"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/e8c8e2b2d191c7d41cbb09013965fbbd68259dea",
-                "reference": "e8c8e2b2d191c7d41cbb09013965fbbd68259dea",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/46e9b7e00a769dc0e242a20cd61561f7a503d410",
+                "reference": "46e9b7e00a769dc0e242a20cd61561f7a503d410",
                 "shasum": ""
             },
             "require": {
@@ -67,9 +67,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v2.0.0"
+                "source": "https://github.com/matecat/xliff-parser/tree/v2.0.5"
             },
-            "time": "2023-09-27T09:16:07+00:00"
+            "time": "2023-12-21T12:41:33+00:00"
         },
         {
             "name": "psr/log",

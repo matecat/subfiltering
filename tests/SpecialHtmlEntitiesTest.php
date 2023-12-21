@@ -184,7 +184,7 @@ class SpecialHtmlEntitiesTest extends TestCase {
          * @var $filter MateCatFilter
          */
         $filter              = $this->getFilterInstance();
-        $segment             = "These dangerous characters in a xliff: '" . chr( 0X07 ) . "'(Bell) '" . chr( 0X7F ) . "'(Delete) '" . chr(0X18) . "'(Cancel)";
+        $segment             = "These dangerous characters in a xliff: '" . chr( 0X07 ) . "'(Bell) '" . chr( 0X7F ) . "'(Delete) '" . chr( 0X18 ) . "'(Cancel)";
         $expected_db_segment = "These dangerous characters in a xliff: ''(Bell) ''(Delete) ''(Cancel)";
 
         $database_segment = $filter->fromRawXliffToLayer0( $segment );
@@ -252,6 +252,31 @@ class SpecialHtmlEntitiesTest extends TestCase {
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
         $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
         $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testEmojiHandling() {
+
+        /**
+         * @var $filter MateCatFilter
+         */
+        $filter = $this->getFilterInstance();
+
+        $segment          = "Questo &#10005; è un emoji a croce &#1048918;&#129689; manina &#128075;&#127995;";
+        $database_segment = $filter->fromRawXliffToLayer0( $segment );
+        $this->assertEquals( $segment, $database_segment );
+
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
+
     }
 
 }
