@@ -1029,4 +1029,19 @@ class MateCatSubFilteringTest extends TestCase {
 
     }
 
+    public function testXliffInXliffWithoutId(){
+
+        $filter = $this->getFilterInstance();
+
+        $db_segment = "Test &lt;X&gt; and &lt;/X&gt; fine.";
+        $layer1And2 = 'Test <ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O1gmZ3Q7"/> and <ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0Oy9YJmd0Ow=="/> fine.';
+
+        $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer1( $db_segment ) );
+        $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer2( $db_segment ) );
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $layer1And2 ) );
+        $this->assertEquals( $db_segment, $filter->fromLayer2ToLayer0( $layer1And2 ) );
+
+    }
+
 }

@@ -43,12 +43,17 @@ class SubFilteredPhToHtml extends AbstractHandler {
      * @return mixed
      */
     private function placeholdXliffTagsInXliff( $value ) {
-        $value = preg_replace( '|(&lt;/x&gt;)|si', "", $value );
         $value = preg_replace( '#&lt;(g\s*id=["\']+.*?["\']+\s*(?!&lt;|&gt;)*?)&gt;#si', ConstantEnum::xliffInXliffStartPlaceHolder . "$1" . ConstantEnum::xliffInXliffEndPlaceHolder, $value );
 
         $value = preg_replace( '|&lt;(/g)&gt;|si', ConstantEnum::xliffInXliffStartPlaceHolder . "$1" . ConstantEnum::xliffInXliffEndPlaceHolder, $value );
 
-        $value = preg_replace( '|&lt;(x .*?/?)&gt;|si', ConstantEnum::xliffInXliffStartPlaceHolder . "$1" . ConstantEnum::xliffInXliffEndPlaceHolder, $value );
+        /*
+         * According to the Oasis XLIFF standard, the X tags cannot be closing tags but only self-closing.
+         * This regular expression does not comply with the oasis standard for xliff and is not required to do so, as it is an xliff embedded within an xliff in this case.
+         * It is not Matecat's responsibility to handle user data sanitization.
+         */
+        $value = preg_replace( '|&lt;(/?x.*?/?)&gt;|si', ConstantEnum::xliffInXliffStartPlaceHolder . "$1" . ConstantEnum::xliffInXliffEndPlaceHolder, $value );
+        
         $value = preg_replace( '#&lt;(bx[ ]{0,}/?|bx .*?/?)&gt;#si', ConstantEnum::xliffInXliffStartPlaceHolder . "$1" . ConstantEnum::xliffInXliffEndPlaceHolder, $value );
         $value = preg_replace( '#&lt;(ex[ ]{0,}/?|ex .*?/?)&gt;#si', ConstantEnum::xliffInXliffStartPlaceHolder . "$1" . ConstantEnum::xliffInXliffEndPlaceHolder, $value );
         $value = preg_replace( '|&lt;(bpt\s*.*?)&gt;|si', ConstantEnum::xliffInXliffStartPlaceHolder . "$1" . ConstantEnum::xliffInXliffEndPlaceHolder, $value );
