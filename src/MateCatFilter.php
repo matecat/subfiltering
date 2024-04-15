@@ -15,7 +15,7 @@ use Matecat\SubFiltering\Filters\FromLayer2ToRawXML;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
-use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
+use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardTag;
 use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
 use Matecat\SubFiltering\Filters\EncodeControlCharsInXliff;
@@ -35,6 +35,7 @@ use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\SubFilteredPhToHtml;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\Filters\Variables;
+use Matecat\SubFiltering\Filters\StandardXEquivTextToMateCatCustomPH;
 
 /**
  * Class Filter
@@ -147,6 +148,7 @@ class MateCatFilter extends AbstractFilter {
     public function fromLayer0ToLayer1( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
+        $channel->addLast( new StandardXEquivTextToMateCatCustomPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
@@ -179,7 +181,7 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromLayer1ToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new MateCatCustomPHToStandardPH() );
+        $channel->addLast( new MateCatCustomPHToStandardTag() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new RemoveCTypeFromOriginalPhTags() );
         $channel->addLast( new PlaceHoldXliffTags() );

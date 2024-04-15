@@ -1014,4 +1014,19 @@ class MateCatSubFilteringTest extends TestCase {
         }
     }
 
+    public function testTagXWithEquivTextShouldBeHandled(){
+
+        $filter = $this->getFilterInstance();
+
+        $db_segment = 'Last Successfully Logged In At: <x id="1" equiv-text="&lt;ph id=&quot;3&quot; disp=&quot;{{data}}&quot; dataRef=&quot;d1&quot; /&gt;"/>';
+        $layer1And2 = 'Last Successfully Logged In At: <ph id="mtc_1" x-orig="PHggaWQ9IjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/>';
+
+        $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer1( $db_segment ) );
+        $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer2( $db_segment ) );
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $layer1And2 ) );
+        $this->assertEquals( $db_segment, $filter->fromLayer2ToLayer0( $layer1And2 ) );
+
+    }
+
 }

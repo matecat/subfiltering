@@ -11,7 +11,7 @@ use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
-use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardPH;
+use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardTag;
 use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
 use Matecat\SubFiltering\Filters\PercentSnail;
@@ -92,7 +92,7 @@ class MyMemoryFilter extends AbstractFilter {
      */
     public function fromLayer1ToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new MateCatCustomPHToStandardPH() );
+        $channel->addLast( new MateCatCustomPHToStandardTag() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new RemoveCTypeFromOriginalPhTags() );
         $channel->addLast( new PlaceHoldXliffTags() );
