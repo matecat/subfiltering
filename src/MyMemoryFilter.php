@@ -11,15 +11,13 @@ use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
-use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardTag;
+use Matecat\SubFiltering\Filters\MateCatCustomPHToOriginalValue;
 use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
 use Matecat\SubFiltering\Filters\PercentSnail;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
-use Matecat\SubFiltering\Filters\RemoveCTypeFromOriginalPhTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
-use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\Snails;
@@ -27,7 +25,6 @@ use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
-use Matecat\SubFiltering\Filters\SubFilteredPhToHtml;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\Filters\Variables;
 
@@ -92,11 +89,8 @@ class MyMemoryFilter extends AbstractFilter {
      */
     public function fromLayer1ToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new MateCatCustomPHToStandardTag() );
-        $channel->addLast( new SubFilteredPhToHtml() );
-        $channel->addLast( new RemoveCTypeFromOriginalPhTags() );
+        $channel->addLast( new MateCatCustomPHToOriginalValue() );
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new RestoreXliffTagsInXliff() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new LtGtEncode() );
         $channel->addLast( new RestoreXliffTagsContent() );

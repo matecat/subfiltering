@@ -3,7 +3,6 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Utils\CatUtils;
 
 class EncodeToRawXML extends AbstractHandler {

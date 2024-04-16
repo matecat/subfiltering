@@ -2,6 +2,7 @@
 
 namespace Matecat\SubFiltering;
 
+use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DataRefReplace;
@@ -9,22 +10,20 @@ use Matecat\SubFiltering\Filters\DataRefRestore;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\EmojiToEntity;
+use Matecat\SubFiltering\Filters\EncodeControlCharsInXliff;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\EntityToEmoji;
 use Matecat\SubFiltering\Filters\FromLayer2ToRawXML;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
-use Matecat\SubFiltering\Filters\MateCatCustomPHToStandardTag;
+use Matecat\SubFiltering\Filters\MateCatCustomPHToOriginalValue;
 use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
-use Matecat\SubFiltering\Filters\EncodeControlCharsInXliff;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
-use Matecat\SubFiltering\Filters\RemoveCTypeFromOriginalPhTags;
 use Matecat\SubFiltering\Filters\RemoveDangerousChars;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
-use Matecat\SubFiltering\Filters\RestoreXliffTagsInXliff;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SpecialEntitiesToPlaceholdersForView;
@@ -32,10 +31,9 @@ use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
-use Matecat\SubFiltering\Filters\SubFilteredPhToHtml;
+use Matecat\SubFiltering\Filters\StandardXEquivTextToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\Filters\Variables;
-use Matecat\SubFiltering\Filters\StandardXEquivTextToMateCatCustomPH;
 
 /**
  * Class Filter
@@ -67,7 +65,7 @@ class MateCatFilter extends AbstractFilter {
      * @param string $segment
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function fromLayer0ToLayer2( $segment ) {
         return $this->fromLayer1ToLayer2(
@@ -81,7 +79,7 @@ class MateCatFilter extends AbstractFilter {
      * @param string $segment
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function fromLayer1ToLayer2( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
@@ -101,7 +99,7 @@ class MateCatFilter extends AbstractFilter {
      * @param string $segment
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function fromLayer2ToLayer1( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
@@ -129,7 +127,7 @@ class MateCatFilter extends AbstractFilter {
      * @param string $segment
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function fromLayer2ToLayer0( $segment ) {
         return $this->fromLayer1ToLayer0(
@@ -143,7 +141,7 @@ class MateCatFilter extends AbstractFilter {
      * @param string $segment
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function fromLayer0ToLayer1( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
@@ -177,15 +175,12 @@ class MateCatFilter extends AbstractFilter {
      * @param string $segment
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function fromLayer1ToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new MateCatCustomPHToStandardTag() );
-        $channel->addLast( new SubFilteredPhToHtml() );
-        $channel->addLast( new RemoveCTypeFromOriginalPhTags() );
+        $channel->addLast( new MateCatCustomPHToOriginalValue() );
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new RestoreXliffTagsInXliff() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new LtGtEncode() );
         $channel->addLast( new RestoreXliffTagsContent() );
@@ -204,7 +199,7 @@ class MateCatFilter extends AbstractFilter {
      * @param string $segment
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function fromRawXliffToLayer0( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
@@ -226,7 +221,7 @@ class MateCatFilter extends AbstractFilter {
      * @param string $segment
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function fromLayer0ToRawXliff( $segment ) {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
@@ -249,6 +244,8 @@ class MateCatFilter extends AbstractFilter {
      *
      * The source holds the truth :D
      * realigns the target ids by matching the content of the base64.
+     *
+     * @see getSegmentsController in matecat
      *
      * @param string $source
      * @param string $target
@@ -277,7 +274,6 @@ class MateCatFilter extends AbstractFilter {
                 continue;
             } else {
                 unset( $src_tags[ 2 ][ $src_tag_position ] ); // remove the index to allow array_search to find the equal next one if it is present
-//                unset( $trg_tags[ 2 ][ $trg_tag_position ] ); // remove the index to allow array_search to find the equal next one if it is present
             }
 
             //replace ONLY ONE element AND the EXACT ONE

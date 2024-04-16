@@ -10,6 +10,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class StandardXEquivTextToMateCatCustomPH extends AbstractHandler {
 
@@ -19,7 +20,7 @@ class StandardXEquivTextToMateCatCustomPH extends AbstractHandler {
         foreach ( $xTags as $group ) {
             $segment = preg_replace(
                     '/' . preg_quote( $group[ 0 ], '/' ) . '/',
-                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" x-orig="' . base64_encode( $group[ 0 ] ) . '" equiv-text="base64:' . base64_encode( $group[ 2 ] ) . '"/>',
+                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="' . base64_encode( $group[ 0 ] ) . '" equiv-text="base64:' . base64_encode( $group[ 2 ] ) . '"/>',
                     $segment,
                     1
             );

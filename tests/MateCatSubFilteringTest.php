@@ -6,7 +6,7 @@ use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\SubFiltering\Filters\LtGtDecode;
+use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\MateCatFilter;
@@ -41,8 +41,7 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
     }
 
-    public function testHTMLStringWithApostrophe()
-    {
+    public function testHTMLStringWithApostrophe() {
         $filter = $this->getFilterInstance();
 
         $segment   = "&lt;Value&gt; &lt;![CDATA[Visitez Singapour et détendez-vous sur l'île de Langkawi]]&gt; &lt;/Value&gt;";
@@ -107,10 +106,32 @@ class MateCatSubFilteringTest extends TestCase {
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
-        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;amp; <ph id="PlaceHolder1" ctype="' . CTypeEnum::ORIGINAL_PH . '" equiv-text="base64:ezB9"/> &amp;quot; &amp;apos;<ph id="PlaceHolder2" ctype="' . CTypeEnum::ORIGINAL_PH . '" equiv-text="base64:L3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDtjaWNjaW89MQ=="/> <ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
+        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;amp; <ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9InswfSIvPg==" equiv-text="base64:ezB9"/> &amp;quot; &amp;apos;<ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjIiIGVxdWl2LXRleHQ9Ii91c2Vycy9zZXR0aW5ncz90ZXN0PTEyMyZhbXA7Y2ljY2lvPTEiLz4=" equiv-text="base64:L3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDtjaWNjaW89MQ=="/> <ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
+
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
+
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testOriginalPhContent() {
+
+        $filter = $this->getFilterInstance();
+
+        $segment   = 'Test <ph id="PlaceHolder1">Airbnb &amp;amp; Co. &amp;amp;</ph> locked.';
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $string_from_UI = 'Test <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_CONTENT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiPkFpcmJuYiAmYW1wO2FtcDsgQ28uICZhbXA7YW1wOzwvcGg+" equiv-text="base64:QWlyYm5iICZhbXA7YW1wO2FtcDsgQ28uICZhbXA7YW1wO2FtcDs="/> locked.';
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
 
         $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
         $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
@@ -271,10 +292,10 @@ class MateCatSubFilteringTest extends TestCase {
      */
 
     public function testNbsp() {
-        $filter           = $this->getFilterInstance();
+        $filter = $this->getFilterInstance();
 
         $expected_segment = '   Test';
-        $string_from_UI   = ConstantEnum::nbspPlaceholder.ConstantEnum::nbspPlaceholder.ConstantEnum::nbspPlaceholder.'Test';
+        $string_from_UI   = ConstantEnum::nbspPlaceholder . ConstantEnum::nbspPlaceholder . ConstantEnum::nbspPlaceholder . 'Test';
 
         $this->assertEquals( $expected_segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
         $this->assertEquals( $string_from_UI, $filter->fromLayer0ToLayer2( $expected_segment ) );
@@ -286,7 +307,7 @@ class MateCatSubFilteringTest extends TestCase {
         // &lt;/x&gt; is a html snippet sent as text and encoded inside a xliff
         // &amp;lt;/i&amp;gt; - &amp;nbsp; is html sent as encoded string like a lesson of html on a web page
         $database_segment = '&lt;/a&gt; - &amp;lt;/i&amp;gt; - &amp;nbsp; -      Text <g id="1">pippo</g>';
-        $string_from_UI = '<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> - &amp;lt;/i&amp;gt; - &amp;nbsp; - ##$_A0$##    Text <g id="1">pippo</g>';
+        $string_from_UI   = '<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> - &amp;lt;/i&amp;gt; - &amp;nbsp; - ##$_A0$##    Text <g id="1">pippo</g>';
 
 
         $this->assertEquals( $string_from_UI, $filter->fromLayer0ToLayer2( $database_segment ) );
@@ -946,6 +967,10 @@ class MateCatSubFilteringTest extends TestCase {
      **************************
      */
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function testWithDoubleSquareBrackets() {
         $filter = $this->getFilterInstance();
 
@@ -967,6 +992,10 @@ class MateCatSubFilteringTest extends TestCase {
 //        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
 //    }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function testWithDollarCurlyBrackets() {
         $filter = $this->getFilterInstance();
 
@@ -977,49 +1006,57 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function testWithSquareSprintf() {
         $filter = $this->getFilterInstance();
 
         $tags = [
-            '[%s]',
-            '[%1$s]',
-            '[%222$s]',
-            '[%s:name]',
-            '[%s:placeholder]',
-            '[%s:place_holder]',
-            '[%i]',
-            '[%1$i]',
-            '[%222$i]',
-            '[%i:name]',
-            '[%i:placeholder]',
-            '[%i:place_holder]',
-            '[%f]',
-            '[%.2f]',
-            '[%.2332f]',
-            '[%1$.2f]',
-            '[%23$.24343f]',
-            '[%.222f:name]',
-            '[%.2f:placeholder]',
-            '[%.2f:place_holder]',
-            '[%key_id:1234%]',
-            '[%test:1234%]',
+                '[%s]',
+                '[%1$s]',
+                '[%222$s]',
+                '[%s:name]',
+                '[%s:placeholder]',
+                '[%s:place_holder]',
+                '[%i]',
+                '[%1$i]',
+                '[%222$i]',
+                '[%i:name]',
+                '[%i:placeholder]',
+                '[%i:place_holder]',
+                '[%f]',
+                '[%.2f]',
+                '[%.2332f]',
+                '[%1$.2f]',
+                '[%23$.24343f]',
+                '[%.222f:name]',
+                '[%.2f:placeholder]',
+                '[%.2f:place_holder]',
+                '[%key_id:1234%]',
+                '[%test:1234%]',
         ];
 
-        foreach ($tags as $tag){
+        foreach ( $tags as $tag ) {
             $db_segment      = 'Ciao ' . $tag;
-            $segment_from_UI = 'Ciao <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:'.base64_encode($tag).'"/>';
+            $segment_from_UI = 'Ciao <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:' . base64_encode( $tag ) . '"/>';
 
             $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
             $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
         }
     }
 
-    public function testTagXWithEquivTextShouldBeHandled(){
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testTagXWithEquivTextShouldBeHandled() {
 
         $filter = $this->getFilterInstance();
 
         $db_segment = 'Last Successfully Logged In At: <x id="1" equiv-text="&lt;ph id=&quot;3&quot; disp=&quot;{{data}}&quot; dataRef=&quot;d1&quot; /&gt;"/>';
-        $layer1And2 = 'Last Successfully Logged In At: <ph id="mtc_1" x-orig="PHggaWQ9IjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/>';
+        $layer1And2 = 'Last Successfully Logged In At: <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/>';
 
         $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer1( $db_segment ) );
         $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer2( $db_segment ) );
@@ -1029,18 +1066,81 @@ class MateCatSubFilteringTest extends TestCase {
 
     }
 
-    public function testXliffInXliffWithoutId(){
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testXliffInXliffWithoutId() {
 
         $filter = $this->getFilterInstance();
 
-        $db_segment = "Test &lt;X&gt; and &lt;/X&gt; fine.";
-        $layer1And2 = 'Test <ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O1gmZ3Q7"/> and <ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0Oy9YJmd0Ow=="/> fine.';
+        $db_segment = 'Test &lt;X&gt; and &lt;/X&gt; fine.';
+        $layer1And2 = 'Test <ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O1gmZ3Q7"/> and <ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0Oy9YJmd0Ow=="/> fine.';
 
         $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer1( $db_segment ) );
         $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer2( $db_segment ) );
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $layer1And2 ) );
         $this->assertEquals( $db_segment, $filter->fromLayer2ToLayer0( $layer1And2 ) );
+
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSmartCounts() {
+
+        $pipeline = new Pipeline();
+        $pipeline->addLast( new SmartCounts() );
+
+        $db_segment = "Test||||and |||| fine.";
+
+        $transformed = $pipeline->transform( $db_segment );
+        $this->assertEquals( 'Test<ph id="mtc_1" ctype="' . CTypeEnum::SMART_COUNT . '" equiv-text="base64:fHx8fA=="/>and <ph id="mtc_2" ctype="x-smart-count" equiv-text="base64:fHx8fA=="/> fine.', $transformed );
+
+        // revert
+        $filter = $this->getFilterInstance();
+
+        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $transformed ) );
+        $this->assertEquals( $db_segment, $filter->fromLayer2ToLayer0( $transformed ) );
+
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testHtmlDoubleEncodedInXML() {
+        $filter = $this->getFilterInstance();
+
+        $segment   = '<g id="123">&lt;code&gt; &amp;lt;strong&amp;gt; THIS IS TREATED AS TEXT CONTENT EVEN IF IT IS AN HTML &amp;lt;/strong&amp;gt; &lt;/code&gt;</g>';
+        $expectedL1 = '<g id="123"><ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2NvZGUmZ3Q7"/> &amp;lt;strong&amp;gt; THIS IS TREATED AS TEXT CONTENT EVEN IF IT IS AN HTML &amp;lt;/strong&amp;gt; <ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9jb2RlJmd0Ow=="/></g>';
+
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+
+        $this->assertEquals( $expectedL1, $segmentL1 );
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testOriginalPhWithHtmlAttributes() {
+
+        $filter = $this->getFilterInstance();
+
+        $segment   = 'Test <ph id="PlaceHolder1" equiv-text="&lt;ph id=&quot;3&quot; disp=&quot;{{data}}&quot; dataRef=&quot;d1&quot; /&gt;"/> locked.';
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $string_from_UI = 'Test <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/> locked.';
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
 
     }
 
