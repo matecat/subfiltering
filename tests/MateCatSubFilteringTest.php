@@ -1144,4 +1144,27 @@ class MateCatSubFilteringTest extends TestCase {
 
     }
 
+    /**
+     * @throws Exception
+     */
+    public function testRealCaseMxliff(){
+
+        $filter = $this->getFilterInstance();
+
+        $segment = 'For the site <ph id="4" disp="{{siteId}}" dataRef="d2"/><x id="2" equiv-text="&lt;ph id=&quot;4&quot; disp=&quot;{{siteId}}&quot; dataRef=&quot;d2&quot; /&gt;"/><x id="3"/> group id <x id="4"/><x id="5"/><x id="6"/> is already associated.';
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $string_from_UI = 'For the site <ph id="mtc_ph_u_1" equiv-text="base64:PHBoIGlkPSI0IiBkaXNwPSJ7e3NpdGVJZH19IiBkYXRhUmVmPSJkMiIvPg=="/><ph id="mtc_1" ctype="x-original_x" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDs0JnF1b3Q7IGRpc3A9JnF1b3Q7e3tzaXRlSWR9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QyJnF1b3Q7IC8mZ3Q7Ii8+" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzQmcXVvdDsgZGlzcD0mcXVvdDt7e3NpdGVJZH19JnF1b3Q7IGRhdGFSZWY9JnF1b3Q7ZDImcXVvdDsgLyZndDs="/><x id="3"/> group id <x id="4"/><x id="5"/><x id="6"/> is already associated.';
+
+        $this->assertEquals( $segmentL2, $string_from_UI );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
+
+    }
+
 }
