@@ -25,6 +25,7 @@ use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
+use Matecat\SubFiltering\Filters\StandardXEquivTextToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\Filters\Variables;
 
@@ -53,6 +54,7 @@ class MyMemoryFilter extends AbstractFilter {
     public function fromLayer0ToLayer1( $segment, $cid = null ) {
         $channel = new Pipeline( $this->source, $this->target );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
+        $channel->addLast( new StandardXEquivTextToMateCatCustomPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new HtmlToPh() );
