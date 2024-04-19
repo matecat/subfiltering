@@ -2,9 +2,13 @@
 
 namespace Matecat\SubFiltering\Filters;
 
+use LengthException;
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\XliffParser\Utils\HtmlParser;
+use Matecat\SubFiltering\Enum\CTypeEnum;
+use Matecat\XliffParser\Exception\InvalidXmlException;
+use Matecat\XliffParser\Exception\XmlParsingException;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\XliffParser\XliffUtils\XmlParser;
 
 class DataRefReplace extends AbstractHandler {
 
@@ -58,6 +62,8 @@ class DataRefReplace extends AbstractHandler {
      * @param $segment
      *
      * @return string|string[]
+     * @throws InvalidXmlException
+     * @throws XmlParsingException
      */
     private function replaceXliffPhTagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
         preg_match_all( '/<(ph .*?)>/iu', $segment, $phTags );
@@ -66,14 +72,18 @@ class DataRefReplace extends AbstractHandler {
             return $segment;
         }
 
-        $phIndex = 1;
-
         foreach ( $phTags[ 0 ] as $phTag ) {
             // check if phTag has not any correspondence on dataRef map
             if ( $this->isAPhTagWithNoDataRefCorrespondence( $phTag ) ) {
-                $phMatecat = '<ph id="mtc_ph_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $phTag ) . '"/>';
-                $segment   = str_replace( $phTag, $phMatecat, $segment );
-                $phIndex++;
+                $segment = preg_replace(
+                        '/' . preg_quote( $phTag, '/' ) . '/',
+                        '<ph id="' . $this->getPipeline()->getNextId() .
+                        '" ctype="' . CTypeEnum::ORIGINAL_PH .
+                        '" x-layer="data-ref" equiv-text="base64:' . base64_encode( $phTag ) .
+                        '"/>',
+                        $segment,
+                        1 // replace ONLY ONE occurrence
+                );
             }
         }
 
@@ -88,25 +98,36 @@ class DataRefReplace extends AbstractHandler {
      * @param string $phTag
      *
      * @return bool
+     * @throws InvalidXmlException
+     * @throws XmlParsingException
      */
     private function isAPhTagWithNoDataRefCorrespondence( $phTag ) {
-        $parsed = HtmlParser::parse( $phTag );
 
-        if ( !isset( $parsed[ 0 ] ) ) {
-            return false;
+        $parsed = XmlParser::parse( $phTag );
+
+        $phTagDomList = $parsed->getElementsByTagName( 'ph' );
+
+        if ( $phTagDomList->length > 1 ) {
+            throw new LengthException( "Invalid Xml content. Too many tags." );
+        } else {
+            if ( $phTagDomList->length == 0 ) {
+                return false;
+            }
         }
+
+        $phDomElement = $phTagDomList[ 0 ];
 
         // if has equiv-text don't touch
-        if ( isset( $parsed[ 0 ]->attributes[ 'equiv-text' ] ) ) {
+        if ( !is_null( $phDomElement->attributes->getNamedItem( 'equiv-text' ) ) ) {
             return false;
         }
 
-        // if has dataRef attribute check if there is correspondence on dataRef map
-        if ( isset( $parsed[ 0 ]->attributes[ 'dataRef' ] ) ) {
-            return !array_key_exists( $parsed[ 0 ]->attributes[ 'dataRef' ], $this->dataRefMap );
+        if ( !is_null( $phDomElement->attributes->getNamedItem( 'dataRef' ) ) ) {
+            return !array_key_exists( $phDomElement->attributes->getNamedItem( 'dataRef' )->value, $this->dataRefMap );
         }
 
         return true;
+
     }
 
     /**
@@ -128,24 +149,34 @@ class DataRefReplace extends AbstractHandler {
     private function replaceXliffPcTagsToMatecatPhTags( $segment ) {
 
         preg_match_all( '/<(pc .*?)>/iu', $segment, $openingPcTags );
-        preg_match_all( '/<(\/pc)>/iu', $segment, $closingPcTags );
+        preg_match_all( '|<(/pc)>|iu', $segment, $closingPcTags );
 
         if ( count( $openingPcTags[ 0 ] ) === 0 ) {
             return $segment;
         }
 
-        $phIndex = 1;
-
         foreach ( $openingPcTags[ 0 ] as $openingPcTag ) {
-            $phMatecat = '<ph id="mtc_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $openingPcTag ) . '"/>';
-            $segment   = str_replace( $openingPcTag, $phMatecat, $segment );
-            $phIndex++;
+            $segment = preg_replace(
+                    '/' . preg_quote( $openingPcTag, '/' ) . '/',
+                    '<ph id="' . $this->getPipeline()->getNextId() .
+                    '" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN .
+                    '" x-layer="data-ref" equiv-text="base64:' . base64_encode( $openingPcTag ) .
+                    '"/>',
+                    $segment,
+                    1
+            );
         }
 
         foreach ( $closingPcTags[ 0 ] as $closingPcTag ) {
-            $phMatecat = '<ph id="mtc_u_' . $phIndex . '" equiv-text="base64:' . base64_encode( $closingPcTag ) . '"/>';
-            $segment   = str_replace( $closingPcTag, $phMatecat, $segment );
-            $phIndex++;
+            $segment = preg_replace(
+                    '/' . preg_quote( $closingPcTag, '/' ) . '/',
+                    '<ph id="' . $this->getPipeline()->getNextId() .
+                    '" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE .
+                    '" x-layer="data-ref" equiv-text="base64:' . base64_encode( $closingPcTag ) .
+                    '"/>',
+                    $segment,
+                    1
+            );
         }
 
         return $segment;

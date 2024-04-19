@@ -3,6 +3,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 
 class DataRefRestore extends AbstractHandler {
@@ -58,16 +59,14 @@ class DataRefRestore extends AbstractHandler {
      * @return string
      */
     private function restoreXliffPhTagsFromMatecatPhTags( $segment ) {
-        preg_match_all( '/<(ph id="mtc_ph_u_(.*?)" equiv-text="(.*?)")\/>/iu', $segment, $matches );
+        preg_match_all( '|<ph id="mtc_[0-9]+" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-layer="data-ref" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
 
         if ( empty( $matches[ 0 ] ) ) {
             return $segment;
         }
 
         foreach ( $matches[ 0 ] as $index => $match ) {
-            $value   = base64_decode( str_replace( 'base64:', '', $matches[ 3 ][ $index ] ) );
-            $value   = str_replace( [ '&lt;', '&gt;' ], [ '<', '>' ], $value );
-            $segment = str_replace( $match, $value, $segment );
+            $segment = str_replace( $match, base64_decode( $matches[ 1 ][ $index ] ), $segment );
         }
 
         return $segment;
@@ -90,16 +89,15 @@ class DataRefRestore extends AbstractHandler {
      * @return string
      */
     private function restoreXliffPcTagsFromMatecatPhTags( $segment ) {
-        preg_match_all( '/<(ph id="mtc_u_(.*?)" equiv-text="(.*?)")\/>/iu', $segment, $matches );
+        preg_match_all( '|<ph id="mtc_[0-9]+" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN . '" x-layer="data-ref" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
+        preg_match_all( '|<ph id="mtc_[0-9]+" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE . '" x-layer="data-ref" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
 
         if ( empty( $matches[ 0 ] ) ) {
             return $segment;
         }
 
         foreach ( $matches[ 0 ] as $index => $match ) {
-            $value   = base64_decode( str_replace( 'base64:', '', $matches[ 3 ][ $index ] ) );
-            $value   = str_replace( [ '&lt;', '&gt;' ], [ '<', '>' ], $value );
-            $segment = str_replace( $match, $value, $segment );
+            $segment = str_replace( $match, base64_decode( $matches[ 1 ][ $index ] ), $segment );
         }
 
         return $segment;

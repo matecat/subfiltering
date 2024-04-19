@@ -22,7 +22,7 @@ class PercentSnail extends AbstractHandler {
 
             $segment = preg_replace(
                     '/' . preg_quote( $percentSnailVariable[ 0 ], '/' ) . '/',
-                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:' . base64_encode( $percentSnailVariable[ 0 ] ) . '"/>',
+                    '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:' . base64_encode( $percentSnailVariable[ 0 ] ) . '"/>',
                     $segment,
                     1
             );

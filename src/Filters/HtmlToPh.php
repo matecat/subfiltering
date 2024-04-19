@@ -62,7 +62,7 @@ class HtmlToPh extends AbstractHandler {
      * @return string
      */
     protected function _finalizeTag( $buffer ) {
-        return '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**

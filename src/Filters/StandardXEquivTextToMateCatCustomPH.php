@@ -16,11 +16,11 @@ class StandardXEquivTextToMateCatCustomPH extends AbstractHandler {
 
     public function transform( $segment ) {
 
-        preg_match_all( '|<x\s*id=["\'].+?["\']\s*equiv-text\s*?=\s*?["\'](.*?)["\']/>|', $segment, $xTags, PREG_SET_ORDER );
+        preg_match_all( '|<x id=["\'][^\'"]+?["\'] equiv-text\s*?=\s*?["\']([^\'"]+?)["\']/>|', $segment, $xTags, PREG_SET_ORDER );
         foreach ( $xTags as $group ) {
             $segment = preg_replace(
                     '/' . preg_quote( $group[ 0 ], '/' ) . '/',
-                    '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="' . base64_encode( $group[ 0 ] ) . '" equiv-text="base64:' . base64_encode( $group[ 1 ] ) . '"/>',
+                    '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="' . base64_encode( $group[ 0 ] ) . '" equiv-text="base64:' . base64_encode( $group[ 1 ] ) . '"/>',
                     $segment,
                     1
             );

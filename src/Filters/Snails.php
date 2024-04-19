@@ -18,7 +18,7 @@ class Snails extends AbstractHandler {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
                         '/' . preg_quote( $snail_variable[ 0 ], '/' ) . '/',
-                        '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::SNAILS . '" equiv-text="base64:' . base64_encode( $snail_variable[ 0 ] ) . '"/>',
+                        '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::SNAILS . '" equiv-text="base64:' . base64_encode( $snail_variable[ 0 ] ) . '"/>',
                         $segment,
                         1
                 );

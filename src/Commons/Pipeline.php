@@ -9,6 +9,8 @@
 
 namespace Matecat\SubFiltering\Commons;
 
+use Matecat\SubFiltering\Enum\ConstantEnum;
+
 class Pipeline {
 
     /**
@@ -39,7 +41,7 @@ class Pipeline {
     public function getNextId() {
         $this->id_number++;
 
-        return $this->id_number;
+        return ConstantEnum::INTERNAL_ATTR_ID_PREFIX . $this->id_number;
     }
 
     public function resetId() {

@@ -5,9 +5,10 @@ namespace Matecat\SubFiltering\Enum;
 
 class ConstantEnum {
 
-    const LTPLACEHOLDER  = "##LESSTHAN##";
-    const GTPLACEHOLDER  = "##GREATERTHAN##";
-    const AMPPLACEHOLDER = "##AMPPLACEHOLDER##";
+    const INTERNAL_ATTR_ID_PREFIX = '__mtc_';
+    const LTPLACEHOLDER           = "##LESSTHAN##";
+    const GTPLACEHOLDER           = "##GREATERTHAN##";
+    const AMPPLACEHOLDER          = "##AMPPLACEHOLDER##";
 
     const lfPlaceholder   = '##$_0A$##';
     const crPlaceholder   = '##$_0D$##';
