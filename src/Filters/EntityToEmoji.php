@@ -9,8 +9,8 @@
 
 namespace Matecat\SubFiltering\Filters;
 
+use Matecat\EmojiParser\Emoji;
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\XliffParser\Utils\Emoji;
 
 class EntityToEmoji extends AbstractHandler {
 

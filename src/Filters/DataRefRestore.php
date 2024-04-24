@@ -4,7 +4,7 @@ namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 class DataRefRestore extends AbstractHandler {
 

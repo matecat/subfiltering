@@ -5,6 +5,16 @@ namespace Matecat\SubFiltering\Utils;
 class CatUtils {
 
     /**
+     * @param string $needle
+     * @param string $haystack
+     *
+     * @return bool
+     */
+    public static function contains( $needle, $haystack ) {
+        return mb_strpos( $haystack, $needle ) !== false;
+    }
+
+    /**
      * Get the char code from a multi byte char
      *
      * 2/3 times faster than the old implementation

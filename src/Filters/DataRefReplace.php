@@ -2,13 +2,13 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-use LengthException;
+use DOMException;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\XliffParser\Exception\InvalidXmlException;
-use Matecat\XliffParser\Exception\XmlParsingException;
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
-use Matecat\XliffParser\XliffUtils\XmlParser;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
+use Matecat\XmlParser\Exception\InvalidXmlException;
+use Matecat\XmlParser\Exception\XmlParsingException;
+use Matecat\XmlParser\XmlParser;
 
 class DataRefReplace extends AbstractHandler {
 
@@ -100,30 +100,23 @@ class DataRefReplace extends AbstractHandler {
      * @return bool
      * @throws InvalidXmlException
      * @throws XmlParsingException
+     * @throws DOMException
      */
     private function isAPhTagWithNoDataRefCorrespondence( $phTag ) {
 
-        $parsed = XmlParser::parse( $phTag );
+        $parsed = XmlParser::parse( $phTag, true );
 
-        $phTagDomList = $parsed->getElementsByTagName( 'ph' );
-
-        if ( $phTagDomList->length > 1 ) {
-            throw new LengthException( "Invalid Xml content. Too many tags." );
-        } else {
-            if ( $phTagDomList->length == 0 ) {
-                return false;
-            }
-        }
-
-        $phDomElement = $phTagDomList[ 0 ];
-
-        // if has equiv-text don't touch
-        if ( !is_null( $phDomElement->attributes->getNamedItem( 'equiv-text' ) ) ) {
+        if ( $parsed->count() == 0 ) {
             return false;
         }
 
-        if ( !is_null( $phDomElement->attributes->getNamedItem( 'dataRef' ) ) ) {
-            return !array_key_exists( $phDomElement->attributes->getNamedItem( 'dataRef' )->value, $this->dataRefMap );
+        // if has equiv-text don't touch
+        if ( isset( $parsed[ 0 ]->attributes[ 'equiv-text' ] ) ) {
+            return false;
+        }
+
+        if ( isset( $parsed[ 0 ]->attributes[ 'dataRef' ] ) ) {
+            return !array_key_exists( $parsed[ 0 ]->attributes[ 'dataRef' ], $this->dataRefMap );
         }
 
         return true;

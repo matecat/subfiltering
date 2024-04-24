@@ -30,7 +30,8 @@
   },
   "require": {
     "php": ">=5.6",
-    "matecat/xliff-parser": "^2.0",
+    "matecat/emoji-to-entity-converter": "^1",
+    "matecat/xml-dom-parser": "^1",
     "ext-dom": "*",
     "ext-xml": "*",
     "ext-libxml": "*"
