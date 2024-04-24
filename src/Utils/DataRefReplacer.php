@@ -34,11 +34,14 @@ class DataRefReplacer {
      *
      * For a complete reference see:
      *
-     * http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/xliff-core-v2.1-os.html#dataref
+     * Http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/xliff-core-v2.1-os.html#dataref
      *
      * @param string $string
      *
      * @return string
+     * @throws DOMException
+     * @throws InvalidXmlException
+     * @throws XmlParsingException
      */
     public function replace( $string ) {
 
@@ -106,7 +109,7 @@ class DataRefReplacer {
      * This function add equiv-text attribute to <ph>, <ec>, and <sc> tags.
      *
      * Please note that <ec> and <sc> tags are converted to <ph> tags (needed by Matecat);
-     * in this case another special attribute (dataType) is added just before equiv-text
+     * in this case, another special attribute (dataType) is added just before equiv-text
      *
      * If there is no id tag, it will be copied from dataRef attribute
      *
