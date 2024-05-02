@@ -1,5 +1,8 @@
 # Matecat Subfiltering
 
+[![Build Status](https://app.travis-ci.com/matecat/subfiltering.svg?token=qBazxkHwP18h3EWnHjjF&branch=master)](https://app.travis-ci.com/matecat/subfiltering)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/matecat/subfiltering/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/matecat/subfiltering/?branch=master)
+
 Subfiltering is a component used by [Matecat](https://matecat.com) and [MyMemory](https://mymemory.translated.net/)) for string conversion from database to UI layer and viceversa.
 
 ## How to use
