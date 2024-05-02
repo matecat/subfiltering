@@ -24,7 +24,11 @@ The other three arguments are optional:
 
 - `$source` (string) - The source language
 - `$target` (string) - The target language
-- `$dataRefMap` (array) - A map used for tag replacement (only for segments from Xliff 2.0)
+- `$dataRefMap` (array) - A map used for tag replacement (only for segments from Xliff 2.0). A full documentation for dataRef replacement is available [here](https://github.com/matecat/subfiltering/blob/master/docs/dataRef.md).
+
+### dataRef replacement
+
+
 
 ## Basic Usage
 

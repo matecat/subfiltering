@@ -25,12 +25,12 @@ These three tag use `dataRef` attribute to link content from `originalData`. Tak
 </xliff>
 ```
 
-`Matecat\XliffParser\XliffUtils\DataRefReplace` class is capable to introduce a `equiv-text` (with the base64 encoded corresponding value) within `<ph>`,`<sc>` and `<ec>` tags:
+`Matecat\SubFiltering\Utils\DataRefReplacer` class is capable to introduce a `equiv-text` (with the base64 encoded corresponding value) within `<ph>`,`<sc>` and `<ec>` tags:
 
 ```php
 
 // ...
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 // provide original data map
 $map = [
@@ -54,7 +54,7 @@ Please note that `<ec>` and `<sc>` tags are converted to `<ph>` tags (needed by 
 ```php
 
 // ...
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 // provide original data map
 $map = [
@@ -104,7 +104,7 @@ In this case `DataRefReplacer` replaces `<pc>` tags with fictional `<ph>` tags t
 ```php
 
 // ...
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 $map = [
     'd1' => '_',
@@ -132,7 +132,7 @@ In case of missing `dataRefStart` or `dataRefEnd` attributes, `DataRefReplacer` 
 ```php
 
 // ...
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 $map = [
     'd1' => '&lt;br\/&gt;',
@@ -164,7 +164,7 @@ Then the `DataRefReplacer` will replace the corresponding tag with a `NULL` stri
 
 ```php
 // ...
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 $map = [
     'd1' => null
@@ -190,7 +190,7 @@ $replaced = $dataReplacer->replace($string);
 ```php
 
 //...
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 // provide original data map
 $map = [
@@ -214,7 +214,7 @@ $restored = $dataReplacer->restore($string);
 ```php
 
 //...
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 // provide original data map
 $map = [
