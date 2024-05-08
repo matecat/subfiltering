@@ -19,10 +19,10 @@ class MateCatSubFilteringTest extends TestCase {
      * @return \Matecat\SubFiltering\AbstractFilter
      * @throws Exception
      */
-    private function getFilterInstance() {
+    private function getFilterInstance( array $data_ref_map = [] ) {
         MateCatFilter::destroyInstance(); // for isolation test
 
-        return MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT' );
+        return MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', $data_ref_map );
     }
 
     /**
@@ -1203,6 +1203,44 @@ class MateCatSubFilteringTest extends TestCase {
 
         $string_from_UI = 'Click <x id="1"/>Create <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/>Site Admin<ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9ImJvbGQiLz4=" equiv-text="base64:Ym9sZA=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-layer="data-ref" equiv-text="base64:PHBoIGlkPSIxMTEiLz4="/><ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjMiIGVxdWl2LXRleHQ9Iml0YWxpYyIvPg==" equiv-text="base64:aXRhbGlj"/>administration<ph id="mtc_4" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjQiIGVxdWl2LXRleHQ9Iml0YWxpYyIvPg==" equiv-text="base64:aXRhbGlj"/> site.';
 
+        $this->assertEquals( $segmentL2, $string_from_UI );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
+
+    }
+
+    /**
+     * @Test
+     * @return void
+     * @throws Exception
+     */
+    public function testFromUIConversion() {
+
+        $data_ref_map = [
+                'd1' => '[',
+                'd2' => '](http://repubblica.it)',
+        ];
+
+        $filter = $this->getFilterInstance( $data_ref_map );
+
+
+        $segment = 'Link semplice: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
+
+        $segmentL0 = $filter->fromRawXliffToLayer0( $segment );
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+
+        $segmentL0_2 = $filter->fromLayer1ToLayer0( $segmentL1 );
+
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segmentL0, $segmentL0_2 );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+
+        $string_from_UI = 'Link semplice: <ph id="1_1" dataType="pcStart" originalData="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiPg==" dataRef="d1" equiv-text="base64:Ww=="/>La Repubblica<ph id="1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="d2" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk="/>.';
         $this->assertEquals( $segmentL2, $string_from_UI );
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
