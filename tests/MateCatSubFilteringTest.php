@@ -1193,6 +1193,29 @@ class MateCatSubFilteringTest extends TestCase {
     /**
      * @throws Exception
      */
+    public function testXtagAndXtagWithEquivTextWithRandomAttributeOrder() {
+
+        $filter = $this->getFilterInstance();
+
+        $segment   = 'Click <x id="1"/>Create Site Admin<x id="2" equiv-text="bold"/><x equiv-text="italic" id="3"/>administration<x equiv-text="italic" x-attribute="pippo-attribute" id="4"/> site.';
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $string_from_UI = 'Click <x id="1"/>Create Site Admin<ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9ImJvbGQiLz4=" equiv-text="base64:Ym9sZA=="/><ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggZXF1aXYtdGV4dD0iaXRhbGljIiBpZD0iMyIvPg==" equiv-text="base64:aXRhbGlj"/>administration<ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggZXF1aXYtdGV4dD0iaXRhbGljIiB4LWF0dHJpYnV0ZT0icGlwcG8tYXR0cmlidXRlIiBpZD0iNCIvPg==" equiv-text="base64:aXRhbGlj"/> site.';
+
+        $this->assertEquals( $string_from_UI, $segmentL2 );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
+
+    }
+
+    /**
+     * @throws Exception
+     */
     public function testRandomPhAndXTags() {
 
         $filter = $this->getFilterInstance();

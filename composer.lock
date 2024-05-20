@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "matecat/emoji-to-entity-converter",
-            "version": "v1.0.4",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/emoji-to-entity-converter.git",
-                "reference": "b742870539a2285f9b6776799256c3bf2bcb0d62"
+                "reference": "d36beaf10880d30bb7c96bb20c2bea57c4771d65"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/b742870539a2285f9b6776799256c3bf2bcb0d62",
-                "reference": "b742870539a2285f9b6776799256c3bf2bcb0d62",
+                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/d36beaf10880d30bb7c96bb20c2bea57c4771d65",
+                "reference": "d36beaf10880d30bb7c96bb20c2bea57c4771d65",
                 "shasum": ""
             },
             "require": {
@@ -58,22 +58,22 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/emoji-to-entity-converter/issues",
-                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.4"
+                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.5"
             },
-            "time": "2024-04-23T12:10:05+00:00"
+            "time": "2024-05-14T14:43:55+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
-            "version": "v1.0.3",
+            "version": "v1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xml-dom-parser.git",
-                "reference": "f424bb17eea651954911d4b1f8f190dce5c1b4cd"
+                "reference": "04210dd43df350d6a26ee1afb58f8687adf67517"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xml-dom-parser/zipball/f424bb17eea651954911d4b1f8f190dce5c1b4cd",
-                "reference": "f424bb17eea651954911d4b1f8f190dce5c1b4cd",
+                "url": "https://api.github.com/repos/matecat/xml-dom-parser/zipball/04210dd43df350d6a26ee1afb58f8687adf67517",
+                "reference": "04210dd43df350d6a26ee1afb58f8687adf67517",
                 "shasum": ""
             },
             "require": {
@@ -116,9 +116,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xml-dom-parser/issues",
-                "source": "https://github.com/matecat/xml-dom-parser/tree/v1.0.3"
+                "source": "https://github.com/matecat/xml-dom-parser/tree/v1.1.2"
             },
-            "time": "2024-04-24T17:09:36+00:00"
+            "time": "2024-05-09T16:42:28+00:00"
         }
     ],
     "packages-dev": [
@@ -542,16 +542,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "1.28.0",
+            "version": "1.29.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "cd06d6b1a1b3c75b0b83f97577869fd85a3cd4fb"
+                "reference": "536889f2b340489d328f5ffb7b02bb6b183ddedc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/cd06d6b1a1b3c75b0b83f97577869fd85a3cd4fb",
-                "reference": "cd06d6b1a1b3c75b0b83f97577869fd85a3cd4fb",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/536889f2b340489d328f5ffb7b02bb6b183ddedc",
+                "reference": "536889f2b340489d328f5ffb7b02bb6b183ddedc",
                 "shasum": ""
             },
             "require": {
@@ -583,9 +583,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.28.0"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.29.0"
             },
-            "time": "2024-04-03T18:51:33+00:00"
+            "time": "2024-05-06T12:04:23+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
