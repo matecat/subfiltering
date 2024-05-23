@@ -8,7 +8,7 @@ class CTypeEnum {
 
     // Layer 1
     const ORIGINAL_X                             = 'x-original_x';
-    const ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT = 'x-original_sc_ph';
+    const ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT = 'x-original_ph';
     const ORIGINAL_PC_OPEN                       = 'x-original_pc_open';
     const ORIGINAL_PC_CLOSE                        = 'x-original_pc_close';
     const ORIGINAL_PH_CONTENT                      = 'x-original_ph_content';

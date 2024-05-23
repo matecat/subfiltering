@@ -352,7 +352,7 @@ class DataReplacerTest extends TestCase {
         ];
 
         $string       = 'Hola <ph id="source1" dataRef="source1" equiv-text=""/>';
-        $expected     = 'Hola <ph id="source1" dataRef="source1"/>';
+        $expected     = 'Hola <ph id="source1" dataRef="source1" equiv-text=""/>';
         $dataReplacer = new DataRefReplacer( $map );
 
         $this->assertEquals( $expected, $dataReplacer->restore( $string ) );

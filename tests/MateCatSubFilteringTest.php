@@ -1304,4 +1304,27 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segment, $segmentL2 );
     }
 
+    /**
+     * @test
+     */
+    public function when_empty_equiv_text_shgould_put_NULL_in_converted_ph() {
+        // sample test
+        $map = [
+                "source2" => '${RIDER}',
+                "source3" => '&amp;lt;br&amp;gt;',
+        ];
+
+        $filter  = $this->getFilterInstance($map);
+
+        $string       = 'Hola <ph id="source1" dataRef="source1" equiv-text=""/>';
+        $expected     = 'Hola <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIiBlcXVpdi10ZXh0PSIiLz4=" equiv-text="base64:TlVMTA=="/>';
+
+        $layer2 = $filter->fromLayer0ToLayer2( $string );
+        $convertedBack = $filter->fromLayer2ToLayer0( $layer2 );
+
+        $this->assertEquals( $expected, $layer2 );
+        $this->assertEquals( $string, $convertedBack );
+
+    }
+
 }

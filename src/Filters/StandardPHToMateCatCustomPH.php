@@ -64,7 +64,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler {
             $segment = preg_replace(
                     '/' . preg_quote( $tag_attribute[ 0 ], '/' ) . '/',
                     '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="' . base64_encode( $tag_attribute[ 0 ] ) . '" equiv-text="base64:' .
-                    base64_encode( $tag_attribute[ 2 ] ) .
+                    base64_encode( $tag_attribute[ 2 ] != '' ? $tag_attribute[ 2 ] : 'NULL' ) .
                     '"/>',
                     $segment,
                     1

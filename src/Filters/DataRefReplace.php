@@ -36,16 +36,16 @@ class DataRefReplace extends AbstractHandler {
 
         // dataRefMap is present only in xliff 2.0 files
         if ( empty( $this->dataRefMap ) ) {
-            $segment = $this->replaceXliff_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
+            $segment = $this->replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
 
-            return $this->replaceXliff_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
+            return $this->replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
         }
 
-        $dataRefReplacer = new DataRefReplacer( $this->dataRefMap, $this->pipeline );
+        $dataRefReplacer = new DataRefReplacer( $this->dataRefMap );
         $segment         = $dataRefReplacer->replace( $segment );
-        $segment         = $this->replaceXliff_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
+        $segment         = $this->replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
 
-        return $this->replaceXliff_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
+        return $this->replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment );
     }
 
     /**
@@ -63,11 +63,8 @@ class DataRefReplace extends AbstractHandler {
      * @param $segment
      *
      * @return string|string[]
-     * @throws InvalidXmlException
-     * @throws XmlParsingException
-     * @throws DOMException
      */
-    private function replaceXliff_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
+    private function replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
 
         preg_match_all( '/<(ph .*?)>/iu', $segment, $phTags );
 
@@ -151,7 +148,7 @@ class DataRefReplace extends AbstractHandler {
      *
      * @return string|string[]
      */
-    private function replaceXliff_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
+    private function replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
 
         preg_match_all( '/<(pc .*?)>/iu', $segment, $openingPcTags );
         preg_match_all( '|<(/pc)>|iu', $segment, $closingPcTags );

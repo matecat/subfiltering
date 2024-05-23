@@ -120,7 +120,6 @@ class DataRefReplacer {
                 case 'ph':
                 case 'sc':
                 case 'ec':
-//                case 'pc':
                     break;
                 default:
                     return $string;
@@ -143,6 +142,7 @@ class DataRefReplacer {
             if ( is_null( $dataRefValue ) || $dataRefValue === '' ) {
                 $this->map[ $dataRefName ] = 'NULL';
             }
+
 
             $newTag = [ '<ph' ];
 
@@ -259,49 +259,6 @@ class DataRefReplacer {
      */
     private function replaceOpeningPcTags( $node, $string ) {
 
-//        if ( $node->has_children ) {
-//
-//            foreach ( $node->inner_html as $childNode ) {
-//                $string = $this->replaceOpeningPcTags( $childNode, $string );
-//            }
-//
-//        }
-//
-//        if ( $node->tagName == 'pc' ) {
-//
-//            $newNode = $node->node;
-//
-//            // CASE 1 - Missing `dataRefStart`
-//            if ( isset( $node->attributes[ 'dataRefEnd' ] ) && !isset( $node->attributes[ 'dataRefStart' ] ) ) {
-//                $node->attributes[ 'dataRefStart' ] = $node->attributes[ 'dataRefEnd' ];
-//            }
-//
-//            // CASE 2 - Missing `dataRefEnd`
-//            if ( isset( $node->attributes[ 'dataRefStart' ] ) && !isset( $node->attributes[ 'dataRefEnd' ] ) ) {
-//                $node->attributes[ 'dataRefEnd' ] = $node->attributes[ 'dataRefStart' ];
-//            }
-//
-//            if ( isset( $node->attributes[ 'dataRefStart' ] ) ) {
-//
-//                $startValue = $this->map[ $node->attributes[ 'dataRefStart' ] ] ?: 'NULL'; //handling null values in original data map
-//
-//                $newTag = [ '<ph' ];
-//
-//                if ( isset( $node->attributes[ 'id' ] ) ) {
-//                    $newTag[] = 'id="' . $node->attributes[ 'id' ] . '_1"';
-//                }
-//
-//                $newTag[] = 'ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '"';
-//                $newTag[] = 'equiv-text="base64:' . base64_encode( $startValue ) . '"';
-//                $newTag[] = 'x-orig="' . base64_encode( $node->node ) . '"';
-//
-//                // conversion for opening <pc> tag
-//                $string = str_replace( $node->node, implode( " ", $newTag ) . '/>', $string );
-//
-//            }
-//
-//        }
-
         preg_match_all( '|<pc ([^>/]+?)>|iu', $string, $openingPcMatches );
 
         foreach ( $openingPcMatches[ 0 ] as $match ) {
@@ -406,7 +363,7 @@ class DataRefReplacer {
         }
 
         // replace eventual empty equiv-text=""
-        $string = str_replace( ' equiv-text=""', '', $string );
+//        $string = str_replace( ' equiv-text=""', '', $string );
         $html   = XmlParser::parse( $string, true );
 
         foreach ( $html as $node ) {
