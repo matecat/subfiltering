@@ -16,13 +16,17 @@ use PHPUnit\Framework\TestCase;
 
 class MateCatSubFilteringTest extends TestCase {
     /**
-     * @return \Matecat\SubFiltering\AbstractFilter
+     * @return MateCatFilter
      * @throws Exception
      */
     private function getFilterInstance( array $data_ref_map = [] ) {
         MateCatFilter::destroyInstance(); // for isolation test
 
-        return MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', $data_ref_map );
+        /** @var $filter MateCatFilter */
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', $data_ref_map );
+
+        return $filter;
+
     }
 
     /**
@@ -106,7 +110,7 @@ class MateCatSubFilteringTest extends TestCase {
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
-        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;amp; <ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9InswfSIvPg==" equiv-text="base64:ezB9"/> &amp;quot; &amp;apos;<ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjIiIGVxdWl2LXRleHQ9Ii91c2Vycy9zZXR0aW5ncz90ZXN0PTEyMyZhbXA7Y2ljY2lvPTEiLz4=" equiv-text="base64:L3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDtjaWNjaW89MQ=="/> <ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
+        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;amp; <ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9InswfSIvPg==" equiv-text="base64:ezB9"/> &amp;quot; &amp;apos;<ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjIiIGVxdWl2LXRleHQ9Ii91c2Vycy9zZXR0aW5ncz90ZXN0PTEyMyZhbXA7Y2ljY2lvPTEiLz4=" equiv-text="base64:L3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDtjaWNjaW89MQ=="/> <ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
@@ -494,16 +498,16 @@ class MateCatSubFilteringTest extends TestCase {
         $Filter     = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
 
         $expected_l1_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
-        $expected_l2_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> content when with <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-layer="data-ref" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>Visibility Constraints.';
+        $expected_l2_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> content when with <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>Visibility Constraints.';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
 
-        $this->assertEquals( $l1_segment, $expected_l1_segment );
-        $this->assertEquals( $l2_segment, $expected_l2_segment );
+        $this->assertEquals( $expected_l1_segment, $l1_segment );
+        $this->assertEquals( $expected_l2_segment, $l2_segment );
 
         // Persistance test
-        $from_UI              = 'Saame nähtavuse piirangutega kontrollida, <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> kes sisu näeb .<ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-layer="data-ref" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>';
+        $from_UI              = 'Saame nähtavuse piirangutega kontrollida, <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> kes sisu näeb .<ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>';
         $exptected_db_segment = 'Saame nähtavuse piirangutega kontrollida, %s kes sisu näeb .<ph id="source1" dataRef="source1"/>';
         $back_to_db_segment   = $Filter->fromLayer2ToLayer0( $from_UI );
 
@@ -560,8 +564,8 @@ class MateCatSubFilteringTest extends TestCase {
         $db_translation          = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
         $expected_l1_segment     = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
         $expected_l1_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
-        $expected_l2_segment     = 'Frase semplice: <ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>.';
-        $expected_l2_translation = 'Simple sentence: <ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>.';
+        $expected_l2_segment     = 'Frase semplice: <ph id="source1" ctype="' . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O2JyJmd0Ow==" x-orig="PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>.';
+        $expected_l2_translation = 'Simple sentence: <ph id="source1" ctype="' . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O2JyJmd0Ow==" x-orig="PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>.';
 
         $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
         $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
@@ -570,8 +574,8 @@ class MateCatSubFilteringTest extends TestCase {
 
         $this->assertEquals( $l1_segment, $expected_l1_segment );
         $this->assertEquals( $l1_translation, $expected_l1_translation );
-        $this->assertEquals( $l2_segment, $expected_l2_segment );
-        $this->assertEquals( $l2_translation, $expected_l2_translation );
+        $this->assertEquals( $expected_l2_segment, $l2_segment );
+        $this->assertEquals( $expected_l2_translation, $l2_translation );
 
         $back_to_db_segment     = $Filter->fromLayer1ToLayer0( $l1_segment );
         $back_to_db_translation = $Filter->fromLayer1ToLayer0( $l1_translation );
@@ -596,7 +600,7 @@ class MateCatSubFilteringTest extends TestCase {
 
         $db_segment          = '<pc id="source1" dataRefStart="source1">&lt;<pc id="source2" dataRefStart="source2">Rider /&gt;</pc></pc>';
         $expected_l1_segment = '<pc id="source1" dataRefStart="source1">&lt;<pc id="source2" dataRefStart="source2">Rider /&gt;</pc></pc>';
-        $expected_l2_segment = '<ph id="source1_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiPg==" dataRef="source1" equiv-text="base64:PGJyPg=="/>&lt;<ph id="source2_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2UyIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTIiPg==" dataRef="source2" equiv-text="base64:PGhyPg=="/>Rider /&gt;<ph id="source2_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source2" equiv-text="base64:PGhyPg=="/><ph id="source1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source1" equiv-text="base64:PGJyPg=="/>';
+        $expected_l2_segment = '<ph id="source1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGJyPg==" x-orig="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiPg=="/>&lt;<ph id="source2_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGhyPg==" x-orig="PHBjIGlkPSJzb3VyY2UyIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTIiPg=="/>Rider /&gt;<ph id="source2_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGhyPg==" x-orig="PC9wYz4="/><ph id="source1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGJyPg==" x-orig="PC9wYz4="/>';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
@@ -620,13 +624,13 @@ class MateCatSubFilteringTest extends TestCase {
 
         $db_segment          = '<pc id="source1" dataRefStart="source1">Click the image on the left, read the information and then select the contact type that would replace the red question mark.</pc><pc id="source2" dataRefStart="source2"><pc id="source3" dataRefStart="source3">Things to consider:</pc></pc><pc id="source4" dataRefStart="source4"><pc id="source5" dataRefStart="source5">The rider stated the car had a different tag from another state.</pc><pc id="source6" dataRefStart="source6">The rider stated the car had a color from the one registered in Bliss.</pc><pc id="source7" dataRefStart="source7">The rider can’t tell if the driver matched the profile picture.</pc></pc>';
         $expected_l1_segment = '<pc id="source1" dataRefStart="source1">Click the image on the left, read the information and then select the contact type that would replace the red question mark.</pc><pc id="source2" dataRefStart="source2"><pc id="source3" dataRefStart="source3">Things to consider:</pc></pc><pc id="source4" dataRefStart="source4"><pc id="source5" dataRefStart="source5">The rider stated the car had a different tag from another state.</pc><pc id="source6" dataRefStart="source6">The rider stated the car had a color from the one registered in Bliss.</pc><pc id="source7" dataRefStart="source7">The rider can’t tell if the driver matched the profile picture.</pc></pc>';
-        $expected_l2_segment = '<ph id="source1_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiPg==" dataRef="source1" equiv-text="base64:PGcgaWQ9ImxwdXhuaVFsSVczS3JVeXciIGN0eXBlPSJ4LWh0bWwtcCIgXC8+"/>Click the image on the left, read the information and then select the contact type that would replace the red question mark.<ph id="source1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source1" equiv-text="base64:PGcgaWQ9ImxwdXhuaVFsSVczS3JVeXciIGN0eXBlPSJ4LWh0bWwtcCIgXC8+"/><ph id="source2_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2UyIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTIiPg==" dataRef="source2" equiv-text="base64:PGcgaWQ9ImQzVGxQdG9tbFV0MEVqMWsiIGN0eXBlPSJ4LWh0bWwtcCIgXC8+"/><ph id="source3_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2UzIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTMiPg==" dataRef="source3" equiv-text="base64:PGcgaWQ9ImpjUC1URkZTTzJDU3N1THQiIGN0eXBlPSJ4LWh0bWwtc3Ryb25nIiBcLz4="/>Things to consider:<ph id="source3_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source3" equiv-text="base64:PGcgaWQ9ImpjUC1URkZTTzJDU3N1THQiIGN0eXBlPSJ4LWh0bWwtc3Ryb25nIiBcLz4="/><ph id="source2_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source2" equiv-text="base64:PGcgaWQ9ImQzVGxQdG9tbFV0MEVqMWsiIGN0eXBlPSJ4LWh0bWwtcCIgXC8+"/><ph id="source4_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2U0IiBkYXRhUmVmU3RhcnQ9InNvdXJjZTQiPg==" dataRef="source4" equiv-text="base64:PGcgaWQ9IjVTdENZWVJ2cU1jMFVBejQiIGN0eXBlPSJ4LWh0bWwtdWwiIFwvPg=="/><ph id="source5_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2U1IiBkYXRhUmVmU3RhcnQ9InNvdXJjZTUiPg==" dataRef="source5" equiv-text="base64:PGcgaWQ9Ijk5cGhoSmNFUURMSEJqZVUiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg=="/>The rider stated the car had a different tag from another state.<ph id="source5_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source5" equiv-text="base64:PGcgaWQ9Ijk5cGhoSmNFUURMSEJqZVUiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg=="/><ph id="source6_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2U2IiBkYXRhUmVmU3RhcnQ9InNvdXJjZTYiPg==" dataRef="source6" equiv-text="base64:PGcgaWQ9IjBIWnVnMWQzTGtYSlUwNEUiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg=="/>The rider stated the car had a color from the one registered in Bliss.<ph id="source6_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source6" equiv-text="base64:PGcgaWQ9IjBIWnVnMWQzTGtYSlUwNEUiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg=="/><ph id="source7_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2U3IiBkYXRhUmVmU3RhcnQ9InNvdXJjZTciPg==" dataRef="source7" equiv-text="base64:PGcgaWQ9Im9aM29XXzBLYWljRlhGRFMiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg=="/>The rider can’t tell if the driver matched the profile picture.<ph id="source7_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source7" equiv-text="base64:PGcgaWQ9Im9aM29XXzBLYWljRlhGRFMiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg=="/><ph id="source4_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source4" equiv-text="base64:PGcgaWQ9IjVTdENZWVJ2cU1jMFVBejQiIGN0eXBlPSJ4LWh0bWwtdWwiIFwvPg=="/>';
+        $expected_l2_segment = '<ph id="source1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGcgaWQ9ImxwdXhuaVFsSVczS3JVeXciIGN0eXBlPSJ4LWh0bWwtcCIgXC8+" x-orig="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiPg=="/>Click the image on the left, read the information and then select the contact type that would replace the red question mark.<ph id="source1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGcgaWQ9ImxwdXhuaVFsSVczS3JVeXciIGN0eXBlPSJ4LWh0bWwtcCIgXC8+" x-orig="PC9wYz4="/><ph id="source2_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGcgaWQ9ImQzVGxQdG9tbFV0MEVqMWsiIGN0eXBlPSJ4LWh0bWwtcCIgXC8+" x-orig="PHBjIGlkPSJzb3VyY2UyIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTIiPg=="/><ph id="source3_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGcgaWQ9ImpjUC1URkZTTzJDU3N1THQiIGN0eXBlPSJ4LWh0bWwtc3Ryb25nIiBcLz4=" x-orig="PHBjIGlkPSJzb3VyY2UzIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTMiPg=="/>Things to consider:<ph id="source3_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGcgaWQ9ImpjUC1URkZTTzJDU3N1THQiIGN0eXBlPSJ4LWh0bWwtc3Ryb25nIiBcLz4=" x-orig="PC9wYz4="/><ph id="source2_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGcgaWQ9ImQzVGxQdG9tbFV0MEVqMWsiIGN0eXBlPSJ4LWh0bWwtcCIgXC8+" x-orig="PC9wYz4="/><ph id="source4_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGcgaWQ9IjVTdENZWVJ2cU1jMFVBejQiIGN0eXBlPSJ4LWh0bWwtdWwiIFwvPg==" x-orig="PHBjIGlkPSJzb3VyY2U0IiBkYXRhUmVmU3RhcnQ9InNvdXJjZTQiPg=="/><ph id="source5_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGcgaWQ9Ijk5cGhoSmNFUURMSEJqZVUiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg==" x-orig="PHBjIGlkPSJzb3VyY2U1IiBkYXRhUmVmU3RhcnQ9InNvdXJjZTUiPg=="/>The rider stated the car had a different tag from another state.<ph id="source5_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGcgaWQ9Ijk5cGhoSmNFUURMSEJqZVUiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg==" x-orig="PC9wYz4="/><ph id="source6_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGcgaWQ9IjBIWnVnMWQzTGtYSlUwNEUiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg==" x-orig="PHBjIGlkPSJzb3VyY2U2IiBkYXRhUmVmU3RhcnQ9InNvdXJjZTYiPg=="/>The rider stated the car had a color from the one registered in Bliss.<ph id="source6_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGcgaWQ9IjBIWnVnMWQzTGtYSlUwNEUiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg==" x-orig="PC9wYz4="/><ph id="source7_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:PGcgaWQ9Im9aM29XXzBLYWljRlhGRFMiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg==" x-orig="PHBjIGlkPSJzb3VyY2U3IiBkYXRhUmVmU3RhcnQ9InNvdXJjZTciPg=="/>The rider can’t tell if the driver matched the profile picture.<ph id="source7_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGcgaWQ9Im9aM29XXzBLYWljRlhGRFMiIGN0eXBlPSJ4LWh0bWwtbGkiIFwvPg==" x-orig="PC9wYz4="/><ph id="source4_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:PGcgaWQ9IjVTdENZWVJ2cU1jMFVBejQiIGN0eXBlPSJ4LWh0bWwtdWwiIFwvPg==" x-orig="PC9wYz4="/>';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
 
         $this->assertEquals( $l1_segment, $expected_l1_segment );
-        $this->assertEquals( $l2_segment, $expected_l2_segment );
+        $this->assertEquals( $expected_l2_segment, $l2_segment );
 
         $back_to_db_segment_from_l1 = $Filter->fromLayer1ToLayer0( $l1_segment );
 
@@ -644,7 +648,7 @@ class MateCatSubFilteringTest extends TestCase {
 
         $db_segment          = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
         $expected_l1_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
-        $expected_l2_segment = 'Practice using <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN . '" x-layer="data-ref" equiv-text="base64:PHBjIGlkPSIxYiIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOmIiPg=="/>coaching frameworks<ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE . '" x-layer="data-ref" equiv-text="base64:PC9wYz4="/> and skills with peers and coaches in a safe learning environment.';
+        $expected_l2_segment = 'Practice using <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN . '" equiv-text="base64:PHBjIGlkPSIxYiIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOmIiPg=="/>coaching frameworks<ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE . '" equiv-text="base64:PC9wYz4="/> and skills with peers and coaches in a safe learning environment.';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
@@ -669,8 +673,8 @@ class MateCatSubFilteringTest extends TestCase {
         $db_translation          = 'Free text containing <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">curvise</pc>.';
         $expected_l1_segment     = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>.';
         $expected_l1_translation = 'Free text containing <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">curvise</pc>.';
-        $expected_l2_segment     = 'Testo libero contenente <ph id="1_1" dataType="pcStart" originalData="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiPg==" dataRef="d1" equiv-text="base64:Xw=="/>corsivo<ph id="1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="d1" equiv-text="base64:Xw=="/>.';
-        $expected_l2_translation = 'Free text containing <ph id="1_1" dataType="pcStart" originalData="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiPg==" dataRef="d1" equiv-text="base64:Xw=="/>curvise<ph id="1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="d1" equiv-text="base64:Xw=="/>.';
+        $expected_l2_segment     = 'Testo libero contenente <ph id="1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:Xw==" x-orig="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiPg=="/>corsivo<ph id="1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:Xw==" x-orig="PC9wYz4="/>.';
+        $expected_l2_translation = 'Free text containing <ph id="1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:Xw==" x-orig="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDEiIGRhdGFSZWZTdGFydD0iZDEiPg=="/>curvise<ph id="1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:Xw==" x-orig="PC9wYz4="/>.';
 
         $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
         $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
@@ -679,8 +683,8 @@ class MateCatSubFilteringTest extends TestCase {
 
         $this->assertEquals( $l1_segment, $expected_l1_segment );
         $this->assertEquals( $l1_translation, $expected_l1_translation );
-        $this->assertEquals( $l2_segment, $expected_l2_segment );
-        $this->assertEquals( $l2_translation, $expected_l2_translation );
+        $this->assertEquals( $expected_l2_segment, $l2_segment );
+        $this->assertEquals( $expected_l2_translation, $l2_translation );
 
         $back_to_db_segment     = $Filter->fromLayer1ToLayer0( $l1_segment );
         $back_to_db_translation = $Filter->fromLayer1ToLayer0( $l1_translation );
@@ -704,8 +708,8 @@ class MateCatSubFilteringTest extends TestCase {
         $db_translation          = 'Simple link: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
         $expected_l1_segment     = 'Link semplice: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
         $expected_l1_translation = 'Simple link: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
-        $expected_l2_segment     = 'Link semplice: <ph id="1_1" dataType="pcStart" originalData="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiPg==" dataRef="d1" equiv-text="base64:Ww=="/>La Repubblica<ph id="1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="d2" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk="/>.';
-        $expected_l2_translation = 'Simple link: <ph id="1_1" dataType="pcStart" originalData="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiPg==" dataRef="d1" equiv-text="base64:Ww=="/>La Repubblica<ph id="1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="d2" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk="/>.';
+        $expected_l2_segment     = 'Link semplice: <ph id="1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:Ww==" x-orig="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiPg=="/>La Repubblica<ph id="1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk=" x-orig="PC9wYz4="/>.';
+        $expected_l2_translation = 'Simple link: <ph id="1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:Ww==" x-orig="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiPg=="/>La Repubblica<ph id="1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk=" x-orig="PC9wYz4="/>.';
 
         $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
         $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
@@ -714,8 +718,8 @@ class MateCatSubFilteringTest extends TestCase {
 
         $this->assertEquals( $l1_segment, $expected_l1_segment );
         $this->assertEquals( $l1_translation, $expected_l1_translation );
-        $this->assertEquals( $l2_segment, $expected_l2_segment );
-        $this->assertEquals( $l2_translation, $expected_l2_translation );
+        $this->assertEquals( $expected_l2_segment, $l2_segment );
+        $this->assertEquals( $expected_l2_translation, $l2_translation );
 
         $back_to_db_segment     = $Filter->fromLayer1ToLayer0( $l1_segment );
         $back_to_db_translation = $Filter->fromLayer1ToLayer0( $l1_translation );
@@ -739,8 +743,8 @@ class MateCatSubFilteringTest extends TestCase {
         $db_translation          = 'Testo <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
         $expected_l1_segment     = 'Text <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
         $expected_l1_translation = 'Testo <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
-        $expected_l2_segment     = 'Text <ph id="source1_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiIGRhdGFSZWZFbmQ9InNvdXJjZTEiPg==" dataRef="source1" equiv-text="base64:eA=="/><ph id="mtc_1" ctype="x-original_pc_open" x-layer="data-ref" equiv-text="base64:PHBjIGlkPSIxdSIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOnUiPg=="/>link<ph id="mtc_2" ctype="x-original_pc_close" x-layer="data-ref" equiv-text="base64:PC9wYz4="/><ph id="source1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source1" equiv-text="base64:eA=="/>.';
-        $expected_l2_translation = 'Testo <ph id="source1_1" dataType="pcStart" originalData="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiIGRhdGFSZWZFbmQ9InNvdXJjZTEiPg==" dataRef="source1" equiv-text="base64:eA=="/><ph id="mtc_1" ctype="x-original_pc_open" x-layer="data-ref" equiv-text="base64:PHBjIGlkPSIxdSIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOnUiPg=="/>link<ph id="mtc_2" ctype="x-original_pc_close" x-layer="data-ref" equiv-text="base64:PC9wYz4="/><ph id="source1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="source1" equiv-text="base64:eA=="/>.';
+        $expected_l2_segment     = 'Text <ph id="source1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:eA==" x-orig="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiIGRhdGFSZWZFbmQ9InNvdXJjZTEiPg=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN . '" equiv-text="base64:PHBjIGlkPSIxdSIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOnUiPg=="/>link<ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE . '" equiv-text="base64:PC9wYz4="/><ph id="source1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:eA==" x-orig="PC9wYz4="/>.';
+        $expected_l2_translation = 'Testo <ph id="source1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:eA==" x-orig="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiIGRhdGFSZWZFbmQ9InNvdXJjZTEiPg=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN . '" equiv-text="base64:PHBjIGlkPSIxdSIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOnUiPg=="/>link<ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE . '" equiv-text="base64:PC9wYz4="/><ph id="source1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:eA==" x-orig="PC9wYz4="/>.';
 
         $l1_segment     = $Filter->fromLayer0ToLayer1( $db_segment );
         $l1_translation = $Filter->fromLayer0ToLayer1( $db_translation );
@@ -749,8 +753,8 @@ class MateCatSubFilteringTest extends TestCase {
 
         $this->assertEquals( $l1_segment, $expected_l1_segment );
         $this->assertEquals( $l1_translation, $expected_l1_translation );
-        $this->assertEquals( $l2_segment, $expected_l2_segment );
-        $this->assertEquals( $l2_translation, $expected_l2_translation );
+        $this->assertEquals( $expected_l2_segment, $l2_segment );
+        $this->assertEquals( $expected_l2_translation, $l2_translation );
 
         $back_to_db_segment     = $Filter->fromLayer1ToLayer0( $l1_segment );
         $back_to_db_translation = $Filter->fromLayer1ToLayer0( $l1_translation );
@@ -797,13 +801,13 @@ class MateCatSubFilteringTest extends TestCase {
 
         $db_segment          = '<ph id="1j" type="other" subType="m:j"/>';
         $expected_l1_segment = '<ph id="1j" type="other" subType="m:j"/>';
-        $expected_l2_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-layer="data-ref" equiv-text="base64:PHBoIGlkPSIxaiIgdHlwZT0ib3RoZXIiIHN1YlR5cGU9Im06aiIvPg=="/>';
+        $expected_l2_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:PHBoIGlkPSIxaiIgdHlwZT0ib3RoZXIiIHN1YlR5cGU9Im06aiIvPg=="/>';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
         $l2_segment = $Filter->fromLayer1ToLayer2( $l1_segment );
 
-        $this->assertEquals( $l1_segment, $expected_l1_segment );
-        $this->assertEquals( $l2_segment, $expected_l2_segment );
+        $this->assertEquals( $expected_l1_segment, $l1_segment );
+        $this->assertEquals( $expected_l2_segment, $l2_segment );
 
         $back_to_db_segment = $Filter->fromLayer1ToLayer0( $l1_segment );
 
@@ -1134,7 +1138,7 @@ class MateCatSubFilteringTest extends TestCase {
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
-        $string_from_UI = 'Test <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/> locked.';
+        $string_from_UI = 'Test <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/> locked.';
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
@@ -1155,9 +1159,9 @@ class MateCatSubFilteringTest extends TestCase {
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
-        $string_from_UI = 'For the site <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-layer="data-ref" equiv-text="base64:PHBoIGlkPSI0IiBkaXNwPSJ7e3NpdGVJZH19IiBkYXRhUmVmPSJkMiIvPg=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDs0JnF1b3Q7IGRpc3A9JnF1b3Q7e3tzaXRlSWR9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QyJnF1b3Q7IC8mZ3Q7Ii8+" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzQmcXVvdDsgZGlzcD0mcXVvdDt7e3NpdGVJZH19JnF1b3Q7IGRhdGFSZWY9JnF1b3Q7ZDImcXVvdDsgLyZndDs="/><x id="3"/> group id <x id="4"/><x id="5"/><x id="6"/> is already associated.';
+        $string_from_UI = 'For the site <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:PHBoIGlkPSI0IiBkaXNwPSJ7e3NpdGVJZH19IiBkYXRhUmVmPSJkMiIvPg=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDs0JnF1b3Q7IGRpc3A9JnF1b3Q7e3tzaXRlSWR9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QyJnF1b3Q7IC8mZ3Q7Ii8+" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzQmcXVvdDsgZGlzcD0mcXVvdDt7e3NpdGVJZH19JnF1b3Q7IGRhdGFSZWY9JnF1b3Q7ZDImcXVvdDsgLyZndDs="/><x id="3"/> group id <x id="4"/><x id="5"/><x id="6"/> is already associated.';
 
-        $this->assertEquals( $segmentL2, $string_from_UI );
+        $this->assertEquals( $string_from_UI, $segmentL2 );
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
@@ -1224,9 +1228,9 @@ class MateCatSubFilteringTest extends TestCase {
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
-        $string_from_UI = 'Click <x id="1"/>Create <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/>Site Admin<ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9ImJvbGQiLz4=" equiv-text="base64:Ym9sZA=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-layer="data-ref" equiv-text="base64:PHBoIGlkPSIxMTEiLz4="/><ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjMiIGVxdWl2LXRleHQ9Iml0YWxpYyIvPg==" equiv-text="base64:aXRhbGlj"/>administration<ph id="mtc_4" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjQiIGVxdWl2LXRleHQ9Iml0YWxpYyIvPg==" equiv-text="base64:aXRhbGlj"/> site.';
+        $string_from_UI = 'Click <x id="1"/>Create <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDszJnF1b3Q7IGRpc3A9JnF1b3Q7e3tkYXRhfX0mcXVvdDsgZGF0YVJlZj0mcXVvdDtkMSZxdW90OyAvJmd0OyIvPg==" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzMmcXVvdDsgZGlzcD0mcXVvdDt7e2RhdGF9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QxJnF1b3Q7IC8mZ3Q7"/>Site Admin<ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9ImJvbGQiLz4=" equiv-text="base64:Ym9sZA=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:PHBoIGlkPSIxMTEiLz4="/><ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjMiIGVxdWl2LXRleHQ9Iml0YWxpYyIvPg==" equiv-text="base64:aXRhbGlj"/>administration<ph id="mtc_4" ctype="' . CTypeEnum::ORIGINAL_X . '" x-orig="PHggaWQ9IjQiIGVxdWl2LXRleHQ9Iml0YWxpYyIvPg==" equiv-text="base64:aXRhbGlj"/> site.';
 
-        $this->assertEquals( $segmentL2, $string_from_UI );
+        $this->assertEquals( $string_from_UI, $segmentL2 );
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
@@ -1263,8 +1267,8 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segmentL0, $segmentL0_2 );
         $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
 
-        $string_from_UI = 'Link semplice: <ph id="1_1" dataType="pcStart" originalData="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiPg==" dataRef="d1" equiv-text="base64:Ww=="/>La Repubblica<ph id="1_2" dataType="pcEnd" originalData="PC9wYz4=" dataRef="d2" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk="/>.';
-        $this->assertEquals( $segmentL2, $string_from_UI );
+        $string_from_UI = 'Link semplice: <ph id="1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:Ww==" x-orig="PHBjIGlkPSIxIiBjYW5Db3B5PSJubyIgY2FuRGVsZXRlPSJubyIgZGF0YVJlZkVuZD0iZDIiIGRhdGFSZWZTdGFydD0iZDEiPg=="/>La Repubblica<ph id="1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:XShodHRwOi8vcmVwdWJibGljYS5pdCk=" x-orig="PC9wYz4="/>.';
+        $this->assertEquals( $string_from_UI, $segmentL2 );
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
@@ -1272,6 +1276,32 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
         $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $string_from_UI ) );
 
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function layer1ShouldWorkWithMalformedPhTags() {
+
+        $filter  = $this->getFilterInstance();
+        $segment = 'not <ph id="1" dataRef="pippo"> valid';
+
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $this->assertEquals( $segment, $segmentL1 );
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function layer2SShouldWorkWithMalformedPhTags() {
+
+        $filter  = $this->getFilterInstance(['xxx']);
+        $segment = 'not <ph id="1" dataRef="pippo"> valid';
+
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+        $this->assertEquals( $segment, $segmentL2 );
     }
 
 }

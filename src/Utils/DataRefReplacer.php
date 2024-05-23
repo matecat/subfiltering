@@ -10,6 +10,8 @@
 namespace Matecat\SubFiltering\Utils;
 
 use DOMException;
+use Exception;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\XmlParser\Exception\InvalidXmlException;
 use Matecat\XmlParser\Exception\XmlParsingException;
 use Matecat\XmlParser\XmlParser;
@@ -39,9 +41,6 @@ class DataRefReplacer {
      * @param string $string
      *
      * @return string
-     * @throws DOMException
-     * @throws InvalidXmlException
-     * @throws XmlParsingException
      */
     public function replace( $string ) {
 
@@ -52,30 +51,37 @@ class DataRefReplacer {
             return $string;
         }
 
-        // (recursively) clean string from equiv-text eventually present
-        $string = $this->cleanFromEquivText( $string );
+        // try not to throw exception for wrong segments with opening tags and no closing
+        try {
 
-        $html = XmlParser::parse( $string, true );
+            $html = XmlParser::parse( $string, true );
 
-        // 1. Replace <ph>|<sc>|<ec> tags
-        foreach ( $html as $node ) {
-            $string = $this->recursiveAddEquivTextToPhTag( $node, $string );
+            $dataRefEndMap = [];
+
+            foreach ( $html as $node ) {
+
+                // 1. Replace <ph>|<sc>|<ec> tags
+                $string = $this->recursiveTransformDataRefToPhTag( $node, $string );
+
+                // 2. Replace self-closed <pc dataRefStart="xyz" /> tags
+                $string = $this->recursiveReplaceSelfClosedPcTags( $node, $string );
+
+                // 3. Build the DataRefEndMap needed by replaceClosingPcTags function
+                // (needed for correct handling of </pc> closing tags)
+                // make this inline with one foreach cycle
+                $this->extractDataRefMapRecursively( $node, $dataRefEndMap );
+
+            }
+
+            // 4. replace pc tags
+            $string = $this->replaceOpeningPcTags( null, $string );
+            $string = $this->replaceClosingPcTags( $string, $dataRefEndMap );
+
+        } catch ( Exception $ignore ) {
+        } finally {
+            return $string;
         }
 
-        // 2. Replace <pc> tags
-        if ( $this->stringContainsPcTags( $string ) ) {
-
-            // replace self-closed <pc />
-            $string = $this->replaceSelfClosedPcTags( $string );
-
-            // create a dataRefEnd map
-            // (needed for correct handling of </pc> closing tags)
-            $dataRefEndMap = $this->buildDataRefEndMap( $html );
-            $string        = $this->replaceOpeningPcTags( $string );
-            $string        = $this->replaceClosingPcTags( $string, $dataRefEndMap );
-        }
-
-        return $string;
     }
 
     /**
@@ -88,25 +94,7 @@ class DataRefReplacer {
     }
 
     /**
-     * @param string $string
-     *
-     * @return string
-     * @throws DOMException
-     * @throws InvalidXmlException
-     * @throws XmlParsingException
-     */
-    private function cleanFromEquivText( $string ) {
-        $html = XmlParser::parse( $string, true );
-
-        foreach ( $html as $node ) {
-            $string = $this->recursiveCleanFromEquivText( $node, $string );
-        }
-
-        return $string;
-    }
-
-    /**
-     * This function add equiv-text attribute to <ph>, <ec>, and <sc> tags.
+     * This function adds equiv-text attribute to <ph>, <ec>, and <sc> tags.
      *
      * Please note that <ec> and <sc> tags are converted to <ph> tags (needed by Matecat);
      * in this case, another special attribute (dataType) is added just before equiv-text
@@ -118,74 +106,75 @@ class DataRefReplacer {
      *
      * @return string
      */
-    private function recursiveAddEquivTextToPhTag( $node, $string ) {
+    private function recursiveTransformDataRefToPhTag( $node, $string ) {
+
         if ( $node->has_children ) {
+
             foreach ( $node->inner_html as $childNode ) {
-                $string = $this->recursiveAddEquivTextToPhTag( $childNode, $string );
+                $string = $this->recursiveTransformDataRefToPhTag( $childNode, $string );
             }
+
         } else {
-            if ( $node->tagName === 'ph' || $node->tagName === 'sc' || $node->tagName === 'ec' ) {
-                if ( !isset( $node->attributes[ 'dataRef' ] ) ) {
+
+            switch ( $node->tagName ) {
+                case 'ph':
+                case 'sc':
+                case 'ec':
+//                case 'pc':
+                    break;
+                default:
                     return $string;
-                }
-
-                $a = $node->node;  // complete match. Eg:  <ph id="source1" dataRef="source1"/>
-                $b = $node->attributes[ 'dataRef' ];   // map identifier. Eg: source1
-
-                // if isset a value in the map calculate base64 encoded value
-                // otherwise skip
-                if ( !in_array( $b, array_keys( $this->map ) ) ) {
-                    return $string;
-                }
-
-                // check if is null, in this case convert it to NULL string
-                if ( is_null( $this->map[ $b ] ) ) {
-                    $this->map[ $b ] = 'NULL';
-                }
-
-                $value              = $this->map[ $b ];
-                $base64EncodedValue = base64_encode( $value );
-
-                if ( empty( $base64EncodedValue ) ) {
-                    return $string;
-                }
-
-                // if there is no id copy it from dataRef
-                $id = ( !isset( $node->attributes[ 'id' ] ) ) ? ' id="' . $b . '" removeId="true"' : '';
-
-                // introduce dataType for <ec>/<sc> tag handling
-                $dataType = ( $this->isAEcOrScTag( $node ) ) ? ' dataType="' . $node->tagName . '"' : '';
-
-                // replacement
-                $d = str_replace( '/', $id . $dataType . ' equiv-text="base64:' . $base64EncodedValue . '"/', $a );
-                $a = $this->removeAngleBrackets( $a );
-                $d = $this->removeAngleBrackets( $d );
-
-                // convert <ec>/<sc> into <ph>
-                if ( $this->isAEcOrScTag( $node ) ) {
-                    $d = 'ph' . substr( $d, 2 );
-                    $d = trim( $d );
-                }
-
-                return str_replace( $a, $d, $string );
             }
+
+            if ( !isset( $node->attributes[ 'dataRef' ] ) ) {
+                return $string;
+            }
+
+            // if isset a value in the map calculate base64 encoded value
+            // otherwise skip
+            if ( !in_array( $node->attributes[ 'dataRef' ], array_keys( $this->map ) ) ) {
+                return $string;
+            }
+
+            $dataRefName  = $node->attributes[ 'dataRef' ];   // map identifier. Eg: source1
+            $dataRefValue = $this->map[ $dataRefName ];   // map identifier. Eg: source1
+
+            // check if is null or an empty string, in this case, convert it to NULL string
+            if ( is_null( $dataRefValue ) || $dataRefValue === '' ) {
+                $this->map[ $dataRefName ] = 'NULL';
+            }
+
+            $newTag = [ '<ph' ];
+
+            // if there is no id copy it from dataRef
+            if ( !isset( $node->attributes[ 'id' ] ) ) {
+                $newTag[] = 'id="' . $dataRefName . '"';
+                $newTag[] = 'x-removeId="true"';
+            } else {
+                $newTag[] = 'id="' . $node->attributes[ 'id' ] . '"';
+            }
+
+            // introduce dataType for <ec>/<sc> tag handling
+            if ( $node->tagName === 'ec' ) {
+                $newTag[] = 'ctype="' . CTypeEnum::EC_DATA_REF . '"';
+            } elseif ( $node->tagName === 'sc' ) {
+                $newTag[] = 'ctype="' . CTypeEnum::SC_DATA_REF . '"';
+            } else {
+                $newTag[] = 'ctype="' . CTypeEnum::PH_DATA_REF . '"';
+            }
+
+            $newTag[] = 'equiv-text="base64:' . base64_encode( $dataRefValue ) . '"';
+            $newTag[] = 'x-orig="' . base64_encode( $node->node ) . '"';
+
+            return str_replace( $node->node, implode( " ", $newTag ) . '/>', $string );
+
         }
 
         return $string;
     }
 
     /**
-     * @param $string
-     *
-     * @return bool
-     */
-    private function stringContainsPcTags( $string ) {
-        preg_match_all( '/<pc [^>]+?>/iu', $string, $openingPcMatches );
-
-        return ( isset( $openingPcMatches[ 0 ] ) && count( $openingPcMatches[ 0 ] ) > 0 );
-    }
-
-    /**
+     * @param $node
      * @param $string
      *
      * @return mixed
@@ -193,44 +182,35 @@ class DataRefReplacer {
      * @throws InvalidXmlException
      * @throws XmlParsingException
      */
-    private function replaceSelfClosedPcTags( $string ) {
+    private function recursiveReplaceSelfClosedPcTags( $node, $string ) {
 
-        $regex = '|<pc[^>]+?/>|iu';
-        preg_match_all( $regex, $string, $selfClosedPcMatches );
+        if ( $node->has_children ) {
 
-        foreach ( $selfClosedPcMatches[ 0 ] as $match ) {
-
-            $html       = XmlParser::parse( $match, true );
-            $node       = $html[ 0 ];
-            $attributes = $node->attributes;
-
-            if ( isset( $attributes[ 'dataRefStart' ] ) && array_key_exists( $node->attributes[ 'dataRefStart' ], $this->map ) ) {
-                $replacement = '<ph id="' . $attributes[ 'id' ] . '" dataType="pcSelf" originalData="' . base64_encode( $match ) . '" dataRef="' . $attributes[ 'dataRefStart' ] . '" equiv-text="base64:' . base64_encode( $this->map[ $node->attributes[ 'dataRefStart' ] ] ) . '"/>';
-                $string      = str_replace( $match, $replacement, $string );
+            foreach ( $node->inner_html as $childNode ) {
+                $string = $this->recursiveReplaceSelfClosedPcTags( $childNode, $string );
             }
+
+        } elseif ( $node->tagName == 'pc' && $node->self_closed === true ) {
+
+            if ( isset( $node->attributes[ 'dataRefStart' ] ) && array_key_exists( $node->attributes[ 'dataRefStart' ], $this->map ) ) {
+
+                $newTag = [ '<ph' ];
+
+                if ( isset( $node->attributes[ 'id' ] ) ) {
+                    $newTag[] = 'id="' . $node->attributes[ 'id' ] . '_1"';
+                }
+
+                $newTag[] = 'ctype="' . CTypeEnum::PC_SELF_CLOSE_DATA_REF . '"';
+                $newTag[] = 'equiv-text="base64:' . base64_encode( $this->map[ $node->attributes[ 'dataRefStart' ] ] ) . '"';
+                $newTag[] = 'x-orig="' . base64_encode( $node->node ) . '"';
+
+                $string = str_replace( $node->node, implode( " ", $newTag ) . '/>', $string );
+            }
+
         }
 
         return $string;
-    }
 
-    /**
-     * Build the DataRefEndMap needed by replaceClosingPcTags function
-     * (only for <pc> tags handling)
-     *
-     * @param $html
-     *
-     * @return array
-     */
-    private function buildDataRefEndMap( $html ) {
-        $dataRefEndMap = [];
-
-        foreach ( $html as $index => $node ) {
-            if ( $node->tagName === 'pc' ) {
-                $this->extractDataRefMapRecursively( $node, $dataRefEndMap );
-            }
-        }
-
-        return $dataRefEndMap;
     }
 
     /**
@@ -240,7 +220,9 @@ class DataRefReplacer {
      * @param        $dataRefEndMap
      */
     private function extractDataRefMapRecursively( $node, &$dataRefEndMap ) {
-        if ( $this->nodeContainsNestedPcTags( $node ) ) {
+
+        // we have to build the map for the closing pc tag, so get the children first
+        if ( $node->has_children ) {
             foreach ( $node->inner_html as $nestedNode ) {
                 $this->extractDataRefMapRecursively( $nestedNode, $dataRefEndMap );
             }
@@ -260,33 +242,9 @@ class DataRefReplacer {
                     'id'         => isset( $node->attributes[ 'id' ] ) ? $node->attributes[ 'id' ] : null,
                     'dataRefEnd' => $dataRefEnd,
             ];
-        }
-    }
 
-    /**
-     * @param object $node
-     * @param        $string
-     *
-     * @return string|string[]
-     */
-    private function recursiveCleanFromEquivText( $node, $string ) {
-
-        if ( $node->tagName == '#text' ) {
-            return $string;
         }
 
-        if ( $node->has_children ) {
-            foreach ( $node->inner_html as $childNode ) {
-                $string = $this->recursiveCleanFromEquivText( $childNode, $string );
-            }
-        } else {
-            if ( isset( $node->attributes[ 'dataRef' ] ) && array_key_exists( $node->attributes[ 'dataRef' ], $this->map ) ) {
-                $cleaned = preg_replace( '/ equiv-text="(.*?)"/', '', $node->node );
-                $string  = str_replace( $node->node, $cleaned, $string );
-            }
-        }
-
-        return $string;
     }
 
     /**
@@ -295,42 +253,88 @@ class DataRefReplacer {
      * @param string $string
      *
      * @return string
+     * @throws DOMException
+     * @throws InvalidXmlException
+     * @throws XmlParsingException
      */
-    private function replaceOpeningPcTags( $string ) {
+    private function replaceOpeningPcTags( $node, $string ) {
+
+//        if ( $node->has_children ) {
+//
+//            foreach ( $node->inner_html as $childNode ) {
+//                $string = $this->replaceOpeningPcTags( $childNode, $string );
+//            }
+//
+//        }
+//
+//        if ( $node->tagName == 'pc' ) {
+//
+//            $newNode = $node->node;
+//
+//            // CASE 1 - Missing `dataRefStart`
+//            if ( isset( $node->attributes[ 'dataRefEnd' ] ) && !isset( $node->attributes[ 'dataRefStart' ] ) ) {
+//                $node->attributes[ 'dataRefStart' ] = $node->attributes[ 'dataRefEnd' ];
+//            }
+//
+//            // CASE 2 - Missing `dataRefEnd`
+//            if ( isset( $node->attributes[ 'dataRefStart' ] ) && !isset( $node->attributes[ 'dataRefEnd' ] ) ) {
+//                $node->attributes[ 'dataRefEnd' ] = $node->attributes[ 'dataRefStart' ];
+//            }
+//
+//            if ( isset( $node->attributes[ 'dataRefStart' ] ) ) {
+//
+//                $startValue = $this->map[ $node->attributes[ 'dataRefStart' ] ] ?: 'NULL'; //handling null values in original data map
+//
+//                $newTag = [ '<ph' ];
+//
+//                if ( isset( $node->attributes[ 'id' ] ) ) {
+//                    $newTag[] = 'id="' . $node->attributes[ 'id' ] . '_1"';
+//                }
+//
+//                $newTag[] = 'ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '"';
+//                $newTag[] = 'equiv-text="base64:' . base64_encode( $startValue ) . '"';
+//                $newTag[] = 'x-orig="' . base64_encode( $node->node ) . '"';
+//
+//                // conversion for opening <pc> tag
+//                $string = str_replace( $node->node, implode( " ", $newTag ) . '/>', $string );
+//
+//            }
+//
+//        }
 
         preg_match_all( '|<pc ([^>/]+?)>|iu', $string, $openingPcMatches );
 
-        foreach ( $openingPcMatches[ 0 ] as $index => $match ) {
+        foreach ( $openingPcMatches[ 0 ] as $match ) {
 
-            preg_match_all( '|([a-zA-Z]+?)\s*=\s*[\'"](.+?)[\'"]|', $openingPcMatches[ 1 ][ $index ], $_attr, PREG_SET_ORDER );
-
-            $attr = [];
-            foreach ( $_attr as $attrGroup ) {
-                $attr[ $attrGroup[ 1 ] ] = $attrGroup[ 2 ];
-            }
+            $node = XmlParser::parse( $match . '</pc>', true )[ 0 ]; // add a closing tag to not break xml integrity
 
             // CASE 1 - Missing `dataRefStart`
-            if ( isset( $attr[ 'dataRefEnd' ] ) && !isset( $attr[ 'dataRefStart' ] ) ) {
-                $attr[ 'dataRefStart' ] = $attr[ 'dataRefEnd' ];
+            if ( isset( $node->attributes[ 'dataRefEnd' ] ) && !isset( $node->attributes[ 'dataRefStart' ] ) ) {
+                $node->attributes[ 'dataRefStart' ] = $node->attributes[ 'dataRefEnd' ];
             }
 
             // CASE 2 - Missing `dataRefEnd`
-            if ( isset( $attr[ 'dataRefStart' ] ) && !isset( $attr[ 'dataRefEnd' ] ) ) {
-                $attr[ 'dataRefEnd' ] = $attr[ 'dataRefStart' ];
+            if ( isset( $node->attributes[ 'dataRefStart' ] ) && !isset( $node->attributes[ 'dataRefEnd' ] ) ) {
+                $node->attributes[ 'dataRefEnd' ] = $node->attributes[ 'dataRefStart' ];
             }
 
-            if ( isset( $attr[ 'dataRefStart' ] ) ) {
-                $startOriginalData       = $match; // opening <pc>
-                $startValue              = $this->map[ $attr[ 'dataRefStart' ] ] ?: 'NULL'; //handling null values in original data map
-                $base64EncodedStartValue = base64_encode( $startValue );
-                $base64StartOriginalData = base64_encode( $startOriginalData );
+            if ( isset( $node->attributes[ 'dataRefStart' ] ) ) {
+
+                $startValue = $this->map[ $node->attributes[ 'dataRefStart' ] ] ?: 'NULL'; //handling null values in original data map
+
+                $newTag = [ '<ph' ];
+
+                if ( isset( $node->attributes[ 'id' ] ) ) {
+                    $newTag[] = 'id="' . $node->attributes[ 'id' ] . '_1"';
+                }
+
+                $newTag[] = 'ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '"';
+                $newTag[] = 'equiv-text="base64:' . base64_encode( $startValue ) . '"';
+                $newTag[] = 'x-orig="' . base64_encode( $match ) . '"';
 
                 // conversion for opening <pc> tag
-                $openingPcConverted = '<ph ' . ( ( isset( $attr[ 'id' ] ) ) ? 'id="' . $attr[ 'id' ] . '_1"' : '' ) . ' dataType="pcStart" originalData="' . $base64StartOriginalData . '" dataRef="'
-                        . $attr[ 'dataRefStart' ] . '" equiv-text="base64:'
-                        . $base64EncodedStartValue . '"/>';
+                $string = str_replace( $match, implode( " ", $newTag ) . '/>', $string );
 
-                $string = str_replace( $startOriginalData, $openingPcConverted, $string );
             }
         }
 
@@ -347,59 +351,55 @@ class DataRefReplacer {
      * @return string
      */
     private function replaceClosingPcTags( $string, $dataRefEndMap = [] ) {
+
         preg_match_all( '|</pc>|iu', $string, $closingPcMatches, PREG_OFFSET_CAPTURE );
         $delta = 0;
 
         foreach ( $closingPcMatches[ 0 ] as $index => $match ) {
+
             $offset = $match[ 1 ];
-            $length = strlen( $match[ 0 ] );
-            $attr   = $dataRefEndMap[ $index ];
+            $length = 5; // strlen of '</pc>'
+
+            $attr = isset( $dataRefEndMap[ $index ] ) ? $dataRefEndMap[ $index ] : null;
 
             if ( !empty( $attr ) && isset( $attr[ 'dataRefEnd' ] ) ) {
-                $endOriginalData       = $match[ 0 ]; // </pc>
-                $endValue              = $this->map[ $attr[ 'dataRefEnd' ] ] ?: 'NULL';
-                $base64EncodedEndValue = base64_encode( $endValue );
-                $base64EndOriginalData = base64_encode( $endOriginalData );
 
-                // conversion for closing <pc> tag
-                $closingPcConverted = '<ph ' . ( ( isset( $attr[ 'id' ] ) ) ? 'id="' . $attr[ 'id' ] . '_2"' : '' ) . ' dataType="pcEnd" originalData="' . $base64EndOriginalData . '" dataRef="'
-                        . $attr[ 'dataRefEnd' ] . '" equiv-text="base64:' . $base64EncodedEndValue . '"/>';
+                $endValue = !empty( $this->map[ $attr[ 'dataRefEnd' ] ] ) ? $this->map[ $attr[ 'dataRefEnd' ] ] : 'NULL';
 
-                $realOffset = ( $delta === 0 ) ? $offset : ( $offset + $delta );
+                $newTag = [ '<ph' ];
 
-                $string = substr_replace( $string, $closingPcConverted, $realOffset, $length );
-                $delta  = $delta + strlen( $closingPcConverted ) - $length;
+                if ( isset( $attr[ 'id' ] ) ) {
+                    $newTag[] = 'id="' . $attr[ 'id' ] . '_2"';
+                }
+
+                $newTag[] = 'ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '"';
+                $newTag[] = 'equiv-text="base64:' . base64_encode( $endValue ) . '"';
+                $newTag[] = 'x-orig="' . base64_encode( '</pc>' ) . '"';
+
+                // conversion for opening <pc> tag
+                $completeTag = implode( " ", $newTag ) . '/>';
+                $realOffset  = ( $delta === 0 ) ? $offset : ( $offset + $delta );
+                $string      = substr_replace( $string, $completeTag, $realOffset, $length );
+                $delta       = $delta + strlen( $completeTag ) - $length;
+
             }
+
         }
 
-        return !is_array( $string ) ? $string : implode( $string );
-    }
+        return $string;
 
-    /**
-     * @param object $node
-     *
-     * @return bool
-     */
-    private function nodeContainsNestedPcTags( $node ) {
-        if ( !$node->has_children ) {
-            return false;
-        }
-
-        foreach ( $node->inner_html as $nestedNode ) {
-            if ( $nestedNode->tagName === 'pc' && ( isset( $node->attributes[ 'dataRefEnd' ] ) || isset( $node->attributes[ 'dataRefStart' ] ) ) ) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
      * @param string $string
      *
      * @return string
+     * @throws DOMException
+     * @throws InvalidXmlException
+     * @throws XmlParsingException
      */
     public function restore( $string ) {
+
         // if map is empty return string as is
         if ( empty( $this->map ) ) {
             return $string;
@@ -410,7 +410,7 @@ class DataRefReplacer {
         $html   = XmlParser::parse( $string, true );
 
         foreach ( $html as $node ) {
-            $string = $this->recursiveRemoveOriginalData( $node, $string );
+            $string = $this->recursiveRestoreOriginalTags( $node, $string );
         }
 
         return $string;
@@ -420,113 +420,41 @@ class DataRefReplacer {
      * @param object $node
      * @param        $string
      *
-     * @return string|string[]
+     * @return string
      */
-    private function recursiveRemoveOriginalData( $node, $string ) {
+    private function recursiveRestoreOriginalTags( $node, $string ) {
+
         if ( $node->has_children ) {
+
             foreach ( $node->inner_html as $childNode ) {
-                $string = $this->recursiveRemoveOriginalData( $childNode, $string );
+                $string = $this->recursiveRestoreOriginalTags( $childNode, $string );
             }
+
         } else {
 
-            if ( !isset( $node->attributes[ 'dataRef' ] ) ) {
-                return $string;
-            }
+            $cType = isset( $node->attributes[ 'ctype' ] ) ? $node->attributes[ 'ctype' ] : null;
 
-            $a = $node->node;                  // complete match. Eg:  <ph id="source1" dataRef="source1"/>
-            $b = $node->attributes[ 'dataRef' ]; // map identifier. Eg: source1
+            if ( $cType ) {
 
-            // if isset a value in the map calculate base64 encoded value
-            // or it is an empty string
-            // otherwise skip
-            if ( !in_array( $b, array_keys( $this->map ) ) ) {
-                return $string;
-            }
-
-            // check if is null, in this case convert it to NULL string
-            if ( is_null( $this->map[ $b ] ) ) {
-                $this->map[ $b ] = 'NULL';
-            }
-
-            // remove id?
-            $removeId = ( isset( $node->attributes[ 'removeId' ] ) && $node->attributes[ 'removeId' ] === "true" ) ? ' id="' . $b . '" removeId="true"' : '';
-
-            // grab dataType attribute for <ec>/<sc> tag handling
-            $dataType = ( $this->wasAEcOrScTag( $node ) ) ? ' dataType="' . $node->attributes[ 'dataType' ] . '"' : '';
-
-            $d = str_replace( $removeId . $dataType . ' equiv-text="base64:' . base64_encode( $this->map[ $b ] ) . '"/>', '/>', $a );
-
-            // replace original <ec>/<sc> tag
-            if ( $this->wasAEcOrScTag( $node ) ) {
-                $d = $node->attributes[ 'dataType' ] . substr( $d, 3 );
-                $d = trim( $d );
-            }
-
-            // replace only content tag, no matter if the string is encoded or not
-            // in this way we can handle string with mixed tags (encoded and not-encoded)
-            // in the same string
-            $a = $this->removeAngleBrackets( $a );
-            $d = $this->removeAngleBrackets( $d );
-
-            $string = str_replace( $a, $d, $string );
-
-            // restoring <pc/> self-closed here
-            if ( CatUtils::contains( 'dataType="pcSelf"', $d ) ) {
-                preg_match( '/\s?originalData="(.*?)"\s?/', $d, $originalDataMatches );
-
-                if ( isset( $originalDataMatches[ 1 ] ) ) {
-                    $originalData = base64_decode( $originalDataMatches[ 1 ] );
-                    $originalData = $this->removeAngleBrackets( $originalData );
-                    $string       = str_replace( $d, $originalData, $string );
+                switch ( $node->attributes[ 'ctype' ] ) {
+                    case CTypeEnum::ORIGINAL_PC_OPEN:
+                    case CTypeEnum::ORIGINAL_PC_CLOSE:
+                    case CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF:
+                    case CTypeEnum::PH_DATA_REF:
+                    case CTypeEnum::PC_OPEN_DATA_REF:
+                    case CTypeEnum::PC_CLOSE_DATA_REF:
+                    case CTypeEnum::PC_SELF_CLOSE_DATA_REF:
+                    case CTypeEnum::SC_DATA_REF:
+                    case CTypeEnum::EC_DATA_REF:
+                        return preg_replace( '/' . preg_quote( $node->node, '/' ) . '/', base64_decode( $node->attributes[ 'x-orig' ] ), $string, 1 );
                 }
+
             }
 
-            // restoring <pc> tags here
-            // if <ph> tag has originalData and originalType is pcStart or pcEnd,
-            // replace with original data
-            if ( CatUtils::contains( 'dataType="pcStart"', $d ) || CatUtils::contains( 'dataType="pcEnd"', $d ) ) {
-                preg_match( '/\s?originalData="(.*?)"\s?/', $d, $originalDataMatches );
-
-                if ( isset( $originalDataMatches[ 1 ] ) ) {
-                    $originalData = base64_decode( $originalDataMatches[ 1 ] );
-                    $originalData = $this->removeAngleBrackets( $originalData );
-                    $string       = str_replace( $d, $originalData, $string );
-                }
-            }
         }
 
         return $string;
+
     }
 
-    /**
-     * @param string $string
-     *
-     * @return string
-     */
-    private function removeAngleBrackets( $string ) {
-        return str_replace( [ '<', '>', '&lt;', '&gt;' ], '', $string );
-    }
-
-    /**
-     * This function checks if a node is a tag <ec> or <sc>
-     *
-     * @param $node
-     *
-     * @return bool
-     */
-    private function isAEcOrScTag( $node ) {
-        return ( $node->tagName === 'ec' || $node->tagName === 'sc' );
-    }
-
-    /**
-     * This function checks if a <ph> tag node
-     * was originally a <ec> or <sc>
-     *
-     * @param $node
-     *
-     * @return bool
-     */
-    private function wasAEcOrScTag( $node ) {
-        return ( isset( $node->attributes[ 'dataType' ] ) && ( $node->attributes[ 'dataType' ] === 'ec' || $node->attributes[ 'dataType' ] === 'sc' ) );
-    }
 }

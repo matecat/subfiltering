@@ -17,7 +17,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler {
     public function transform( $segment ) {
 
         $segment = $this->filterPhTagContent( $segment );
-        $segment = $this->filterOriginalPhTagsWithEquivText( $segment );
+        $segment = $this->filterOriginalSelfClosePhTagsWithEquivText( $segment );
 
         return $segment;
 
@@ -55,16 +55,16 @@ class StandardPHToMateCatCustomPH extends AbstractHandler {
      *
      * @return string
      */
-    private function filterOriginalPhTagsWithEquivText( $segment ) {
+    private function filterOriginalSelfClosePhTagsWithEquivText( $segment ) {
 
-        preg_match_all( '|<ph id\s*=\s*[\'"]((?!__mtc_)[^\'"]+)[\'"] equiv-text\s*?=\s*?(["\'])(?!base64:)([^\'"]+?)\2\s*/>|', $segment, $html, PREG_SET_ORDER );
+        preg_match_all( '|<ph[^>]+?equiv-text\s*?=\s*?(["\'])(?!base64:)(.*?)?\1[^>]*?/>|', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $tag_attribute ) {
 
             //replace subsequent elements excluding already encoded
             $segment = preg_replace(
                     '/' . preg_quote( $tag_attribute[ 0 ], '/' ) . '/',
-                    '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-orig="' . base64_encode( $tag_attribute[ 0 ] ) . '" equiv-text="base64:' .
-                    base64_encode( $tag_attribute[ 3 ] ) .
+                    '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="' . base64_encode( $tag_attribute[ 0 ] ) . '" equiv-text="base64:' .
+                    base64_encode( $tag_attribute[ 2 ] ) .
                     '"/>',
                     $segment,
                     1

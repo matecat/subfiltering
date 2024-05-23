@@ -59,7 +59,7 @@ class DataRefRestore extends AbstractHandler {
      * @return string
      */
     private function restoreXliffPhTagsFromMatecatPhTags( $segment ) {
-        preg_match_all( '|<ph id="mtc_[0-9]+" ctype="' . CTypeEnum::ORIGINAL_PH . '" x-layer="data-ref" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
+        preg_match_all( '|<ph id="mtc_[0-9]+" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
 
         if ( empty( $matches[ 0 ] ) ) {
             return $segment;
@@ -89,8 +89,8 @@ class DataRefRestore extends AbstractHandler {
      * @return string
      */
     private function restoreXliffPcTagsFromMatecatPhTags( $segment ) {
-        preg_match_all( '|<ph id="mtc_[0-9]+" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN . '" x-layer="data-ref" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
-        preg_match_all( '|<ph id="mtc_[0-9]+" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE . '" x-layer="data-ref" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
+        preg_match_all( '|<ph.+? ctype="' . CTypeEnum::ORIGINAL_PC_OPEN . '" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
+        preg_match_all( '|<ph.+? ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE . '" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
 
         if ( empty( $matches[ 0 ] ) ) {
             return $segment;
