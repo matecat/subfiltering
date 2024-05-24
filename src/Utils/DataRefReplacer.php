@@ -18,7 +18,7 @@ use Matecat\XmlParser\XmlParser;
 
 class DataRefReplacer {
     /**
-     * @var array
+     * @var Map
      */
     private $map;
 
@@ -27,8 +27,8 @@ class DataRefReplacer {
      *
      * @param array $map
      */
-    public function __construct( array $map = null ) {
-        $this->map = $map;
+    public function __construct( array $map = [] ) {
+        $this->map = Map::instance( $this->sanitizeMap( $map ) );
     }
 
     /**
@@ -44,10 +44,10 @@ class DataRefReplacer {
      */
     public function replace( $string ) {
 
-        // if map is empty
+        // if the map is empty
         // or the string has not a dataRef attribute
         // return string as is
-        if ( empty( $this->map ) || !$this->hasAnyDataRefAttribute( $string ) ) {
+        if ( $this->map->isEmpty() || !$this->hasAnyDataRefAttribute( $string ) ) {
             return $string;
         }
 
@@ -56,7 +56,7 @@ class DataRefReplacer {
 
             $html = XmlParser::parse( $string, true );
 
-            $dataRefEndMap = [];
+            $dataRefEndMap = new ArrayList();
 
             foreach ( $html as $node ) {
 
@@ -79,6 +79,7 @@ class DataRefReplacer {
 
         } catch ( Exception $ignore ) {
             // if something fails here, do not throw exception and return the original string instead
+//            var_dump( $ignore );
         } finally {
             return $string;
         }
@@ -117,61 +118,59 @@ class DataRefReplacer {
 
         } else {
 
+            // accept only those tags
             switch ( $node->tagName ) {
                 case 'ph':
+                    $ctype = CTypeEnum::PH_DATA_REF;
+                    break;
                 case 'sc':
+                    $ctype = CTypeEnum::SC_DATA_REF;
+                    break;
                 case 'ec':
+                    $ctype = CTypeEnum::EC_DATA_REF;
                     break;
                 default:
                     return $string;
             }
 
-            if ( !isset( $node->attributes[ 'dataRef' ] ) ) {
+            // if isset a value in the map proceed with conversion otherwise skip
+            $attributesMap = Map::instance( $node->attributes );
+            if ( !$this->map->get( $attributesMap->get( 'dataRef' ) ) ) {
                 return $string;
             }
 
-            // if isset a value in the map calculate base64 encoded value
-            // otherwise skip
-            if ( !in_array( $node->attributes[ 'dataRef' ], array_keys( $this->map ) ) ) {
-                return $string;
-            }
+            $dataRefName = $node->attributes[ 'dataRef' ];   // map identifier. Eg: source1
 
-            $dataRefName  = $node->attributes[ 'dataRef' ];   // map identifier. Eg: source1
-            $dataRefValue = $this->map[ $dataRefName ];   // map identifier. Eg: source1
-
-            // check if is null or an empty string, in this case, convert it to NULL string
-            if ( is_null( $dataRefValue ) || $dataRefValue === '' ) {
-                $this->map[ $dataRefName ] = 'NULL';
-            }
-
-
-            $newTag = [ '<ph' ];
-
-            // if there is no id copy it from dataRef
-            if ( !isset( $node->attributes[ 'id' ] ) ) {
-                $newTag[] = 'id="' . $dataRefName . '"';
-                $newTag[] = 'x-removeId="true"';
-            } else {
-                $newTag[] = 'id="' . $node->attributes[ 'id' ] . '"';
-            }
-
-            // introduce dataType for <ec>/<sc> tag handling
-            if ( $node->tagName === 'ec' ) {
-                $newTag[] = 'ctype="' . CTypeEnum::EC_DATA_REF . '"';
-            } elseif ( $node->tagName === 'sc' ) {
-                $newTag[] = 'ctype="' . CTypeEnum::SC_DATA_REF . '"';
-            } else {
-                $newTag[] = 'ctype="' . CTypeEnum::PH_DATA_REF . '"';
-            }
-
-            $newTag[] = 'equiv-text="base64:' . base64_encode( $dataRefValue ) . '"';
-            $newTag[] = 'x-orig="' . base64_encode( $node->node ) . '"';
-
-            return str_replace( $node->node, implode( " ", $newTag ) . '/>', $string );
+            return $this->replaceNewTagString(
+                    $node->node,
+                    $attributesMap->getOrDefault( 'id', $dataRefName ),
+                    $this->map->getOrDefault( $node->attributes[ 'dataRef' ], 'NULL' ),
+                    $ctype,
+                    $string,
+                    null
+            );
 
         }
 
         return $string;
+    }
+
+    /**
+     * Check if values in the map are null or an empty string, in that case, convert them to NULL string
+     *
+     * @param $map
+     *
+     * @return array
+     */
+    private function sanitizeMap( $map ) {
+
+        foreach ( $map as $name => $value ) {
+            if ( is_null( $value ) || $value === '' ) {
+                $map[ $name ] = 'NULL';
+            }
+        }
+
+        return $map;
     }
 
     /**
@@ -193,19 +192,18 @@ class DataRefReplacer {
 
         } elseif ( $node->tagName == 'pc' && $node->self_closed === true ) {
 
-            if ( isset( $node->attributes[ 'dataRefStart' ] ) && array_key_exists( $node->attributes[ 'dataRefStart' ], $this->map ) ) {
+            $attributesMap = Map::instance( $node->attributes );
 
-                $newTag = [ '<ph' ];
+            if ( $dataRefStartValue = $this->map->get( $node->attributes[ 'dataRefStart' ] ) ) {
 
-                if ( isset( $node->attributes[ 'id' ] ) ) {
-                    $newTag[] = 'id="' . $node->attributes[ 'id' ] . '_1"';
-                }
+                $string = $this->replaceNewTagString(
+                        $node->node,
+                        $attributesMap->get( 'id' ),
+                        $dataRefStartValue,
+                        CTypeEnum::PC_SELF_CLOSE_DATA_REF,
+                        $string
+                );
 
-                $newTag[] = 'ctype="' . CTypeEnum::PC_SELF_CLOSE_DATA_REF . '"';
-                $newTag[] = 'equiv-text="base64:' . base64_encode( $this->map[ $node->attributes[ 'dataRefStart' ] ] ) . '"';
-                $newTag[] = 'x-orig="' . base64_encode( $node->node ) . '"';
-
-                $string = str_replace( $node->node, implode( " ", $newTag ) . '/>', $string );
             }
 
         }
@@ -217,10 +215,10 @@ class DataRefReplacer {
     /**
      * Extract (recursively) the dataRefEnd map from single nodes
      *
-     * @param object $node
-     * @param        $dataRefEndMap
+     * @param object    $node
+     * @param ArrayList $dataRefEndMap
      */
-    private function extractDataRefMapRecursively( $node, &$dataRefEndMap ) {
+    private function extractDataRefMapRecursively( $node, ArrayList $dataRefEndMap ) {
 
         // we have to build the map for the closing pc tag, so get the children first
         if ( $node->has_children ) {
@@ -231,16 +229,12 @@ class DataRefReplacer {
 
         // EXCLUDE self closed <pc/>
         if ( $node->tagName === 'pc' && $node->self_closed === false ) {
-            if ( isset( $node->attributes[ 'dataRefEnd' ] ) ) {
-                $dataRefEnd = $node->attributes[ 'dataRefEnd' ];
-            } elseif ( isset( $node->attributes[ 'dataRefStart' ] ) ) {
-                $dataRefEnd = $node->attributes[ 'dataRefStart' ];
-            } else {
-                $dataRefEnd = null;
-            }
+
+            $attributesMap = Map::instance( $node->attributes );
+            $dataRefEnd    = $attributesMap->getOrDefault( 'dataRefEnd', $attributesMap->get( 'dataRefStart' ) );
 
             $dataRefEndMap[] = [
-                    'id'         => isset( $node->attributes[ 'id' ] ) ? $node->attributes[ 'id' ] : null,
+                    'id'         => $attributesMap->get( 'id' ),
                     'dataRefEnd' => $dataRefEnd,
             ];
 
@@ -278,20 +272,14 @@ class DataRefReplacer {
 
             if ( isset( $node->attributes[ 'dataRefStart' ] ) ) {
 
-                $startValue = $this->map[ $node->attributes[ 'dataRefStart' ] ] ?: 'NULL'; //handling null values in original data map
-
-                $newTag = [ '<ph' ];
-
-                if ( isset( $node->attributes[ 'id' ] ) ) {
-                    $newTag[] = 'id="' . $node->attributes[ 'id' ] . '_1"';
-                }
-
-                $newTag[] = 'ctype="' . CTypeEnum::PC_OPEN_DATA_REF . '"';
-                $newTag[] = 'equiv-text="base64:' . base64_encode( $startValue ) . '"';
-                $newTag[] = 'x-orig="' . base64_encode( $match ) . '"';
-
-                // conversion for opening <pc> tag
-                $string = str_replace( $match, implode( " ", $newTag ) . '/>', $string );
+                $attributesMap = Map::instance( $node->attributes );
+                $string        = $this->replaceNewTagString(
+                        $match,
+                        $attributesMap->get( 'id' ),
+                        $this->map->getOrDefault( $node->attributes[ 'dataRefStart' ], 'NULL' ),
+                        CTypeEnum::PC_OPEN_DATA_REF,
+                        $string
+                );
 
             }
         }
@@ -303,12 +291,12 @@ class DataRefReplacer {
      * Replace closing </pc> tags with correct reference in the $string
      * thanks to $dataRefEndMap
      *
-     * @param string $string
-     * @param array  $dataRefEndMap
+     * @param string    $string
+     * @param ArrayList $dataRefEndMap
      *
      * @return string
      */
-    private function replaceClosingPcTags( $string, $dataRefEndMap = [] ) {
+    private function replaceClosingPcTags( $string, ArrayList $dataRefEndMap ) {
 
         preg_match_all( '|</pc>|iu', $string, $closingPcMatches, PREG_OFFSET_CAPTURE );
         $delta = 0;
@@ -318,27 +306,21 @@ class DataRefReplacer {
             $offset = $match[ 1 ];
             $length = 5; // strlen of '</pc>'
 
-            $attr = isset( $dataRefEndMap[ $index ] ) ? $dataRefEndMap[ $index ] : null;
-
+            $attr = $dataRefEndMap->get( $index );
             if ( !empty( $attr ) && isset( $attr[ 'dataRefEnd' ] ) ) {
 
-                $endValue = !empty( $this->map[ $attr[ 'dataRefEnd' ] ] ) ? $this->map[ $attr[ 'dataRefEnd' ] ] : 'NULL';
-
-                $newTag = [ '<ph' ];
-
-                if ( isset( $attr[ 'id' ] ) ) {
-                    $newTag[] = 'id="' . $attr[ 'id' ] . '_2"';
-                }
-
-                $newTag[] = 'ctype="' . CTypeEnum::PC_CLOSE_DATA_REF . '"';
-                $newTag[] = 'equiv-text="base64:' . base64_encode( $endValue ) . '"';
-                $newTag[] = 'x-orig="' . base64_encode( '</pc>' ) . '"';
-
                 // conversion for opening <pc> tag
-                $completeTag = implode( " ", $newTag ) . '/>';
-                $realOffset  = ( $delta === 0 ) ? $offset : ( $offset + $delta );
-                $string      = substr_replace( $string, $completeTag, $realOffset, $length );
-                $delta       = $delta + strlen( $completeTag ) - $length;
+                $completeTag = $this->getNewTagString(
+                        '</pc>',
+                        $attr[ 'id' ],
+                        $this->map->getOrDefault( $attr[ 'dataRefEnd' ], 'NULL' ),
+                        CTypeEnum::PC_CLOSE_DATA_REF,
+                        '_2'
+                );
+
+                $realOffset = ( $delta === 0 ) ? $offset : ( $offset + $delta );
+                $string     = substr_replace( $string, $completeTag, $realOffset, $length );
+                $delta      = $delta + strlen( $completeTag ) - $length;
 
             }
 
@@ -358,7 +340,7 @@ class DataRefReplacer {
      */
     public function restore( $string ) {
 
-        // if map is empty return string as is
+        // if the map is empty return string as is
         if ( empty( $this->map ) ) {
             return $string;
         }
@@ -388,29 +370,46 @@ class DataRefReplacer {
 
         } else {
 
-            $cType = isset( $node->attributes[ 'ctype' ] ) ? $node->attributes[ 'ctype' ] : null;
+            $nodeAttributesMap = Map::instance( $node->attributes );
+            $cType             = $nodeAttributesMap->get( 'ctype' );
 
-            if ( $cType ) {
-
-                switch ( $node->attributes[ 'ctype' ] ) {
-                    case CTypeEnum::ORIGINAL_PC_OPEN:
-                    case CTypeEnum::ORIGINAL_PC_CLOSE:
-                    case CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF:
-                    case CTypeEnum::PH_DATA_REF:
-                    case CTypeEnum::PC_OPEN_DATA_REF:
-                    case CTypeEnum::PC_CLOSE_DATA_REF:
-                    case CTypeEnum::PC_SELF_CLOSE_DATA_REF:
-                    case CTypeEnum::SC_DATA_REF:
-                    case CTypeEnum::EC_DATA_REF:
-                        return preg_replace( '/' . preg_quote( $node->node, '/' ) . '/', base64_decode( $node->attributes[ 'x-orig' ] ), $string, 1 );
-                }
-
+            if ( CTypeEnum::isLayer2Constant( $cType ) ) {
+                return preg_replace( '/' . preg_quote( $node->node, '/' ) . '/', base64_decode( $node->attributes[ 'x-orig' ] ), $string, 1 );
             }
 
         }
 
         return $string;
 
+    }
+
+    /**
+     * @param string      $actualNodeString
+     * @param string      $id
+     * @param string      $dataRefValue
+     * @param string      $ctype
+     * @param string|null $upCountIdValue
+     *
+     * @return string
+     */
+    private function getNewTagString( $actualNodeString, $id, $dataRefValue, $ctype, $upCountIdValue = null ) {
+
+        $newTag = [ '<ph' ];
+
+        if ( isset( $id ) ) {
+            $newTag[] = 'id="' . $id . $upCountIdValue . '"';
+        }
+
+        $newTag[] = 'ctype="' . $ctype . '"';
+        $newTag[] = 'equiv-text="base64:' . base64_encode( $dataRefValue ) . '"';
+        $newTag[] = 'x-orig="' . base64_encode( $actualNodeString ) . '"';
+
+        return implode( " ", $newTag ) . '/>';
+
+    }
+
+    private function replaceNewTagString( $actualNodeString, $id, $dataRefValue, $ctype, $originalString, $upCountIdValue = '_1' ) {
+        return str_replace( $actualNodeString, $this->getNewTagString( $actualNodeString, $id, $dataRefValue, $ctype, $upCountIdValue ), $originalString );
     }
 
 }

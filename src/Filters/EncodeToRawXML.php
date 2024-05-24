@@ -3,7 +3,7 @@
 namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Utils\CatUtils;
+use Matecat\SubFiltering\Utils\Utils;
 
 class EncodeToRawXML extends AbstractHandler {
     public function transform( $segment ) {
@@ -21,7 +21,7 @@ class EncodeToRawXML extends AbstractHandler {
         $segment = preg_replace( '/&#09;|\t/', '##_ent_09_##', $segment );
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ CatUtils::class, 'htmlentitiesFromUnicode' ], $segment );
+        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ Utils::class, 'htmlentitiesFromUnicode' ], $segment );
 
         // handling &#10;
         if ( strpos( $segment, '##_ent_0D_##' ) !== false ) {

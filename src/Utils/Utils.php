@@ -2,7 +2,7 @@
 
 namespace Matecat\SubFiltering\Utils;
 
-class CatUtils {
+class Utils {
 
     /**
      * @param string $needle
@@ -11,11 +11,11 @@ class CatUtils {
      * @return bool
      */
     public static function contains( $needle, $haystack ) {
-        return mb_strpos( $haystack, $needle ) !== false;
+        return strpos( $haystack, $needle ) !== false;
     }
 
     /**
-     * Get the char code from a multi byte char
+     * Get the char code from a multibyte char
      *
      * 2/3 times faster than the old implementation
      *
@@ -28,22 +28,18 @@ class CatUtils {
         switch ( strlen( $mb_char ) ) {
             case 1:
                 return ord( $mb_char );
-                break;
             case 2:
                 return ( ord( $mb_char[ 0 ] ) - 0xC0 ) * 0x40 +
                         ord( $mb_char[ 1 ] ) - 0x80;
-                break;
             case 3:
                 return ( ord( $mb_char[ 0 ] ) - 0xE0 ) * 0x1000 +
                         ( ord( $mb_char[ 1 ] ) - 0x80 ) * 0x40 +
                         ord( $mb_char[ 2 ] ) - 0x80;
-                break;
             case 4:
                 return ( ord( $mb_char[ 0 ] ) - 0xF0 ) * 0x40000 +
                         ( ord( $mb_char[ 1 ] ) - 0x80 ) * 0x1000 +
                         ( ord( $mb_char[ 2 ] ) - 0x80 ) * 0x40 +
                         ord( $mb_char[ 3 ] ) - 0x80;
-                break;
         }
 
         return 20; //as default return a space ( should never happen )

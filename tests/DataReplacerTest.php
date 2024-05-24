@@ -43,7 +43,7 @@ class DataReplacerTest extends TestCase {
         $dataReplacer = new DataRefReplacer( $map );
 
         $string   = '<ph dataRef="d1" id="d1"/> ciao';
-        $expected = '<ph id="d1" ctype="' . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:" x-orig="PHBoIGRhdGFSZWY9ImQxIiBpZD0iZDEiLz4="/> ciao';
+        $expected = '<ph id="d1" ctype="' . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:TlVMTA==" x-orig="PHBoIGRhdGFSZWY9ImQxIiBpZD0iZDEiLz4="/> ciao';
 
         $this->assertEquals( $expected, $dataReplacer->replace( $string ) );
         $this->assertEquals( $string, $dataReplacer->restore( $expected ) );
@@ -79,7 +79,7 @@ class DataReplacerTest extends TestCase {
 
         $string   = '<ph dataRef="d1" id="d1"/><ec dataRef="d2" startRef="5" subType="xlf:b" type="fmt"/>';
         $expected = '<ph id="d1" ctype="'
-                . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O3gvJmd0Ow==" x-orig="PHBoIGRhdGFSZWY9ImQxIiBpZD0iZDEiLz4="/><ph id="d2" x-removeId="true" ctype="'
+                . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O3gvJmd0Ow==" x-orig="PHBoIGRhdGFSZWY9ImQxIiBpZD0iZDEiLz4="/><ph id="d2" ctype="'
                 . CTypeEnum::EC_DATA_REF . '" equiv-text="base64:Jmx0O2JyXC8mZ3Q7" x-orig="PGVjIGRhdGFSZWY9ImQyIiBzdGFydFJlZj0iNSIgc3ViVHlwZT0ieGxmOmIiIHR5cGU9ImZtdCIvPg=="/>';
 
         $dataReplacer = new DataRefReplacer( $map );
@@ -777,12 +777,12 @@ class DataReplacerTest extends TestCase {
         $string   = '<sc dataRef="d1" id="1" subType="xlf:b" type="fmt"/>Elysian Collection<ph dataRef="d3" id="2" subType="xlf:lb" type="fmt"/><ec dataRef="d2" startRef="1" subType="xlf:b" type="fmt"/>Bahnhofstrasse 15, Postfach 341, Zermatt CH- 3920, Switzerland<ph dataRef="d3" id="3" subType="xlf:lb" type="fmt"/>Tel: +44 203 468 2235  Email: <pc dataRefEnd="d5" dataRefStart="d4" id="4" type="link">info@elysiancollection.com</pc><sc dataRef="d1" id="5" subType="xlf:b" type="fmt"/><ph dataRef="d3" id="6" subType="xlf:lb" type="fmt"/><ec dataRef="d2" startRef="5" subType="xlf:b" type="fmt"/>';
         $expected = '<ph id="1" ctype="'
                 . CTypeEnum::SC_DATA_REF . '" equiv-text="base64:Jmx0O3N0cm9uZyZndDs=" x-orig="PHNjIGRhdGFSZWY9ImQxIiBpZD0iMSIgc3ViVHlwZT0ieGxmOmIiIHR5cGU9ImZtdCIvPg=="/>Elysian Collection<ph id="2" ctype="'
-                . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O2JyXC8mZ3Q7" x-orig="PHBoIGRhdGFSZWY9ImQzIiBpZD0iMiIgc3ViVHlwZT0ieGxmOmxiIiB0eXBlPSJmbXQiLz4="/><ph id="d2" x-removeId="true" ctype="'
+                . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O2JyXC8mZ3Q7" x-orig="PHBoIGRhdGFSZWY9ImQzIiBpZD0iMiIgc3ViVHlwZT0ieGxmOmxiIiB0eXBlPSJmbXQiLz4="/><ph id="d2" ctype="'
                 . CTypeEnum::EC_DATA_REF . '" equiv-text="base64:Jmx0O1wvc3Ryb25nJmd0Ow==" x-orig="PGVjIGRhdGFSZWY9ImQyIiBzdGFydFJlZj0iMSIgc3ViVHlwZT0ieGxmOmIiIHR5cGU9ImZtdCIvPg=="/>Bahnhofstrasse 15, Postfach 341, Zermatt CH- 3920, Switzerland<ph id="3" ctype="'
                 . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O2JyXC8mZ3Q7" x-orig="PHBoIGRhdGFSZWY9ImQzIiBpZD0iMyIgc3ViVHlwZT0ieGxmOmxiIiB0eXBlPSJmbXQiLz4="/>Tel: +44 203 468 2235  Email: <ph id="4_1" ctype="'
                 . CTypeEnum::PC_OPEN_DATA_REF . '" equiv-text="base64:Jmx0O2EgaHJlZj0ibWFpbHRvOmluZm9AZWx5c2lhbmNvbGxlY3Rpb24uY29tIiZndDs=" x-orig="PHBjIGRhdGFSZWZFbmQ9ImQ1IiBkYXRhUmVmU3RhcnQ9ImQ0IiBpZD0iNCIgdHlwZT0ibGluayI+"/>info@elysiancollection.com<ph id="4_2" ctype="'
                 . CTypeEnum::PC_CLOSE_DATA_REF . '" equiv-text="base64:Jmx0O1wvYSZndDs=" x-orig="PC9wYz4="/><ph id="5" ctype="x-sc_data_ref" equiv-text="base64:Jmx0O3N0cm9uZyZndDs=" x-orig="PHNjIGRhdGFSZWY9ImQxIiBpZD0iNSIgc3ViVHlwZT0ieGxmOmIiIHR5cGU9ImZtdCIvPg=="/><ph id="6" ctype="'
-                . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O2JyXC8mZ3Q7" x-orig="PHBoIGRhdGFSZWY9ImQzIiBpZD0iNiIgc3ViVHlwZT0ieGxmOmxiIiB0eXBlPSJmbXQiLz4="/><ph id="d2" x-removeId="true" ctype="'
+                . CTypeEnum::PH_DATA_REF . '" equiv-text="base64:Jmx0O2JyXC8mZ3Q7" x-orig="PHBoIGRhdGFSZWY9ImQzIiBpZD0iNiIgc3ViVHlwZT0ieGxmOmxiIiB0eXBlPSJmbXQiLz4="/><ph id="d2" ctype="'
                 . CTypeEnum::EC_DATA_REF . '" equiv-text="base64:Jmx0O1wvc3Ryb25nJmd0Ow==" x-orig="PGVjIGRhdGFSZWY9ImQyIiBzdGFydFJlZj0iNSIgc3ViVHlwZT0ieGxmOmIiIHR5cGU9ImZtdCIvPg=="/>';
 
         $dataReplacer = new DataRefReplacer( $map );

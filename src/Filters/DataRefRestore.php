@@ -89,8 +89,8 @@ class DataRefRestore extends AbstractHandler {
      * @return string
      */
     private function restoreXliffPcTagsFromMatecatPhTags( $segment ) {
-        preg_match_all( '|<ph.+? ctype="' . CTypeEnum::ORIGINAL_PC_OPEN . '" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
-        preg_match_all( '|<ph.+? ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE . '" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
+        preg_match_all( '|<ph.+? ctype="' . CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF . '" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
+        preg_match_all( '|<ph.+? ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF . '" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
 
         if ( empty( $matches[ 0 ] ) ) {
             return $segment;
