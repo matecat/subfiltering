@@ -2,13 +2,10 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-use DOMException;
 use Exception;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
-use Matecat\XmlParser\Exception\InvalidXmlException;
-use Matecat\XmlParser\Exception\XmlParsingException;
 use Matecat\XmlParser\XmlParser;
 
 class DataRefReplace extends AbstractHandler {
@@ -56,13 +53,13 @@ class DataRefReplace extends AbstractHandler {
      *
      * We can control who sees content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.
      *
-     * is transformed to:
+     * Is transformed to:
      *
      * We can control who sees content when with &lt;ph id="mtc_ph_u_1" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/&gt;Visibility Constraints.
      *
      * @param $segment
      *
-     * @return string|string[]
+     * @return string
      */
     private function replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
 
@@ -109,10 +106,6 @@ class DataRefReplace extends AbstractHandler {
             return false;
         }
 
-        if ( $parsed->count() == 0 ) {
-            return false;
-        }
-
         // check for matecat ctype
         $cType = isset( $parsed[ 0 ]->attributes[ 'ctype' ] ) ? $parsed[ 0 ]->attributes[ 'ctype' ] : null;
         if ( CTypeEnum::isMatecatCType( $cType ) ) {
@@ -146,7 +139,7 @@ class DataRefReplace extends AbstractHandler {
      *
      * @param $segment
      *
-     * @return string|string[]
+     * @return string
      */
     private function replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
 

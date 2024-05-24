@@ -74,10 +74,11 @@ class DataRefReplacer {
             }
 
             // 4. replace pc tags
-            $string = $this->replaceOpeningPcTags( null, $string );
+            $string = $this->replaceOpeningPcTags( $string );
             $string = $this->replaceClosingPcTags( $string, $dataRefEndMap );
 
         } catch ( Exception $ignore ) {
+            // if something fails here, do not throw exception and return the original string instead
         } finally {
             return $string;
         }
@@ -177,7 +178,7 @@ class DataRefReplacer {
      * @param $node
      * @param $string
      *
-     * @return mixed
+     * @return string
      * @throws DOMException
      * @throws InvalidXmlException
      * @throws XmlParsingException
@@ -257,7 +258,7 @@ class DataRefReplacer {
      * @throws InvalidXmlException
      * @throws XmlParsingException
      */
-    private function replaceOpeningPcTags( $node, $string ) {
+    private function replaceOpeningPcTags( $string ) {
 
         preg_match_all( '|<pc ([^>/]+?)>|iu', $string, $openingPcMatches );
 
@@ -362,9 +363,7 @@ class DataRefReplacer {
             return $string;
         }
 
-        // replace eventual empty equiv-text=""
-//        $string = str_replace( ' equiv-text=""', '', $string );
-        $html   = XmlParser::parse( $string, true );
+        $html = XmlParser::parse( $string, true );
 
         foreach ( $html as $node ) {
             $string = $this->recursiveRestoreOriginalTags( $node, $string );
