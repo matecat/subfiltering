@@ -10,13 +10,21 @@
 namespace Matecat\SubFiltering\Utils;
 
 use ArrayObject;
+use DomainException;
 
+/**
+ * A Java like Interface helper for key/value php arrays, with safe access to the elements (no warning for undefined index)
+ *
+ */
 class ArrayList extends ArrayObject {
 
     /**
      * @param array $list
      */
     public function __construct( array $list = [] ) {
+        if ( !empty( $list ) && !Utils::array_is_list( $list ) ) {
+            throw new DomainException( "Invalid list provided" );
+        }
         parent::__construct( $list );
     }
 
@@ -48,5 +56,16 @@ class ArrayList extends ArrayObject {
         return $this->offsetGet( $key );
     }
 
+    /**
+     * Appends the specified element to the end of this list.
+     *
+     * @param $value
+     *
+     * @return true
+     */
+    public function add( $value ) {
+        parent::append( $value );
+        return true;
+    }
 
 }

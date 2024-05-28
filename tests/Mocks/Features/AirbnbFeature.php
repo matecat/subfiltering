@@ -3,7 +3,6 @@
 namespace Matecat\SubFiltering\Tests\Mocks\Features;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\Variables;
 

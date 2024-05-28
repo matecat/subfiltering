@@ -28,14 +28,22 @@ class RubyOnRailsI18n extends AbstractHandler {
      * @return string
      */
     public function transform( $segment ) {
-        preg_match_all( '/%{[^<>\s%]+?}/', $segment, $html, PREG_SET_ORDER );
-        foreach ( $html as $pos => $percentage_variable ) {
+
+        /*
+         * Examples:
+         * - %{# }
+         * - %{\n}$spaces=2%{\n}
+         * - %{vars}
+         *
+         */
+        preg_match_all( '/%{(?!<ph )[^{}]*?}/', $segment, $html, PREG_SET_ORDER );
+        foreach ( $html as $pos => $ruby_variable ) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
-            if ( !strstr( $percentage_variable[ 0 ], ConstantEnum::GTPLACEHOLDER ) ) {
+            if ( !strstr( $ruby_variable[ 0 ], ConstantEnum::GTPLACEHOLDER ) ) {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
-                        '/' . preg_quote( $percentage_variable[ 0 ], '/' ) . '/',
-                        '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:' . base64_encode( $percentage_variable[ 0 ] ) . '"/>',
+                        '/' . preg_quote( $ruby_variable[ 0 ], '/' ) . '/',
+                        '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:' . base64_encode( $ruby_variable[ 0 ] ) . '"/>',
                         $segment,
                         1
                 );

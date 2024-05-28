@@ -142,6 +142,7 @@ class Pipeline {
         foreach ( $this->handlers as $pos => $handler ) {
             if ( $handler->getName() == $handlerToDelete->getName() ) {
                 unset( $this->handlers[ $pos ] );
+                $this->handlers = array_values( $this->handlers );
                 break;
             }
         }

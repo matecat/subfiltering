@@ -82,6 +82,9 @@ class HtmlParser {
 
             return $reflector->invoke( $this->callbacksHandler, $arguments[ 0 ] );
         }
+
+        return null;
+
     }
 
     public function transform( $segment ) {
@@ -127,9 +130,6 @@ class HtmlParser {
                         // is not possible to have angle brackets inside a tag, this case can not happen
                         // this code would ignore '>' if inside a quote, useless
                         // for more info see https://www.w3.org/TR/xml/#charsets
-//                        if ( $in_quote_char ) {
-//                            break;
-//                        }
 
                         // if we found a second less than symbol the first one IS NOT a tag,
                         // treat the html_buffer as plain text and attach to the output
@@ -141,9 +141,6 @@ class HtmlParser {
                         // is not possible to have angle brackets inside a tag, this case can not happen
                         // this code would ignore '>' if inside a quote, useless
                         // for more info see https://www.w3.org/TR/xml/#charsets
-//                        if ( $in_quote_char ) {
-//                            break;
-//                        }
 
                         if ( in_array( substr( $html_buffer, 0, 8 ), [ '<script ', '<style', '<script', '<style ' ] ) ) {
                             $html_buffer .= $char;
@@ -247,49 +244,39 @@ class HtmlParser {
                         break;
                 }
             } elseif ( $state == static::STATE_COMMENT ) {
-                switch ( $char ) {
-                    case '>':
-                        $html_buffer .= $char;
 
-                        if ( substr( $html_buffer, -3 ) == '-->' ) {
-                            // close the comment
-                            $state       = static::STATE_PLAINTEXT;
-                            $output      .= $this->_finalizeScriptTag( $html_buffer );
-                            $html_buffer = '';
+                $html_buffer .= $char;
 
-                            if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                                $this->_setSegmentContainsHtml();
-                            }
+                if ( $char == '>' ) {
+                    if ( substr( $html_buffer, -3 ) == '-->' ) {
+                        // close the comment
+                        $state       = static::STATE_PLAINTEXT;
+                        $output      .= $this->_finalizeScriptTag( $html_buffer );
+                        $html_buffer = '';
+
+                        if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
+                            $this->_setSegmentContainsHtml();
                         }
-
-                        break;
-
-                    default:
-                        $html_buffer .= $char;
-                        break;
+                    }
                 }
+
             } elseif ( $state == static::STATE_JS_CSS ) {
-                switch ( $char ) {
-                    case '>':
-                        $html_buffer .= $char;
 
-                        if ( in_array( substr( $html_buffer, -6 ), [ 'cript>', 'style>' ] ) ) {
-                            // close the comment
-                            $state       = static::STATE_PLAINTEXT;
-                            $output      .= $this->_finalizeScriptTag( $html_buffer );
-                            $html_buffer = '';
+                $html_buffer .= $char;
 
-                            if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                                $this->_setSegmentContainsHtml();
-                            }
+                if ( $char == '>' ) {
+                    if ( in_array( substr( $html_buffer, -6 ), [ 'cript>', 'style>' ] ) ) {
+                        // close the comment
+                        $state       = static::STATE_PLAINTEXT;
+                        $output      .= $this->_finalizeScriptTag( $html_buffer );
+                        $html_buffer = '';
+
+                        if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
+                            $this->_setSegmentContainsHtml();
                         }
-
-                        break;
-
-                    default:
-                        $html_buffer .= $char;
-                        break;
+                    }
                 }
+
             }
         }
 

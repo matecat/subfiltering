@@ -5,6 +5,25 @@ namespace Matecat\SubFiltering\Utils;
 class Utils {
 
     /**
+     * @param $array
+     *
+     * @return bool
+     */
+    public static function array_is_list( $array ) {
+
+        if ( !function_exists( 'array_is_list' ) ) { // since php 8.1
+
+            if ( $array === [] ) {
+                return true;
+            }
+
+            return array_keys( $array ) === range( 0, count( $array ) - 1 );
+        }
+
+        return array_is_list( $array );
+    }
+
+    /**
      * @param string $needle
      * @param string $haystack
      *

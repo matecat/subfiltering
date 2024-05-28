@@ -11,14 +11,16 @@ namespace Matecat\SubFiltering\Utils;
 
 use ArrayAccess;
 use ArrayIterator;
+use Countable;
+use DomainException;
 use Generator;
 use IteratorAggregate;
 
 /**
- * Java like interface helper for key/value php arrays
+ * A Java like Interface helper for key/value php arrays, with safe access to the elements (no warning for undefined index)
  *
  */
-class Map implements IteratorAggregate, ArrayAccess {
+class Map implements ArrayAccess, IteratorAggregate, Countable {
 
     /**
      * @var array
@@ -26,8 +28,19 @@ class Map implements IteratorAggregate, ArrayAccess {
     private $map;
 
     public function __construct( array $map ) {
+        if ( !empty( $map ) && Utils::array_is_list( $map ) ) {
+            throw new DomainException( "Invalid map provided" );
+        }
         $this->map = $map;
     }
+
+    /**
+     * @return int
+     */
+    public function count() {
+        return sizeof( $this->map );
+    }
+
 
     /**
      * @return ArrayIterator
@@ -73,16 +86,13 @@ class Map implements IteratorAggregate, ArrayAccess {
         $this->remove( $offset );
     }
 
-
     /**
-     * @return Generator
+     * Static helper for constructor
+     *
+     * @param array $map
+     *
+     * @return static
      */
-    public function entrySet() {
-        foreach ( $this->map as $k => $v ) {
-            yield [ $k, $v ];
-        }
-    }
-
     public static function instance( array $map = [] ) {
         return new static( $map );
     }
@@ -124,8 +134,8 @@ class Map implements IteratorAggregate, ArrayAccess {
         return new static( $this->map );
     }
 
-    public function containsKey( $key ) {
-        return array_key_exists( $key, $this->map );
+    public function containsKey( $offset ) {
+        return array_key_exists( $offset, $this->map );
     }
 
     /**
@@ -134,10 +144,10 @@ class Map implements IteratorAggregate, ArrayAccess {
      *
      * @param $value
      *
-     * @return false|string
+     * @return boolean
      */
     public function containsValue( $value ) {
-        return array_search( $value, $this->map, true );
+        return !empty( array_search( $value, $this->map, true ) );
     }
 
     /**
@@ -148,9 +158,9 @@ class Map implements IteratorAggregate, ArrayAccess {
      *
      * @return Generator
      */
-    public function foreEach( callable $callable ) {
+    public function for_each( callable $callable ) {
         foreach ( $this->map as $k => $v ) {
-            yield $callable( $k, $v );
+            $callable( $k, $v );
         }
     }
 
@@ -164,23 +174,23 @@ class Map implements IteratorAggregate, ArrayAccess {
     }
 
     /**
-     * @return Map
+     * @return string[]
      */
     public function keySet() {
-        return static::instance( array_keys( $this->map ) );
+        return array_keys( $this->map );
     }
 
     /**
      * Associates the specified value with the specified key in this map. If the map previously contained a mapping for the key, the old value is replaced.
      *
-     * @param $key
+     * @param $offset
      * @param $value
      *
      * @return mixed|null the previous value associated with `key`, or null if there was no mapping for `key`.
      */
-    public function put( $key, $value ) {
-        $previousValue     = $this->get( $key );
-        $this->map[ $key ] = $value;
+    public function put( $offset, $value ) {
+        $previousValue        = $this->get( $offset );
+        $this->map[ $offset ] = $value;
 
         return $previousValue;
     }
@@ -199,16 +209,16 @@ class Map implements IteratorAggregate, ArrayAccess {
     /**
      * If the specified key is not already associated with a value (or is mapped to null) associates it with the given value and returns null, else returns the current value.
      *
-     * @param $key
+     * @param $offset
      * @param $value
      *
      * @return mixed|null the previous value associated with the specified key, or null if there was no mapping for the key.
      *               A null return can also indicate that the map previously associated null with the `key`
      */
-    public function putIfAbsent( $key, $value ) {
-        $previousValue = $this->get( $key );
+    public function putIfAbsent( $offset, $value ) {
+        $previousValue = $this->get( $offset );
         if ( $previousValue === null ) {
-            $this->map[ $key ] = $value;
+            $this->map[ $offset ] = $value;
         }
 
         return $previousValue;
@@ -217,14 +227,14 @@ class Map implements IteratorAggregate, ArrayAccess {
     /**
      * Removes the mapping for the specified key from this map if present.
      *
-     * @param $key
+     * @param $offset
      *
      * @return bool true if the value was removed
      */
-    public function remove( $key ) {
-        $exists = array_key_exists( $key, $this->map );
+    public function remove( $offset ) {
+        $exists = array_key_exists( $offset, $this->map );
         if ( $exists ) {
-            unset( $this->map[ $key ] );
+            unset( $this->map[ $offset ] );
         }
 
         return $exists;
@@ -236,11 +246,11 @@ class Map implements IteratorAggregate, ArrayAccess {
      * @return mixed|null the previous value associated with the specified key, or null if there was no mapping for the key.
      *                      A null return can also indicate that the map previously associated null with the key.
      */
-    public function replace( $key, $value ) {
-        $exists        = array_key_exists( $key, $this->map );
-        $previousValue = $this->get( $key );
+    public function replace( $offset, $value ) {
+        $exists        = array_key_exists( $offset, $this->map );
+        $previousValue = $this->get( $offset );
         if ( $exists ) {
-            $this->map[ $key ] = $value;
+            $this->map[ $offset ] = $value;
         }
 
         return $previousValue;
@@ -249,17 +259,17 @@ class Map implements IteratorAggregate, ArrayAccess {
     /**
      * Replaces the entry for the specified key only if currently mapped to the specified value.
      *
-     * @param $key
+     * @param $offset
      * @param $newValue
      * @param $oldValue
      *
      * @return boolean true if the value was replaced
      */
-    public function replaceIfEquals( $key, $newValue, $oldValue ) {
-        $exists        = array_key_exists( $key, $this->map );
-        $previousValue = $this->get( $key );
+    public function replaceIfEquals( $offset, $newValue, $oldValue ) {
+        $exists        = array_key_exists( $offset, $this->map );
+        $previousValue = $this->get( $offset );
         if ( $exists && $previousValue === $oldValue ) {
-            $this->map[ $key ] = $newValue;
+            $this->map[ $offset ] = $newValue;
 
             return true;
         }
@@ -277,8 +287,8 @@ class Map implements IteratorAggregate, ArrayAccess {
      * @return void
      */
     public function replaceAll( callable $callable ) {
-        foreach ( $this->map as $key => $value ) {
-            $this->map[ $key ] = $callable( $key, $value );
+        foreach ( $this->map as $offset => $value ) {
+            $this->map[ $offset ] = $callable( $offset, $value );
         }
     }
 
@@ -290,10 +300,10 @@ class Map implements IteratorAggregate, ArrayAccess {
     }
 
     /**
-     * @return Map
+     * @return array
      */
     public function values() {
-        return new static( array_values( $this->map ) );
+        return array_values( $this->map );
     }
 
     /**
@@ -307,19 +317,21 @@ class Map implements IteratorAggregate, ArrayAccess {
      * If the function returns null, the mapping is removed (or remains absent if initially absent).
      * If the function itself throws an (unchecked) exception, the exception is rethrown, and the current mapping is left unchanged.
      *
-     * @param          $key
+     * @param          $offset
      * @param callable $callable
      *
      * @return mixed|null the new value associated with the specified key, or null if none
      */
-    public function compute( $key, callable $callable ) {
-        $exists = array_key_exists( $key, $this->map );
+    public function compute( $offset, callable $callable ) {
+        $exists = array_key_exists( $offset, $this->map );
         if ( $exists ) {
-            $res = $callable( $key, $this->get( $key ) );
+            $res = $callable( $offset, $this->get( $offset ) );
             if ( $res == null ) {
-                unset( $this->map[ $key ] );
+                unset( $this->map[ $offset ] );
             } else {
-                $this->map[ $key ] = $callable( $key, $this->get( $key ) );
+                $this->map[ $offset ] = $callable( $offset, $this->get( $offset ) );
+
+                return $this->map[ $offset ];
             }
         }
 
@@ -335,19 +347,19 @@ class Map implements IteratorAggregate, ArrayAccess {
      *
      * The most common usage is to construct a new object serving as an initial mapped value or memoized result, as in:
      *
-     * @param          $key
+     * @param          $offset
      * @param callable $callable
      *
      * @return mixed|null the current (existing or computed) value associated with the specified key, or null if the computed value is null
      */
-    public function computeIfAbsent( $key, callable $callable ) {
-        $exists        = array_key_exists( $key, $this->map );
-        $previousValue = $this->get( $key );
+    public function computeIfAbsent( $offset, callable $callable ) {
+        $exists        = array_key_exists( $offset, $this->map );
+        $previousValue = $this->get( $offset );
         $res           = null;
-        if ( !$exists || $previousValue !== null ) {
-            $res = $callable( $key, $this->get( $key ) );
+        if ( !$exists || $previousValue === null ) {
+            $res = $callable( $offset, $this->get( $offset ) );
             if ( $res != null ) {
-                $this->map[ $key ] = $res;
+                $this->map[ $offset ] = $res;
             }
 
         }
@@ -362,21 +374,21 @@ class Map implements IteratorAggregate, ArrayAccess {
      * If the function returns null, the mapping is removed.
      * If the function itself throws an (unchecked) exception, the exception is rethrown, and the current mapping is left unchanged.
      *
-     * @param          $key
+     * @param          $offset
      * @param callable $callable
      *
      * @return mixed|null the new value associated with the specified key, or null if none
      */
-    public function computeIfPresent( $key, callable $callable ) {
-        $exists        = array_key_exists( $key, $this->map );
-        $previousValue = $this->get( $key );
+    public function computeIfPresent( $offset, callable $callable ) {
+        $exists        = array_key_exists( $offset, $this->map );
+        $previousValue = $this->get( $offset );
         $res           = null;
         if ( $exists && $previousValue !== null ) {
-            $res = $callable( $key, $this->map[ $key ] );
+            $res = $callable( $offset, $this->map[ $offset ] );
             if ( $res == null ) {
-                unset( $this->map[ $key ] );
+                unset( $this->map[ $offset ] );
             } else {
-                $this->map[ $key ] = $res;
+                $this->map[ $offset ] = $res;
             }
         }
 

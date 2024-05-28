@@ -824,7 +824,7 @@ class MateCatSubFilteringTest extends TestCase {
         $Filter = MateCatFilter::getInstance( new FeatureSet( [ new AirbnbFeature() ] ), 'en-EN', 'et-ET', [] );
 
         $db_segment      = '%{smart_count} discount||||%{smart_count} discounts';
-        $segment_from_UI = '<ph id="mtc_1" ctype="x-percent-variable" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discount<ph id="mtc_2" ctype="x-smart-count" equiv-text="base64:fHx8fA=="/><ph id="mtc_3" ctype="x-percent-variable" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discounts';
+        $segment_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discount<ph id="mtc_2" ctype="x-smart-count" equiv-text="base64:fHx8fA=="/><ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discounts';
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
 
@@ -1297,7 +1297,7 @@ class MateCatSubFilteringTest extends TestCase {
      */
     public function layer2SShouldWorkWithMalformedPhTags() {
 
-        $filter  = $this->getFilterInstance(['xxx']);
+        $filter  = $this->getFilterInstance( [ 'yyy' => 'xxx' ] );
         $segment = 'not <ph id="1" dataRef="pippo"> valid';
 
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
@@ -1314,16 +1314,59 @@ class MateCatSubFilteringTest extends TestCase {
                 "source3" => '&amp;lt;br&amp;gt;',
         ];
 
-        $filter  = $this->getFilterInstance($map);
+        $filter = $this->getFilterInstance( $map );
 
-        $string       = 'Hola <ph id="source1" dataRef="source1" equiv-text=""/>';
-        $expected     = 'Hola <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIiBlcXVpdi10ZXh0PSIiLz4=" equiv-text="base64:TlVMTA=="/>';
+        $string   = 'Hola <ph id="source1" dataRef="source1" equiv-text=""/>';
+        $expected = 'Hola <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIiBlcXVpdi10ZXh0PSIiLz4=" equiv-text="base64:TlVMTA=="/>';
 
-        $layer2 = $filter->fromLayer0ToLayer2( $string );
+        $layer2        = $filter->fromLayer0ToLayer2( $string );
         $convertedBack = $filter->fromLayer2ToLayer0( $layer2 );
 
         $this->assertEquals( $expected, $layer2 );
         $this->assertEquals( $string, $convertedBack );
+
+    }
+
+    /**
+     * @test
+     */
+    public function should_work_with_real_pc_case() {
+
+        $segment    = '<pc id="1b" type="fmt" subType="m:b">Ready to get started?</pc>';
+        $segment_UI = '<ph id="mtc_1" ctype="x-original_pc_open" equiv-text="base64:PHBjIGlkPSIxYiIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOmIiPg=="/>Ready to get started?<ph id="mtc_2" ctype="x-original_pc_close" equiv-text="base64:PC9wYz4="/>';
+
+        $filter = $this->getFilterInstance( [] );
+
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segment_UI, $segmentL2 );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
+
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function testRubyOnRails() {
+        $segment = 'For the %{first_ruby_variable} site %{{second_bnb_variable}}, is ok.';
+        $forUI   = 'For the <ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtmaXJzdF9ydWJ5X3ZhcmlhYmxlfQ=="/> site <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:JXt7c2Vjb25kX2JuYl92YXJpYWJsZX19"/>, is ok.';
+
+        $filter = $this->getFilterInstance();
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $forUI, $segmentL2 );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
 
     }
 
