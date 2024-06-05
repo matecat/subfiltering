@@ -371,10 +371,15 @@ class DataRefReplacer {
         } else {
 
             $nodeAttributesMap = Map::instance( $node->attributes );
-            $cType             = $nodeAttributesMap->get( 'ctype' );
+
+            if ( !$nodeAttributesMap->get( 'x-orig' ) ) {
+                return $string;
+            }
+
+            $cType = $nodeAttributesMap->get( 'ctype' );
 
             if ( CTypeEnum::isLayer2Constant( $cType ) ) {
-                return preg_replace( '/' . preg_quote( $node->node, '/' ) . '/', base64_decode( $node->attributes[ 'x-orig' ] ), $string, 1 );
+                return preg_replace( '/' . preg_quote( $node->node, '/' ) . '/', base64_decode( $nodeAttributesMap->get( 'x-orig' ) ), $string, 1 );
             }
 
         }

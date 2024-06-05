@@ -1357,7 +1357,7 @@ class MateCatSubFilteringTest extends TestCase {
         $segment = 'For the %{first_ruby_variable} site %{{second_bnb_variable}}, is ok.';
         $forUI   = 'For the <ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtmaXJzdF9ydWJ5X3ZhcmlhYmxlfQ=="/> site <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:JXt7c2Vjb25kX2JuYl92YXJpYWJsZX19"/>, is ok.';
 
-        $filter = $this->getFilterInstance();
+        $filter    = $this->getFilterInstance();
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
 
@@ -1366,6 +1366,37 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
         $this->assertEquals( $forUI, $segmentL2 );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
+
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function nested_pc_tags_real_case() {
+
+        $refMap = [
+                'source1' => '&lt;w:hyperlink r:id="rId25"&gt;&lt;/w:hyperlink&gt;',
+                'source2' => '&lt;w:r&gt;&lt;w:rPr&gt;&lt;w:color w:val="1A1A1A"&gt;&lt;/w:color&gt;&lt;/w:rPr&gt;&lt;w:t&gt;&lt;/w:t&gt;&lt;/w:r&gt;',
+        ];
+
+        $filter = $this->getFilterInstance( $refMap );
+
+        $segment    = '<pc id="source1" dataRefStart="source1"><pc id="1u" type="fmt" subType="m:u">Crea una carpeta separada en tu Cuenta de ahorros Square para impuestos</pc></pc><pc id="source2" dataRefStart="source2"> y automáticamente contribuye un porcentaje de cada venta de Square.</pc>';
+        $sentFromUI = '<ph id="source1_1" ctype="x-pc_open_data_ref" equiv-text="base64:Jmx0O3c6aHlwZXJsaW5rIHI6aWQ9InJJZDI1IiZndDsmbHQ7L3c6aHlwZXJsaW5rJmd0Ow==" x-orig="PHBjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiPg=="/><ph id="mtc_1" ctype="x-original_pc_open" equiv-text="base64:PHBjIGlkPSIxdSIgdHlwZT0iZm10IiBzdWJUeXBlPSJtOnUiPg=="/>Crea una carpeta separada en tu Cuenta de ahorros Square para impuestos<ph id="mtc_2" ctype="x-original_pc_close" equiv-text="base64:PC9wYz4="/><ph id="source1_2" ctype="x-pc_close_data_ref" equiv-text="base64:Jmx0O3c6aHlwZXJsaW5rIHI6aWQ9InJJZDI1IiZndDsmbHQ7L3c6aHlwZXJsaW5rJmd0Ow==" x-orig="PC9wYz4="/><ph id="source2_1" ctype="x-pc_open_data_ref" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6Y29sb3Igdzp2YWw9IjFBMUExQSImZ3Q7Jmx0Oy93OmNvbG9yJmd0OyZsdDsvdzpyUHImZ3Q7Jmx0O3c6dCZndDsmbHQ7L3c6dCZndDsmbHQ7L3c6ciZndDs=" x-orig="PHBjIGlkPSJzb3VyY2UyIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTIiPg=="/> y automáticamente contribuye un porcentaje de cada venta de Square.<ph id="source2_2" ctype="x-pc_close_data_ref" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6Y29sb3Igdzp2YWw9IjFBMUExQSImZ3Q7Jmx0Oy93OmNvbG9yJmd0OyZsdDsvdzpyUHImZ3Q7Jmx0O3c6dCZndDsmbHQ7L3c6dCZndDsmbHQ7L3c6ciZndDs=" x-orig="PC9wYz4="/>';
+
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        // layer 2
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $sentFromUI, $segmentL2 );
+
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $sentFromUI ) );
+
         $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
 
     }
