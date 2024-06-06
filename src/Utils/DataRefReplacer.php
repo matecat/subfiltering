@@ -69,7 +69,7 @@ class DataRefReplacer {
                 // 3. Build the DataRefEndMap needed by replaceClosingPcTags function
                 // (needed for correct handling of </pc> closing tags)
                 // make this inline with one foreach cycle
-                $this->extractDataRefMapRecursively( $node, $dataRefEndMap );
+                $this->extractDataRefMapRecursively( $node, $string, $dataRefEndMap );
 
             }
 
@@ -213,22 +213,33 @@ class DataRefReplacer {
     }
 
     /**
-     * Extract (recursively) the dataRefEnd map from single nodes
+     * Extract (recursively) the dataRefEnd map from a single node
      *
      * @param object    $node
+     * @param string    $completeString
      * @param ArrayList $dataRefEndMap
      */
-    private function extractDataRefMapRecursively( $node, ArrayList $dataRefEndMap ) {
+    private function extractDataRefMapRecursively( $node, $completeString, ArrayList $dataRefEndMap ) {
 
         // we have to build the map for the closing pc tag, so get the children first
         if ( $node->has_children ) {
             foreach ( $node->inner_html as $nestedNode ) {
-                $this->extractDataRefMapRecursively( $nestedNode, $dataRefEndMap );
+                $this->extractDataRefMapRecursively( $nestedNode, $completeString, $dataRefEndMap );
             }
         }
 
-        // EXCLUDE self closed <pc/>
-        if ( $node->tagName === 'pc' && $node->self_closed === false ) {
+        // EXCLUDE self-closing <pc id='xx'/> by checking for `$node->self_closed === false`
+        // BUT here we have an ambiguity on self-closing pc tags when the inner text node is empty, so we must use a strpos to check for those false self-closing matches.
+        //
+        // Remove '/>' if present, add a closing tag '></pc>' and guess the match on the original string, if it succeeds, the tag was an empty `<pc id='yy'></pc>` pair
+        // EX:
+        // <pc id="source5" dataRefStart="source5"/>
+        //   becomes
+        // <pc id="source5" dataRefStart="source5"></pc>
+        //
+        $isATagPairWithEmptyTextNode = strpos( $completeString, substr( $node->node, 0, -2 ) . '></pc>' ) !== false;
+
+        if ( $node->tagName === 'pc' && ( $node->self_closed === false || $isATagPairWithEmptyTextNode ) ) {
 
             $attributesMap = Map::instance( $node->attributes );
             $dataRefEnd    = $attributesMap->getOrDefault( 'dataRefEnd', $attributesMap->get( 'dataRefStart' ) );

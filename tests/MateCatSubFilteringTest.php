@@ -1401,4 +1401,88 @@ class MateCatSubFilteringTest extends TestCase {
 
     }
 
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function nested_pc_tags_real_case2() {
+
+        $refMap = [
+                'source3'  => '&lt;bpt ctype="x-style" id="span_2"&gt;&lt;Style FontSize="11" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source34' => '&lt;g ctype="x-text" id="text_13" /&gt;',
+                'source45' => '&lt;bpt ctype="x-block" id="block_17" /&gt;',
+                'source56' => '&lt;g ctype="x-text" id="text_22" /&gt;',
+                'source30' => '&lt;ph id="generic_12"&gt;&lt;Style FlowDirection="LeftToRight" LeadingMargin="72" TrailingMargin="0" FirstLineMargin="36" Justification="Left" ListLevel="1" LineSpacingRule="Multiple" LineSpacing="21" SpacingBefore="0" SpacingAfter="6"&gt;&lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#000000" BulletFont="Arial" /&gt;&lt;/Style&gt;&lt;/ph&gt;',
+                'source41' => '&lt;g ctype="x-text" id="text_16" /&gt;',
+                'source52' => '&lt;ept id="block_17" /&gt;',
+                'source17' => '&lt;g ctype="x-text" id="text_7" /&gt;',
+                'source28' => '&lt;ept id="block_8" /&gt;',
+                'source8'  => '&lt;bpt ctype="x-block" id="block_3" /&gt;',
+                'source39' => '&lt;bpt ctype="x-style" id="span_16"&gt;&lt;Style FontSize="11" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source13' => '&lt;bpt ctype="x-style" id="span_6"&gt;&lt;Style FontSize="11" FontIsBold="True" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source24' => '&lt;bpt ctype="x-style" id="span_10"&gt;&lt;Style FontSize="11" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source4'  => '&lt;g ctype="x-text" id="text_2" /&gt;',
+                'source35' => '&lt;ept id="span_13" /&gt;',
+                'source46' => '&lt;ph id="generic_18"&gt;&lt;Style FlowDirection="LeftToRight" LeadingMargin="72" TrailingMargin="0" FirstLineMargin="36" Justification="Left" ListLevel="1" LineSpacingRule="Multiple" LineSpacing="21" SpacingBefore="0" SpacingAfter="6"&gt;&lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#000000" BulletFont="Arial" /&gt;&lt;/Style&gt;&lt;/ph&gt;',
+                'source57' => '&lt;ept id="span_22" /&gt;',
+                'source20' => '&lt;ept id="span_7" /&gt;',
+                'source31' => '&lt;bpt ctype="x-style" id="span_13"&gt;&lt;Style FontSize="11" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source42' => '&lt;g ctype="x-text" id="text_16" /&gt;',
+                'source53' => '&lt;bpt ctype="x-block" id="block_20" /&gt;',
+                'source18' => '&lt;g ctype="x-text" id="text_7" /&gt;',
+                'source29' => '&lt;bpt ctype="x-block" id="block_11" /&gt;',
+                'source9'  => '&lt;ph id="generic_4"&gt;&lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" LineSpacingRule="Multiple" LineSpacing="21" SpacingBefore="0" SpacingAfter="6"&gt;&lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#000000" BulletFont="Arial" /&gt;&lt;/Style&gt;&lt;/ph&gt;',
+                'source14' => '&lt;g ctype="x-text" id="text_6" /&gt;',
+                'source25' => '&lt;g ctype="x-text" id="text_10" /&gt;',
+                'source5'  => '&lt;g ctype="x-text" id="text_2" /&gt;',
+                'source36' => '&lt;ept id="block_11" /&gt;',
+                'source47' => '&lt;bpt ctype="x-style" id="span_19"&gt;&lt;Style FontSize="11" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source58' => '&lt;ept id="block_20" /&gt;',
+                'source10' => '&lt;bpt ctype="x-style" id="span_5"&gt;&lt;Style FontSize="11" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source21' => '&lt;ept id="block_3" /&gt;',
+                'source1'  => '&lt;bpt ctype="x-block" id="block_0" /&gt;',
+                'source32' => '&lt;g ctype="x-text" id="text_13" /&gt;',
+                'source43' => '&lt;ept id="span_16" /&gt;',
+                'source54' => '&lt;ph id="generic_21"&gt;&lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" LineSpacingRule="Multiple" LineSpacing="21" SpacingBefore="0" SpacingAfter="6"&gt;&lt;ListStyle ListType="None" ListTypeFormat="Parentheses" BulletFont="Arial" /&gt;&lt;/Style&gt;&lt;/ph&gt;',
+                'source50' => '&lt;g ctype="x-text" id="text_19" /&gt;',
+                'source19' => '&lt;g ctype="x-text" id="text_7" /&gt;',
+                'source15' => '&lt;ept id="span_6" /&gt;',
+                'source26' => '&lt;g ctype="x-text" id="text_10" /&gt;',
+                'source6'  => '&lt;ept id="span_2" /&gt;',
+                'source37' => '&lt;bpt ctype="x-block" id="block_14" /&gt;',
+                'source48' => '&lt;g ctype="x-text" id="text_19" /&gt;',
+                'source11' => '&lt;g ctype="x-text" id="text_5" /&gt;',
+                'source22' => '&lt;bpt ctype="x-block" id="block_8" /&gt;',
+                'source2'  => '&lt;ph id="generic_1"&gt;&lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" LineSpacingRule="Multiple" LineSpacing="21" SpacingBefore="0" SpacingAfter="6"&gt;&lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#000000" BulletFont="Arial" /&gt;&lt;/Style&gt;&lt;/ph&gt;',
+                'source33' => '&lt;g ctype="x-text" id="text_13" /&gt;',
+                'source44' => '&lt;ept id="block_14" /&gt;',
+                'source55' => '&lt;bpt ctype="x-style" id="span_22"&gt;&lt;Style FontSize="11" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source40' => '&lt;g ctype="x-text" id="text_16" /&gt;',
+                'source51' => '&lt;ept id="span_19" /&gt;',
+                'source16' => '&lt;bpt ctype="x-style" id="span_7"&gt;&lt;Style FontSize="11" ForegroundColor="lt1,00" LinkColor="lt1,00" /&gt;&lt;/bpt&gt;',
+                'source27' => '&lt;ept id="span_10" /&gt;',
+                'source7'  => '&lt;ept id="block_0" /&gt;',
+                'source38' => '&lt;ph id="generic_15"&gt;&lt;Style FlowDirection="LeftToRight" LeadingMargin="72" TrailingMargin="0" FirstLineMargin="36" Justification="Left" ListLevel="1" LineSpacingRule="Multiple" LineSpacing="21" SpacingBefore="0" SpacingAfter="6"&gt;&lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#000000" BulletFont="Arial" /&gt;&lt;/Style&gt;&lt;/ph&gt;',
+                'source49' => '&lt;g ctype="x-text" id="text_19" /&gt;',
+                'source12' => '&lt;ept id="span_5" /&gt;',
+                'source23' => '&lt;ph id="generic_9"&gt;&lt;Style FlowDirection="LeftToRight" LeadingMargin="0" TrailingMargin="0" FirstLineMargin="0" Justification="Left" LineSpacingRule="Multiple" LineSpacing="21" SpacingBefore="0" SpacingAfter="6"&gt;&lt;ListStyle ListType="None" ListTypeFormat="Parentheses" Color="#000000" BulletFont="Arial" /&gt;&lt;/Style&gt;&lt;/ph&gt;',
+        ];
+
+
+        $filter = $this->getFilterInstance( $refMap );
+
+        $segment    = '<pc id="source5" dataRefStart="source5"></pc><ph id="source6" dataRef="source6"/><ph id="source7" dataRef="source7"/><ph id="source8" dataRef="source8"/><ph id="source9" dataRef="source9"/><ph id="source10" dataRef="source10"/><pc id="source11" dataRefStart="source11">Uber is committed to our employees, contractors, customers, and to the communities where we do business by </pc><ph id="source12" dataRef="source12"/><ph id="source13" dataRef="source13"/><pc id="source14" dataRefStart="source14">putting people first</pc><ph id="source15" dataRef="source15"/><ph id="source16" dataRef="source16"/><pc id="source17" dataRefStart="source17">.</pc>';
+
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        // layer 2
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
+
+    }
+
+
 }
