@@ -468,8 +468,8 @@ class MateCatSubFilteringTest extends TestCase {
     }
 
     public function testTwigFilterWithSingleBrackets() {
-        $segment  = 'Hi {this strings would not be escaped}. Instead {{this one}} is a valid twig expression. Also {%%ciao%%} is valid!';
-        $expected = 'Hi {this strings would not be escaped}. Instead <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t0aGlzIG9uZX19"/> is a valid twig expression. Also <ph id="mtc_2" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUlY2lhbyUlfQ=="/> is valid!';
+        $segment  = 'Hi {this strings would not be escaped}. Instead {{this one}} is a valid twig expression. Also {%ciao%} is valid!';
+        $expected = 'Hi {this strings would not be escaped}. Instead <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t0aGlzIG9uZX19"/> is a valid twig expression. Also <ph id="mtc_2" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyVjaWFvJX0="/> is valid!';
 
         $channel = new Pipeline();
         $channel->addLast( new TwigToPh() );
