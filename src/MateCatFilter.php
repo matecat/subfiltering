@@ -25,6 +25,7 @@ use Matecat\SubFiltering\Filters\RemoveDangerousChars;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
+use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SpecialEntitiesToPlaceholdersForView;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
