@@ -19,6 +19,24 @@ class MyMemorySubFilteringTest extends TestCase {
     }
 
     /**
+     **************************
+     * Roblox pipeline
+     **************************
+     */
+
+    public function testSingleCurlyBrackets() {
+        $filter = $this->getFilterInstance();
+
+        $segment   = "This is a {placeholder}";
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment, 'roblox' );
+
+        $string_from_UI = 'This is a <ph id="mtc_1" ctype="'.CTypeEnum::CURLY_BRACKETS.'" equiv-text="base64:e3BsYWNlaG9sZGVyfQ=="/>';
+
+        $this->assertEquals($segmentL1, $string_from_UI);
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+    }
+
+    /**
      * Test for Airbnb
      *
      * @throws \Exception
