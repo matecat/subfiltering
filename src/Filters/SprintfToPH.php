@@ -51,7 +51,7 @@ class SprintfToPH extends AbstractHandler {
         $segment = $sprintfLocker->lock( $segment );
 
         // Octal parsing is disabled due to Hungarian percentages 20%-os
-        $regex = '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|[+-]?\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?((?:[hjlqtzL]{0,2}[ac-giopsuxAC-GOSUX]{1})(?![\d\w])|(?:#@[\w]+@)|(?:@)))/';
+        $regex = '/%(?:\d+\$)?[ac-giopsuxAC-GOSUX]|(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|[+-]?\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?((?:[hjlqtzL]{0,2}[ac-giopsuxAC-GOSUX]{1})(?![\d\w])|(?:#@[\w]+@)|(?:@)))/';
 
 
         preg_match_all( $regex, $segment, $vars, PREG_SET_ORDER );
