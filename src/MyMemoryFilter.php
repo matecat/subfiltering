@@ -75,6 +75,11 @@ class MyMemoryFilter extends AbstractFilter {
             $channel->addLast( new SingleCurlyBracketsToPh() );
         }
 
+        if ( $cid == 'familysearch' ) {
+            $channel->remove( new TwigToPh() );
+            $channel->addLast( new SingleCurlyBracketsToPh() );
+        }
+
         $channel->addLast( new PercentSnail() );
         $channel->addLast( new PercentNumberSnail() );
         $channel->addLast( new Percentages() );
