@@ -21,10 +21,7 @@ class PlaceHoldXliffTags extends AbstractHandler {
         //remove not existent </x> tags
         $segment = preg_replace( '|(</x>)|si', "", $segment );
 
-        //$segment=preg_replace('|<(g\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER."$1".ConstantEnum::GTPLACEHOLDER,$segment);
-        $segment = preg_replace( '|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '|<(g\s*xid=["\']+.*?["\']+\s*[^<>]*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
-
+        $segment=preg_replace('|<(g\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER."$1".ConstantEnum::GTPLACEHOLDER,$segment);
         $segment = preg_replace( '|<(/g)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
 
         $segment = preg_replace( '|<(x .*?/?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
