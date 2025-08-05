@@ -9,7 +9,6 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-
 use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class EquivTextToBase64 extends AbstractHandler {
@@ -31,7 +30,5 @@ class EquivTextToBase64 extends AbstractHandler {
         }
 
         return $segment;
-
     }
-
 }

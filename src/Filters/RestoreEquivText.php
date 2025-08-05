@@ -9,7 +9,6 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-
 use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class RestoreEquivText extends AbstractHandler {
