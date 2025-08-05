@@ -13,6 +13,7 @@ use Matecat\SubFiltering\Filters\EmojiToEntity;
 use Matecat\SubFiltering\Filters\EncodeControlCharsInXliff;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\EntityToEmoji;
+use Matecat\SubFiltering\Filters\EquivTextToBase64;
 use Matecat\SubFiltering\Filters\FromLayer2ToRawXML;
 use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
@@ -22,6 +23,7 @@ use Matecat\SubFiltering\Filters\Percentages;
 use Matecat\SubFiltering\Filters\PercentNumberSnail;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RemoveDangerousChars;
+use Matecat\SubFiltering\Filters\RestoreEquivText;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
@@ -162,6 +164,7 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new SprintfToPH() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        $channel->addLast( new EquivTextToBase64() );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer0ToLayer1', $channel );
@@ -186,6 +189,7 @@ class MateCatFilter extends AbstractFilter {
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new SplitPlaceholder() );
+        $channel->addLast( new RestoreEquivText() );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer1ToLayer0', $channel );

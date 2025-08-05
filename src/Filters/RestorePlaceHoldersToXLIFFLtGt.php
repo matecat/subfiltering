@@ -9,9 +9,9 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\ConstantEnum;
+use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler {
 
@@ -20,7 +20,5 @@ class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler {
         $segment = str_replace( ConstantEnum::GTPLACEHOLDER, ">", $segment );
 
         return $segment;
-
     }
-
 }
