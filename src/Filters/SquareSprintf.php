@@ -9,27 +9,27 @@ class SquareSprintf extends AbstractHandler {
     /**
      * @inheritDoc
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         $tags = [
-            '\[%s\]',
-            '\[%\d+\$s\]',
-            '\[%\d+\$i\]',
-            '\[%\d+\$s:[a-z_]+\]',
-            '\[%\d+\$i:[a-z_]+\]',
-            '\[%s:[a-z_]+\]',
-            '\[%i\]',
-            '\[%i:[a-z_]+\]',
-            '\[%f\]',
-            '\[%f:[a-z_]+\]',
-            '\[%.\d+f\]',
-            '\[%\d+\$.\d+f\]',
-            '\[%\d+\$.\d+f:[a-z_]+\]',
-            '\[%.\d+f:[a-z_]+\]',
-            '\[%[a-z_]+:\d+%\]',
+                '\[%s\]',
+                '\[%\d+\$s\]',
+                '\[%\d+\$i\]',
+                '\[%\d+\$s:[a-z_]+\]',
+                '\[%\d+\$i:[a-z_]+\]',
+                '\[%s:[a-z_]+\]',
+                '\[%i\]',
+                '\[%i:[a-z_]+\]',
+                '\[%f\]',
+                '\[%f:[a-z_]+\]',
+                '\[%.\d+f\]',
+                '\[%\d+\$.\d+f\]',
+                '\[%\d+\$.\d+f:[a-z_]+\]',
+                '\[%.\d+f:[a-z_]+\]',
+                '\[%[a-z_]+:\d+%\]',
         ];
 
-        $regex = '/'.implode("|", $tags).'/iu';
+        $regex = '/' . implode( "|", $tags ) . '/iu';
 
         preg_match_all( $regex, $segment, $html, PREG_SET_ORDER );
 

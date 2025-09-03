@@ -14,21 +14,20 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class StandardPHToMateCatCustomPH extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         $segment = $this->filterPhTagContent( $segment );
-        $segment = $this->filterOriginalSelfClosePhTagsWithEquivText( $segment );
 
-        return $segment;
+        return $this->filterOriginalSelfClosePhTagsWithEquivText( $segment );
 
     }
 
     /**
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      */
-    private function filterPhTagContent( $segment ) {
+    private function filterPhTagContent( string $segment ): string {
 
         if ( preg_match( '|</ph>|s', $segment ) ) {
             preg_match_all( '|<ph id=["\']([^\'"]+?)["\'].*?>(.*?)</ph>|', $segment, $phTags, PREG_SET_ORDER );
@@ -55,7 +54,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler {
      *
      * @return string
      */
-    private function filterOriginalSelfClosePhTagsWithEquivText( $segment ) {
+    private function filterOriginalSelfClosePhTagsWithEquivText( string $segment ): string {
 
         preg_match_all( '|<ph[^>]+?equiv-text\s*?=\s*?(["\'])(?!base64:)(.*?)?\1[^>]*?/>|', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $tag_attribute ) {

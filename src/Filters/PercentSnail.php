@@ -10,7 +10,7 @@ class PercentSnail extends AbstractHandler {
     /**
      * @inheritDoc
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
 
@@ -18,7 +18,7 @@ class PercentSnail extends AbstractHandler {
         $segment = $sprintfLocker->lock( $segment );
 
         preg_match_all( '/%@/', $segment, $html, PREG_SET_ORDER );
-        foreach ( $html as $pos => $percentSnailVariable ) {
+        foreach ( $html as $percentSnailVariable ) {
 
             $segment = preg_replace(
                     '/' . preg_quote( $percentSnailVariable[ 0 ], '/' ) . '/',
@@ -28,8 +28,6 @@ class PercentSnail extends AbstractHandler {
             );
         }
 
-        $segment = $sprintfLocker->unlock( $segment );
-
-        return $segment;
+        return $sprintfLocker->unlock( $segment );
     }
 }

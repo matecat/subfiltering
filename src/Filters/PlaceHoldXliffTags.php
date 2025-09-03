@@ -14,14 +14,14 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class PlaceHoldXliffTags extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
 
         //remove not existent </x> tags
         $segment = preg_replace( '|(</x>)|si', "", $segment );
 
-        $segment=preg_replace('|<(g\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER."$1".ConstantEnum::GTPLACEHOLDER,$segment);
+        $segment = preg_replace( '|<(g\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(/g)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
 
         $segment = preg_replace( '|<(x .*?/?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );

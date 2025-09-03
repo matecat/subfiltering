@@ -3,6 +3,7 @@
 namespace Matecat\SubFiltering;
 
 
+use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoubleSnail;
@@ -47,12 +48,13 @@ class MyMemoryFilter extends AbstractFilter {
     /**
      * Used to transform database raw xml content ( Layer 0 ) to the sub filtered structures, used for server to server ( Ex: TM/MT ) communications ( Layer 1 )
      *
-     * @param $segment
-     * @param $cid
+     * @param string      $segment
+     * @param string|null $cid
      *
      * @return mixed
+     * @throws Exception
      */
-    public function fromLayer0ToLayer1( $segment, $cid = null ) {
+    public function fromLayer0ToLayer1( string $segment, ?string $cid = null ) {
         $channel = new Pipeline( $this->source, $this->target );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
         $channel->addLast( new StandardXEquivTextToMateCatCustomPH() );
@@ -95,12 +97,12 @@ class MyMemoryFilter extends AbstractFilter {
     /**
      * Used to transform external server raw xml content ( Ex: TM/MT ) to allow them to be stored in database ( Layer 0 ), used for server to server communications ( Layer 1 )
      *
-     * @param $segment
+     * @param string $segment
      *
-     * @return mixed
-     * @throws \Exception
+     * @return string
+     * @throws Exception
      */
-    public function fromLayer1ToLayer0( $segment ) {
+    public function fromLayer1ToLayer0( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new MateCatCustomPHToOriginalValue() );
         $channel->addLast( new PlaceHoldXliffTags() );

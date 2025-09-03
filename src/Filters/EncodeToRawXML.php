@@ -6,7 +6,7 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Utils\Utils;
 
 class EncodeToRawXML extends AbstractHandler {
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         // handling &#10; (line feed)
         // prevent to convert it to \n
@@ -41,8 +41,6 @@ class EncodeToRawXML extends AbstractHandler {
 
 
         //encode all not valid XML entities
-        $segment = preg_replace( '/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;', $segment );
-
-        return $segment;
+        return preg_replace( '/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;', $segment );
     }
 }

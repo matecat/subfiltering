@@ -9,6 +9,7 @@
 
 namespace Matecat\SubFiltering\Filters\Html;
 
+use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Commons\Pipeline;
 use ReflectionException;
 use ReflectionMethod;
@@ -38,25 +39,25 @@ class HtmlParser {
     const STATE_JS_CSS    = 3;
 
     /**
-     * @var Pipeline
+     * @var Pipeline|null
      */
-    private $pipeline;
+    private ?Pipeline $pipeline;
 
     /**
      * HtmlParser constructor.
      *
-     * @param Pipeline $pipeline
+     * @param Pipeline|null $pipeline
      */
     public function __construct( Pipeline $pipeline = null ) {
         $this->pipeline = $pipeline;
     }
 
     /**
-     * @var CallbacksHandler
+     * @var AbstractHandler
      */
-    protected $callbacksHandler;
+    protected AbstractHandler $callbacksHandler;
 
-    public function registerCallbacksHandler( $class ) {
+    public function registerCallbacksHandler( AbstractHandler $class ) {
         //check: $class must use CallbacksHandler trait
         if ( !in_array( CallbacksHandler::class, class_uses( $class ) ) ) {
             throw new RuntimeException( "Class passed to " . __METHOD__ . " must use " . CallbacksHandler::class . " trait." );
@@ -65,29 +66,34 @@ class HtmlParser {
     }
 
     /**
-     * @param $name
-     * @param $arguments
+     * Magic method to handle calls to inaccessible methods (protected/private)
+     * on the registered `$callbacksHandler` object.
      *
-     * @return mixed
-     * @throws ReflectionException
+     * This method uses reflection to bypass visibility restrictions, allowing
+     * protected or private methods of the `$callbacksHandler` to be invoked dynamically.
+     *
+     * @param string   $name      The name of the method being called.
+     * @param string[] $arguments The arguments passed to the method.
+     *
+     * @return mixed The result of the invoked method.
+     *
+     * @throws ReflectionException If the method does not exist or cannot be reflected.
      */
-    public function __call( $name, $arguments ) {
+    public function __call( string $name, array $arguments = [] ) {
 
-        if ( $this->callbacksHandler !== null ) {
-            //Reflection to allow protected/private methods to be set as callback
-            $reflector = new ReflectionMethod( $this->callbacksHandler, $name );
-            if ( !$reflector->isPublic() ) {
-                $reflector->setAccessible( true );
-            }
+        // Create a ReflectionMethod instance for the method being called on the callback handler
+        $reflector = new ReflectionMethod( $this->callbacksHandler, $name );
 
-            return $reflector->invoke( $this->callbacksHandler, $arguments[ 0 ] );
+        // If the method is not public, make it accessible
+        if ( !$reflector->isPublic() ) {
+            $reflector->setAccessible( true );
         }
 
-        return null;
-
+        // Invoke the method on the callback handler with the provided arguments
+        return $reflector->invoke( $this->callbacksHandler, $arguments[ 0 ] );
     }
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         $originalSplit = preg_split( '//u', $segment, -1, PREG_SPLIT_NO_EMPTY );
 
@@ -207,9 +213,9 @@ class HtmlParser {
                     default:
 
                         // Check the last char
-                        if ( $idx === ( count( $originalSplit ) - 1 ) ) {
+                        $html_buffer .= $char;
 
-                            $html_buffer .= $char;
+                        if ( $idx === ( count( $originalSplit ) - 1 ) ) {
 
                             //
                             // *************************************
@@ -240,7 +246,6 @@ class HtmlParser {
                             break;
                         }
 
-                        $html_buffer .= $char;
                         break;
                 }
             } elseif ( $state == static::STATE_COMMENT ) {
@@ -291,7 +296,7 @@ class HtmlParser {
         }
 
         //string ends with plain text, so no state change is triggered at the end of string
-        if ( '' !== $plain_text_buffer and null !== $plain_text_buffer ) {
+        if ( '' !== $plain_text_buffer ) {
             $output .= $this->_finalizePlainText( $plain_text_buffer );
         }
 

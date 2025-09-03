@@ -20,7 +20,7 @@ class DataRefReplacer {
     /**
      * @var Map
      */
-    private $map;
+    private Map $map;
 
     /**
      * DataRefReplacer constructor.
@@ -42,7 +42,7 @@ class DataRefReplacer {
      *
      * @return string
      */
-    public function replace( $string ) {
+    public function replace( string $string ): string {
 
         // if the map is empty
         // or the string has not a dataRef attribute
@@ -78,7 +78,7 @@ class DataRefReplacer {
             $string = $this->replaceClosingPcTags( $string, $dataRefEndMap );
 
         } catch ( Exception $ignore ) {
-            // if something fails here, do not throw exception and return the original string instead
+            // if something fails here, do not throw an exception and return the original string instead
 //            var_dump( $ignore );
         } finally {
             return $string;
@@ -91,7 +91,7 @@ class DataRefReplacer {
      *
      * @return bool
      */
-    private function hasAnyDataRefAttribute( $string ) {
+    private function hasAnyDataRefAttribute( string $string ): bool {
         return (bool)preg_match( '/(dataRef|dataRefStart|dataRefEnd)=[\'"].*?[\'"]/', $string );
     }
 
@@ -101,14 +101,14 @@ class DataRefReplacer {
      * Please note that <ec> and <sc> tags are converted to <ph> tags (needed by Matecat);
      * in this case, another special attribute (dataType) is added just before equiv-text
      *
-     * If there is no id tag, it will be copied from dataRef attribute
+     * If there is no id tag, it will be copied from the dataRef attribute
      *
      * @param object $node
      * @param string $string
      *
      * @return string
      */
-    private function recursiveTransformDataRefToPhTag( $node, $string ) {
+    private function recursiveTransformDataRefToPhTag( object $node, string $string ): string {
 
         if ( $node->has_children ) {
 
@@ -133,7 +133,7 @@ class DataRefReplacer {
                     return $string;
             }
 
-            // if isset a value in the map proceed with conversion otherwise skip
+            // if isset a value in the map, proceed with conversion, otherwise skip
             $attributesMap = Map::instance( $node->attributes );
             if ( !$this->map->get( $attributesMap->get( 'dataRef' ) ) ) {
                 return $string;
@@ -158,11 +158,11 @@ class DataRefReplacer {
     /**
      * Check if values in the map are null or an empty string, in that case, convert them to NULL string
      *
-     * @param $map
+     * @param array $map
      *
      * @return array
      */
-    private function sanitizeMap( $map ) {
+    private function sanitizeMap( array $map ): array {
 
         foreach ( $map as $name => $value ) {
             if ( is_null( $value ) || $value === '' ) {
@@ -174,15 +174,15 @@ class DataRefReplacer {
     }
 
     /**
-     * @param $node
-     * @param $string
+     * @param object $node
+     * @param string $string
      *
      * @return string
      * @throws DOMException
      * @throws InvalidXmlException
      * @throws XmlParsingException
      */
-    private function recursiveReplaceSelfClosedPcTags( $node, $string ) {
+    private function recursiveReplaceSelfClosedPcTags( object $node, string $string ): string {
 
         if ( $node->has_children ) {
 
@@ -219,7 +219,7 @@ class DataRefReplacer {
      * @param string    $completeString
      * @param ArrayList $dataRefEndMap
      */
-    private function extractDataRefMapRecursively( $node, $completeString, ArrayList $dataRefEndMap ) {
+    private function extractDataRefMapRecursively( object $node, string $completeString, ArrayList $dataRefEndMap ) {
 
         // we have to build the map for the closing pc tag, so get the children first
         if ( $node->has_children ) {
@@ -254,7 +254,7 @@ class DataRefReplacer {
     }
 
     /**
-     * Replace opening <pc> tags with correct reference in the $string
+     * Replace opening <pc> tags with the correct reference in the $string
      *
      * @param string $string
      *
@@ -263,13 +263,13 @@ class DataRefReplacer {
      * @throws InvalidXmlException
      * @throws XmlParsingException
      */
-    private function replaceOpeningPcTags( $string ) {
+    private function replaceOpeningPcTags( string $string ): string {
 
         preg_match_all( '|<pc ([^>/]+?)>|iu', $string, $openingPcMatches );
 
         foreach ( $openingPcMatches[ 0 ] as $match ) {
 
-            $node = XmlParser::parse( $match . '</pc>', true )[ 0 ]; // add a closing tag to not break xml integrity
+            $node = XmlParser::parse( $match . '</pc>', true )[ 0 ]; // add a closing tag to not break XML integrity
 
             // CASE 1 - Missing `dataRefStart`
             if ( isset( $node->attributes[ 'dataRefEnd' ] ) && !isset( $node->attributes[ 'dataRefStart' ] ) ) {
@@ -299,7 +299,7 @@ class DataRefReplacer {
     }
 
     /**
-     * Replace closing </pc> tags with correct reference in the $string
+     * Replace closing </pc> tags with the correct reference in the $string
      * thanks to $dataRefEndMap
      *
      * @param string    $string
@@ -307,7 +307,7 @@ class DataRefReplacer {
      *
      * @return string
      */
-    private function replaceClosingPcTags( $string, ArrayList $dataRefEndMap ) {
+    private function replaceClosingPcTags( string $string, ArrayList $dataRefEndMap ): string {
 
         preg_match_all( '|</pc>|iu', $string, $closingPcMatches, PREG_OFFSET_CAPTURE );
         $delta = 0;
@@ -349,7 +349,7 @@ class DataRefReplacer {
      * @throws InvalidXmlException
      * @throws XmlParsingException
      */
-    public function restore( $string ) {
+    public function restore( string $string ): string {
 
         // if the map is empty return string as is
         if ( empty( $this->map ) ) {
@@ -367,11 +367,11 @@ class DataRefReplacer {
 
     /**
      * @param object $node
-     * @param        $string
+     * @param string $string
      *
      * @return string
      */
-    private function recursiveRestoreOriginalTags( $node, $string ) {
+    private function recursiveRestoreOriginalTags( object $node, string $string ): string {
 
         if ( $node->has_children ) {
 
@@ -401,14 +401,14 @@ class DataRefReplacer {
 
     /**
      * @param string      $actualNodeString
-     * @param string      $id
+     * @param string|null $id
      * @param string      $dataRefValue
      * @param string      $ctype
      * @param string|null $upCountIdValue
      *
      * @return string
      */
-    private function getNewTagString( $actualNodeString, $id, $dataRefValue, $ctype, $upCountIdValue = null ) {
+    private function getNewTagString( string $actualNodeString, ?string $id, string $dataRefValue, string $ctype, ?string $upCountIdValue = null ): string {
 
         $newTag = [ '<ph' ];
 

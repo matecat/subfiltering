@@ -9,6 +9,7 @@
 
 namespace Matecat\SubFiltering\Commons;
 
+use Exception;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class Pipeline {
@@ -16,42 +17,42 @@ class Pipeline {
     /**
      * @var AbstractHandler[]
      */
-    protected $handlers;
+    protected array $handlers;
 
     /**
      * @var int
      */
-    protected $id_number = -1;
+    protected int $id_number = -1;
 
-    protected $source;
-    protected $target;
-    protected $dataRefMap;
+    protected ?string $source;
+    protected ?string $target;
+    protected array   $dataRefMap;
 
     /**
      * @var bool
      */
-    private $segmentContainsHtml = false;
+    private bool $segmentContainsHtml = false;
 
-    public function __construct( $source = null, $target = null, $dataRefMap = [] ) {
+    public function __construct( ?string $source = null, ?string $target = null, array $dataRefMap = [] ) {
         $this->source     = $source;
         $this->target     = $target;
         $this->dataRefMap = $dataRefMap;
     }
 
-    public function getNextId() {
+    public function getNextId(): string {
         $this->id_number++;
 
         return ConstantEnum::INTERNAL_ATTR_ID_PREFIX . $this->id_number;
     }
 
-    public function resetId() {
+    public function resetId(): void {
         $this->id_number = -1;
     }
 
     /**
      * @return bool
      */
-    public function segmentContainsHtml() {
+    public function segmentContainsHtml(): bool {
         return $this->segmentContainsHtml;
     }
 
@@ -61,23 +62,23 @@ class Pipeline {
     }
 
     /**
-     * @return mixed|null
+     * @return string|null
      */
-    public function getSource() {
+    public function getSource(): ?string {
         return $this->source;
     }
 
     /**
-     * @return mixed|null
+     * @return string|null
      */
-    public function getTarget() {
+    public function getTarget(): ?string {
         return $this->target;
     }
 
     /**
-     * @return array|mixed
+     * @return array
      */
-    public function getDataRefMap() {
+    public function getDataRefMap(): array {
         return $this->dataRefMap;
     }
 
@@ -86,7 +87,7 @@ class Pipeline {
      *
      * @return Pipeline
      */
-    public function addFirst( AbstractHandler $handler ) {
+    public function addFirst( AbstractHandler $handler ): Pipeline {
         $this->_register( $handler );
         array_unshift( $this->handlers, $handler );
 
@@ -99,7 +100,7 @@ class Pipeline {
      *
      * @return Pipeline
      */
-    public function addBefore( AbstractHandler $before, AbstractHandler $newPipeline ) {
+    public function addBefore( AbstractHandler $before, AbstractHandler $newPipeline ): Pipeline {
         $this->_register( $newPipeline );
         foreach ( $this->handlers as $pos => $handler ) {
             if ( $handler->getName() == $before->getName() ) {
@@ -118,7 +119,7 @@ class Pipeline {
      *
      * @return Pipeline
      */
-    public function addAfter( AbstractHandler $after, AbstractHandler $newPipeline ) {
+    public function addAfter( AbstractHandler $after, AbstractHandler $newPipeline ): Pipeline {
         $this->_register( $newPipeline );
         foreach ( $this->handlers as $pos => $handler ) {
             if ( $handler->getName() == $after->getName() ) {
@@ -138,7 +139,7 @@ class Pipeline {
      *
      * @return $this
      */
-    public function remove( AbstractHandler $handlerToDelete ) {
+    public function remove( AbstractHandler $handlerToDelete ): Pipeline {
         foreach ( $this->handlers as $pos => $handler ) {
             if ( $handler->getName() == $handlerToDelete->getName() ) {
                 unset( $this->handlers[ $pos ] );
@@ -155,7 +156,7 @@ class Pipeline {
      *
      * @return Pipeline
      */
-    public function addLast( AbstractHandler $handler ) {
+    public function addLast( AbstractHandler $handler ): Pipeline {
         $this->_register( $handler );
         $this->handlers[] = $handler;
 
@@ -163,11 +164,12 @@ class Pipeline {
     }
 
     /**
-     * @param $segment
+     * @param string $segment
      *
      * @return mixed
+     * @throws Exception
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ) {
         $this->id_number = -1;
         foreach ( $this->handlers as $handler ) {
             $segment = $handler->transform( $segment );
@@ -176,7 +178,7 @@ class Pipeline {
         return $this->realignIDs( $segment );
     }
 
-    protected function realignIDs( $segment ) {
+    protected function realignIDs( string $segment ) {
         if ( $this->id_number > -1 ) {
             preg_match_all( '/"__mtc_[0-9]+"/', $segment, $html, PREG_SET_ORDER );
             foreach ( $html as $pos => $tag_id ) {
@@ -193,7 +195,7 @@ class Pipeline {
      *
      * @return $this
      */
-    protected function _register( AbstractHandler $handler ) {
+    protected function _register( AbstractHandler $handler ): Pipeline {
         $handler->setPipeline( $this );
 
         return $this;

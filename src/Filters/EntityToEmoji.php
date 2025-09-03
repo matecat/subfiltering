@@ -14,7 +14,7 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class EntityToEmoji extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
         return Emoji::toEmoji( $segment );
     }
 

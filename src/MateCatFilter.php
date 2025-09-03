@@ -44,9 +44,9 @@ use Matecat\SubFiltering\Filters\Variables;
  *
  * # Definitions
  *
- * - Raw file, the real xml file in input, with data in XML
- * - Layer 0 is defined to be the Database. The data stored in the database should be in the same form ( sanitized if needed ) they comes from Xliff file
- * - Layer 1 is defined to be external services and resources, for example MT/TM server. This layer is different from layer 0, HTML subfiltering is applied here
+ * - Raw file, the real XML file in input, with data in XML
+ * - Layer 0 is defined to be the Database. The data stored in the database should be in the same form (sanitized if needed) they come from Xliff file
+ * - Layer 1 is defined to be external services and resources, for example, MT/TM server. This layer is different from layer 0, HTML subfiltering is applied here
  * - Layer 2 is defined to be the MayeCat UI.
  *
  * # Constraints
@@ -55,35 +55,35 @@ use Matecat\SubFiltering\Filters\Variables;
  *
  * - Data sent to the external services like MT/TM are sub-filtered:
  * -- &lt;br/&gt; become <ph id="mtc_[0-9]+" equiv-text="base64:Jmx0O2JyLyZndDs="/>
- * -- Existent tags in the XLIFF like <ph id="[0-9+]" equiv-text="&lt;br/&gt;"/> will leaved as is
+ * -- Existent tags in the XLIFF like <ph id="[0-9+]" equiv-text="&lt;br/&gt;"/> will leave as is
  *
  *
  * @package SubFiltering
  */
 class MateCatFilter extends AbstractFilter {
     /**
-     * Used to transform database raw xml content ( Layer 0 ) to the UI structures ( Layer 2 )
+     * Used to transform database raw XML content (Layer 0) to the UI structures (Layer 2)
      *
      * @param string $segment
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function fromLayer0ToLayer2( $segment ) {
+    public function fromLayer0ToLayer2( string $segment ): string {
         return $this->fromLayer1ToLayer2(
                 $this->fromLayer0ToLayer1( $segment )
         );
     }
 
     /**
-     * Used to transform database raw xml content ( Layer 0 ) to the UI structures ( Layer 2 )
+     * Used to transform database raw XML content (Layer 0) to the UI structures (Layer 2)
      *
      * @param string $segment
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function fromLayer1ToLayer2( $segment ) {
+    public function fromLayer1ToLayer2( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new SpecialEntitiesToPlaceholdersForView() );
         $channel->addLast( new EntityToEmoji() );
@@ -96,14 +96,14 @@ class MateCatFilter extends AbstractFilter {
     }
 
     /**
-     * Used to transform UI data ( Layer 2 ) to the XML structures ( Layer 1 )
+     * Used to transform UI data (Layer 2) to the XML structures (Layer 1)
      *
      * @param string $segment
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function fromLayer2ToLayer1( $segment ) {
+    public function fromLayer2ToLayer1( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new PlaceHoldXliffTags() );
@@ -121,31 +121,31 @@ class MateCatFilter extends AbstractFilter {
 
     /**
      *
-     * Used to transform the UI structures ( Layer 2 ) to allow them to be stored in database ( Layer 0 )
+     * Used to transform the UI structures (Layer 2) to allow them to be stored in the database (Layer 0)
      *
-     * It is assumed that the UI send strings having XLF tags not encoded and HTML in XML encoding representation:
+     * It is assumed that the UI sends strings having XLF tags not encoded and HTML in XML encoding representation:
      * - &lt;b&gt;de <ph id="mtc_1" equiv-text="base64:JTEkcw=="/>, <x id="1" /> &lt;/b&gt;que
      *
      * @param string $segment
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function fromLayer2ToLayer0( $segment ) {
+    public function fromLayer2ToLayer0( string $segment ): string {
         return $this->fromLayer1ToLayer0(
                 $this->fromLayer2ToLayer1( $segment )
         );
     }
 
     /**
-     * Used to transform database raw xml content ( Layer 0 ) to the sub filtered structures, used for server to server ( Ex: TM/MT ) communications ( Layer 1 )
+     * Used to transform database raw XML content (Layer 0) to the sub-filtered structures, used for server-to-server (Ex: TM/MT) communications (Layer 1)
      *
      * @param string $segment
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function fromLayer0ToLayer1( $segment ) {
+    public function fromLayer0ToLayer1( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new StandardPHToMateCatCustomPH() );
         $channel->addLast( new StandardXEquivTextToMateCatCustomPH() );
@@ -173,14 +173,14 @@ class MateCatFilter extends AbstractFilter {
     }
 
     /**
-     * Used to transform external server raw xml content ( Ex: TM/MT ) to allow them to be stored in database ( Layer 0 ), used for server to server communications ( Layer 1 )
+     * Used to transform external server raw XML content (Ex: TM/MT) to allow them to be stored in a database (Layer 0), used for server-to-server communications (Layer 1)
      *
      * @param string $segment
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function fromLayer1ToLayer0( $segment ) {
+    public function fromLayer1ToLayer0( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new MateCatCustomPHToOriginalValue() );
         $channel->addLast( new PlaceHoldXliffTags() );
@@ -198,14 +198,14 @@ class MateCatFilter extends AbstractFilter {
     }
 
     /**
-     * Used to convert the raw XLIFF content from file to an XML for the database ( Layer 0 )
+     * Used to convert the raw XLIFF content from the file to an XML for the database (Layer 0)
      *
      * @param string $segment
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function fromRawXliffToLayer0( $segment ) {
+    public function fromRawXliffToLayer0( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new RemoveDangerousChars() );
         $channel->addLast( new PlaceHoldXliffTags() );
@@ -224,10 +224,10 @@ class MateCatFilter extends AbstractFilter {
      *
      * @param string $segment
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public function fromLayer0ToRawXliff( $segment ) {
+    public function fromLayer0ToRawXliff( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new RemoveDangerousChars() );
@@ -242,21 +242,21 @@ class MateCatFilter extends AbstractFilter {
     }
 
     /**
-     * Used to align the tags when created from Layer 0 to Layer 1, when converting data from database is possible that html placeholders are in different positions
+     * Used to align the tags when created from Layer 0 to Layer 1, when converting data from the database is possible that HTML placeholders are in different positions
      * and their id are different because they are simple sequences.
      * We must place the right source tag ID in the corresponding target tags.
      *
      * The source holds the truth :D
      * realigns the target ids by matching the content of the base64.
      *
-     * @see getSegmentsController in matecat
-     *
      * @param string $source
      * @param string $target
      *
      * @return string
+     * @see getSegmentsController in matecat
+     *
      */
-    public function realignIDInLayer1( $source, $target ) {
+    public function realignIDInLayer1( string $source, string $target ): string {
         $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
         preg_match_all( $pattern, $source, $src_tags, PREG_PATTERN_ORDER );
         preg_match_all( $pattern, $target, $trg_tags, PREG_PATTERN_ORDER );

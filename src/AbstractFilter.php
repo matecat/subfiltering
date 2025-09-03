@@ -2,33 +2,34 @@
 
 namespace Matecat\SubFiltering;
 
+use Exception;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 
 abstract class AbstractFilter {
     /**
-     * @var AbstractFilter
+     * @var AbstractFilter|null
      */
-    protected static $_INSTANCE;
+    protected static ?AbstractFilter $_INSTANCE = null;
 
     /**
      * @var FeatureSetInterface
      */
-    protected $featureSet;
+    protected FeatureSetInterface $featureSet;
 
     /**
      * @var string
      */
-    protected $source;
+    protected string $source;
 
     /**
      * @var string
      */
-    protected $target;
+    protected string $target;
 
     /**
      * @var array
      */
-    protected $dataRefMap = [];
+    protected array $dataRefMap = [];
 
     /**
      * Update/Add featureSet
@@ -49,14 +50,14 @@ abstract class AbstractFilter {
     /**
      * @param string $source
      */
-    protected function setSource( $source ) {
+    protected function setSource( string $source ) {
         $this->source = $source;
     }
 
     /**
      * @param string $target
      */
-    protected function setTarget( $target ) {
+    protected function setTarget( string $target ) {
         $this->target = $target;
     }
 
@@ -74,7 +75,7 @@ abstract class AbstractFilter {
      * @param array               $dataRefMap
      *
      * @return AbstractFilter
-     * @throws \Exception
+     * @throws Exception
      */
     public static function getInstance( FeatureSetInterface $featureSet, $source = null, $target = null, array $dataRefMap = [] ) {
         if ( static::$_INSTANCE === null ) {
@@ -92,18 +93,18 @@ abstract class AbstractFilter {
     /**
      * Used to transform database raw xml content ( Layer 0 ) to the sub filtered structures, used for server to server ( Ex: TM/MT ) communications ( Layer 1 )
      *
-     * @param $segment
+     * @param string $segment
      *
      * @return mixed
      */
-    abstract public function fromLayer0ToLayer1( $segment );
+    abstract public function fromLayer0ToLayer1( string $segment );
 
     /**
      * Used to transform external server raw xml content ( Ex: TM/MT ) to allow them to be stored in database ( Layer 0 ), used for server to server communications ( Layer 1 )
      *
-     * @param $segment
+     * @param string $segment
      *
      * @return mixed
      */
-    abstract public function fromLayer1ToLayer0( $segment );
+    abstract public function fromLayer1ToLayer0( string $segment );
 }

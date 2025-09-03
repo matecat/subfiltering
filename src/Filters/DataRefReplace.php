@@ -13,7 +13,7 @@ class DataRefReplace extends AbstractHandler {
     /**
      * @var array
      */
-    private $dataRefMap;
+    private array $dataRefMap = [];
 
     /**
      * DataRefReplace constructor.
@@ -25,7 +25,7 @@ class DataRefReplace extends AbstractHandler {
     /**
      * @inheritDoc
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         if ( empty( $this->dataRefMap ) ) {
             $this->dataRefMap = $this->pipeline->getDataRefMap();
@@ -61,7 +61,7 @@ class DataRefReplace extends AbstractHandler {
      *
      * @return string
      */
-    private function replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
+    private function replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags( string $segment ): string {
 
         preg_match_all( '/<(ph .*?)>/iu', $segment, $phTags );
 
@@ -97,17 +97,17 @@ class DataRefReplace extends AbstractHandler {
      *
      * @return bool
      */
-    private function isAValidPhTag( $phTag ) {
+    private function isAValidPhTag( string $phTag ): bool {
 
         // try not to throw exception for wrong segments with opening tags and no closing
         try {
             $parsed = XmlParser::parse( $phTag, true );
-        } catch ( Exception $e ){
+        } catch ( Exception $e ) {
             return false;
         }
 
         // check for matecat ctype
-        $cType = isset( $parsed[ 0 ]->attributes[ 'ctype' ] ) ? $parsed[ 0 ]->attributes[ 'ctype' ] : null;
+        $cType = isset( $parsed[ 0 ]->attributes[ 'ctype' ] ) ? $parsed[ 0 ]->attributes[ 'ctype' ] : 'not-found';
         if ( CTypeEnum::isMatecatCType( $cType ) ) {
             return false;
         }
@@ -141,7 +141,7 @@ class DataRefReplace extends AbstractHandler {
      *
      * @return string
      */
-    private function replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( $segment ) {
+    private function replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags( string $segment ): string {
 
         preg_match_all( '/<(pc .*?)>/iu', $segment, $openingPcTags );
         preg_match_all( '|<(/pc)>|iu', $segment, $closingPcTags );

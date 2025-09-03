@@ -27,20 +27,20 @@ class HtmlToPh extends AbstractHandler {
     use CallbacksHandler;
 
     /**
-     * @param $buffer
+     * @param string $buffer
      *
-     * @return mixed
+     * @return string
      */
-    protected function _finalizePlainText( $buffer ) {
+    protected function _finalizePlainText( string $buffer ): string {
         return $buffer;
     }
 
     /**
-     * @param $buffer
+     * @param string $buffer
      *
      * @return string
      */
-    protected function _finalizeHTMLTag( $buffer ) {
+    protected function _finalizeHTMLTag( string $buffer ): string {
         //decode attributes by locking <,> first
         //because a html tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
         // Ex:
@@ -57,32 +57,31 @@ class HtmlToPh extends AbstractHandler {
     }
 
     /**
-     * @param $buffer
+     * @param string $buffer
      *
      * @return string
      */
-    protected function _finalizeTag( $buffer ) {
+    protected function _finalizeTag( string $buffer ): string {
         return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**
-     * @param $buffer
-     *
-     * @return mixed
-     */
-    protected function _fixWrongBuffer( $buffer ) {
-        $buffer = str_replace( "<", "&lt;", $buffer );
-        $buffer = str_replace( ">", "&gt;", $buffer );
-
-        return $buffer;
-    }
-
-    /**
-     * @param $buffer
+     * @param string $buffer
      *
      * @return string
      */
-    protected function _finalizeScriptTag( $buffer ) {
+    protected function _fixWrongBuffer( string $buffer ): string {
+        $buffer = str_replace( "<", "&lt;", $buffer );
+
+        return str_replace( ">", "&gt;", $buffer );
+    }
+
+    /**
+     * @param string $buffer
+     *
+     * @return string
+     */
+    protected function _finalizeScriptTag( string $buffer ): string {
         return $this->_finalizeTag( $buffer );
     }
 
@@ -93,11 +92,11 @@ class HtmlToPh extends AbstractHandler {
      *
      * Only tags should be converted here
      *
-     * @param $buffer
+     * @param string $buffer
      *
      * @return bool
      */
-    protected function _isTagValid( $buffer ) {
+    protected function _isTagValid( string $buffer ): bool {
 
         /*
          * accept tags start with:
@@ -129,11 +128,11 @@ class HtmlToPh extends AbstractHandler {
     }
 
     /**
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
         $parser = new HtmlParser();
         $parser->registerCallbacksHandler( $this );
 

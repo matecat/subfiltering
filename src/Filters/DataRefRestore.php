@@ -11,7 +11,7 @@ class DataRefRestore extends AbstractHandler {
     /**
      * @var array
      */
-    private $dataRefMap;
+    private array $dataRefMap = [];
 
     /**
      * DataRefReplace constructor.
@@ -23,7 +23,7 @@ class DataRefRestore extends AbstractHandler {
     /**
      * @inheritDoc
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         if ( empty( $this->dataRefMap ) ) {
             $this->dataRefMap = $this->pipeline->getDataRefMap();
@@ -54,11 +54,11 @@ class DataRefRestore extends AbstractHandler {
      *
      * Saame nähtavuse piirangutega kontrollida, kes sisu näeb .<ph id="source1" dataRef="source1"/>
      *
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      */
-    private function restoreXliffPhTagsFromMatecatPhTags( $segment ) {
+    private function restoreXliffPhTagsFromMatecatPhTags( string $segment ): string {
         preg_match_all( '|<ph[^>]+? ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:(.*?)"/>|iu', $segment, $matches );
 
         if ( empty( $matches[ 0 ] ) ) {
@@ -88,7 +88,7 @@ class DataRefRestore extends AbstractHandler {
      *
      * @return string
      */
-    private function restoreXliffPcTagsFromMatecatPhTags( $segment ) {
+    private function restoreXliffPcTagsFromMatecatPhTags( string $segment ): string {
 
         $matches = [];
         preg_match_all( '|<ph[^>]+? ctype="' . CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF . '" equiv-text="base64:(.*?)"/>|iu', $segment, $open_matches );

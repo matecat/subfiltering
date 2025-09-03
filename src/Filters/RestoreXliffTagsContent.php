@@ -15,7 +15,7 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class RestoreXliffTagsContent extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         $segment = preg_replace_callback( '/' . ConstantEnum::LTPLACEHOLDER . '(.*?)' . ConstantEnum::GTPLACEHOLDER . '/u',
                 function ( $matches ) {

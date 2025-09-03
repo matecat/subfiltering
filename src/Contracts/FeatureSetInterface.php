@@ -2,6 +2,8 @@
 
 namespace Matecat\SubFiltering\Contracts;
 
+use Exception;
+
 interface FeatureSetInterface {
     /**
      * Returns the filtered subject variable passed to all enabled features.
@@ -13,7 +15,7 @@ interface FeatureSetInterface {
      *
      * FIXME: this is not a real filter since the input params are not passed
      * modified in cascade to the next function in the queue.
-     * @throws \Exception
+     * @throws Exception
      */
     public function filter( $method, $filterable );
 }

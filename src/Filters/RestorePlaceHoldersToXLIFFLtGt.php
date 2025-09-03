@@ -15,10 +15,9 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform(string $segment ): string {
         $segment = str_replace( ConstantEnum::LTPLACEHOLDER, "<", $segment );
-        $segment = str_replace( ConstantEnum::GTPLACEHOLDER, ">", $segment );
 
-        return $segment;
+        return str_replace( ConstantEnum::GTPLACEHOLDER, ">", $segment );
     }
 }

@@ -10,9 +10,6 @@ use Matecat\SubFiltering\Filters\Sprintf\SprintfLocker;
 
 class SprintfToPH extends AbstractHandler {
 
-    private $source;
-    private $target;
-
     public function __construct() {
         parent::__construct();
     }
@@ -33,17 +30,17 @@ class SprintfToPH extends AbstractHandler {
      * 20%-zar - ignored
      *</code>
      *
+     * @param $segment
+     *
+     * @return string
      * @see
      * - https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html#//apple_ref/doc/uid/TP40004265-SW1
      * - https://en.cppreference.com/w/c/io/fprintf
      * - https://www.php.net/manual/en/function.sprintf.php
      * - https://www.w3resource.com/c-programming/stdio/c_library_method_sprintf.php
      *
-     * @param $segment
-     *
-     * @return string
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
 
@@ -67,9 +64,7 @@ class SprintfToPH extends AbstractHandler {
         }
 
         //revert placeholding
-        $segment = $sprintfLocker->unlock( $segment );
-
-        return $segment;
+        return $sprintfLocker->unlock( $segment );
     }
 
 }

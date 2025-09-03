@@ -9,7 +9,7 @@ class PercentNumberSnail extends AbstractHandler {
     /**
      * @inheritDoc
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         preg_match_all( '/%\d+\$@/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $pos => $percentNumberSnailVariable ) {

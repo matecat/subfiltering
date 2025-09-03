@@ -14,7 +14,7 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class StandardXEquivTextToMateCatCustomPH extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         preg_match_all( '|<x[^>]*?equiv-text="([^"]*?)"[^>]*?/>|', $segment, $xTags, PREG_SET_ORDER );
         foreach ( $xTags as $group ) {

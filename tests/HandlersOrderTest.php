@@ -31,7 +31,7 @@ class HandlersOrderTest extends TestCase {
      */
     protected $channel;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->channel = new Pipeline( 'it-IT', 'en-US', [] );
         $this->channel->addLast( new StandardPHToMateCatCustomPH() );
         $this->channel->addLast( new PlaceHoldXliffTags() );
