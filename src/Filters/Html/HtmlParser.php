@@ -187,15 +187,13 @@ class HtmlParser {
                         // Validate and finalize HTML tag. Invalid tags are corrected/errors handled.
                         if ( $this->_isTagValid( $html_buffer ) ) {
                             $output .= $this->_finalizeHTMLTag( $html_buffer );
+                            if ( null !== $this->pipeline ) {
+                                // Mark the segment as containing HTML if required.
+                                $this->_setSegmentContainsHtml();
+                            }
                         } else {
                             $output .= $this->_fixWrongBuffer( $html_buffer );
                         }
-
-                        // Mark the segment as containing HTML if required.
-                        if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                            $this->_setSegmentContainsHtml();
-                        }
-
                         $html_buffer = '';
                         break;
 
@@ -229,7 +227,7 @@ class HtmlParser {
                             $output      .= $this->_fixWrongBuffer( '< ' );
                             $html_buffer = '';
 
-                            if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
+                            if ( null !== $this->pipeline ) {
                                 $this->_setSegmentContainsHtml();
                             }
 
@@ -251,11 +249,6 @@ class HtmlParser {
                                 $state             = static::STATE_PLAINTEXT; // Error: not a valid tag
                                 $plain_text_buffer .= $this->_fixWrongBuffer( $html_buffer );
                                 $html_buffer       = '';
-
-                                if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                                    $this->_setSegmentContainsHtml();
-                                }
-
                                 break;
                             }
 
@@ -276,7 +269,7 @@ class HtmlParser {
                         $output      .= $this->_finalizeScriptTag( $html_buffer );
                         $html_buffer = '';
 
-                        if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
+                        if ( null !== $this->pipeline ) {
                             $this->_setSegmentContainsHtml();
                         }
                     }
@@ -294,9 +287,10 @@ class HtmlParser {
                         $output      .= $this->_finalizeScriptTag( $html_buffer );
                         $html_buffer = '';
 
-                        if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
+                        if ( null !== $this->pipeline ) {
                             $this->_setSegmentContainsHtml();
                         }
+
                     }
                 }
 
