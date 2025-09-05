@@ -11,7 +11,7 @@ class DollarCurlyBrackets extends AbstractHandler {
      * @inheritDoc
      */
     public function transform( string $segment ): string {
-        preg_match_all( '/\$\{[^<>\s]+?\}/', $segment, $html, PREG_SET_ORDER );
+        preg_match_all( '/\$\{[^<>\s]+?}/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $pos => $snail_variable ) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
             if ( !strstr( $snail_variable[ 0 ], ConstantEnum::GTPLACEHOLDER ) ) {

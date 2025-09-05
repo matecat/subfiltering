@@ -13,7 +13,7 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
-class Percentages extends AbstractHandler {
+class DoublePercentages extends AbstractHandler {
 
     /**
      * All inside percentages will be locked if there are no spaces

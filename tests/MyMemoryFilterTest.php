@@ -2,20 +2,21 @@
 
 namespace Matecat\SubFiltering\Tests;
 
+use Exception;
+use Matecat\SubFiltering\AbstractFilter;
+use Matecat\SubFiltering\Commons\EmptyFeatureSet;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MyMemoryFilter;
-use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\TestCase;
 
-class MyMemorySubFilteringTest extends TestCase {
+class MyMemoryFilterTest extends TestCase {
     /**
-     * @return \Matecat\SubFiltering\AbstractFilter
-     * @throws \Exception
+     * @return AbstractFilter
+     * @throws Exception
      */
     private function getFilterInstance() {
-        MyMemoryFilter::destroyInstance(); // for isolation test
 
-        return MyMemoryFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [] );
+        return MyMemoryFilter::getInstance( new EmptyFeatureSet(), 'en-US', 'it-IT' );
     }
 
     /**
@@ -30,22 +31,22 @@ class MyMemorySubFilteringTest extends TestCase {
         $segment   = "This is a {placeholder}";
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment, 'roblox' );
 
-        $string_from_UI = 'This is a <ph id="mtc_1" ctype="'.CTypeEnum::CURLY_BRACKETS.'" equiv-text="base64:e3BsYWNlaG9sZGVyfQ=="/>';
+        $string_from_UI = 'This is a <ph id="mtc_1" ctype="' . CTypeEnum::CURLY_BRACKETS . '" equiv-text="base64:e3BsYWNlaG9sZGVyfQ=="/>';
 
-        $this->assertEquals($segmentL1, $string_from_UI);
+        $this->assertEquals( $segmentL1, $string_from_UI );
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
     }
 
     /**
      * Test for Airbnb
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function testVariablesWithHTML() {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'Airbnb account.%{\n}%{&lt;br&gt;}%{\n}1) From ';
-        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>1) From ';
+        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>1) From ';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'airbnb' ) );
@@ -55,7 +56,7 @@ class MyMemorySubFilteringTest extends TestCase {
      * Test for skyscanner
      * (promoted to global behavior)
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSinglePercentageSyntax() {
         $filter = $this->getFilterInstance();
@@ -71,7 +72,7 @@ class MyMemorySubFilteringTest extends TestCase {
      * Test for skyscanner
      * (promoted to global behavior)
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function testDoublePercentageSyntax() {
         $filter = $this->getFilterInstance();
@@ -87,7 +88,7 @@ class MyMemorySubFilteringTest extends TestCase {
      * Test for skyscanner
      * (promoted to global behavior)
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSingleSnailSyntax() {
         $filter = $this->getFilterInstance();
@@ -146,7 +147,7 @@ class MyMemorySubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %@ is a IOS placeholder %@.';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_SNAILS . '" equiv-text="base64:JUA="/>.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/>.';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -156,7 +157,7 @@ class MyMemorySubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTE0MzQzJEA="/>';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTE0MzQzJEA="/>';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -165,7 +166,7 @@ class MyMemorySubFilteringTest extends TestCase {
     public function testDecodeInternalEncodedXliffTags() {
         $filter           = $this->getFilterInstance();
         $db_segment       = '&lt;x id="1"/&gt;&lt;g id="2"&gt;As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
-        $segment_received = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/><ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2cgaWQ9IjIiJmd0Ow=="/>As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
+        $segment_received = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/><ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2cgaWQ9IjIiJmd0Ow=="/>As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_received ) );
         $this->assertEquals( $segment_received, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -214,33 +215,33 @@ class MyMemorySubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $tags = [
-            '[%s]',
-            '[%1$s]',
-            '[%222$s]',
-            '[%s:name]',
-            '[%s:placeholder]',
-            '[%s:place_holder]',
-            '[%i]',
-            '[%1$i]',
-            '[%222$i]',
-            '[%i:name]',
-            '[%i:placeholder]',
-            '[%i:place_holder]',
-            '[%f]',
-            '[%.2f]',
-            '[%.2332f]',
-            '[%1$.2f]',
-            '[%23$.24343f]',
-            '[%.222f:name]',
-            '[%.2f:placeholder]',
-            '[%.2f:place_holder]',
-            '[%key_id:1234%]',
-            '[%test:1234%]',
-            '[%.2f:placeholder]',
-            '[%1$s:placeholder]',
-            '[%1$i:placeholder]',
-            '[%f:placeholder]',
-            '[%1$.2f:placeholder]',
+                '[%s]',
+                '[%1$s]',
+                '[%222$s]',
+                '[%s:name]',
+                '[%s:placeholder]',
+                '[%s:place_holder]',
+                '[%i]',
+                '[%1$i]',
+                '[%222$i]',
+                '[%i:name]',
+                '[%i:placeholder]',
+                '[%i:place_holder]',
+                '[%f]',
+                '[%.2f]',
+                '[%.2332f]',
+                '[%1$.2f]',
+                '[%23$.24343f]',
+                '[%.222f:name]',
+                '[%.2f:placeholder]',
+                '[%.2f:place_holder]',
+                '[%key_id:1234%]',
+                '[%test:1234%]',
+                '[%.2f:placeholder]',
+                '[%1$s:placeholder]',
+                '[%1$i:placeholder]',
+                '[%f:placeholder]',
+                '[%1$.2f:placeholder]',
         ];
 
         foreach ( $tags as $tag ) {

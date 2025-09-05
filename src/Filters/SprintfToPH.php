@@ -52,7 +52,7 @@ class SprintfToPH extends AbstractHandler {
 
 
         preg_match_all( $regex, $segment, $vars, PREG_SET_ORDER );
-        foreach ( $vars as $pos => $variable ) {
+        foreach ( $vars as $variable ) {
 
             //replace subsequent elements excluding already encoded
             $segment = preg_replace(

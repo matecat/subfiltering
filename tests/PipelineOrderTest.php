@@ -10,9 +10,9 @@
 namespace Matecat\SubFiltering\Tests;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\HtmlToPh;
+use Matecat\SubFiltering\Filters\XmlToPh;
 use Matecat\SubFiltering\Filters\LtGtDecode;
-use Matecat\SubFiltering\Filters\Percentages;
+use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
@@ -24,7 +24,7 @@ use Matecat\SubFiltering\Filters\TwigToPh;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
-class HandlersOrderTest extends TestCase {
+class PipelineOrderTest extends TestCase {
 
     /**
      * @var Pipeline
@@ -33,14 +33,14 @@ class HandlersOrderTest extends TestCase {
 
     public function setUp(): void {
         $this->channel = new Pipeline( 'it-IT', 'en-US', [] );
-        $this->channel->addLast( new StandardPHToMateCatCustomPH() );
-        $this->channel->addLast( new PlaceHoldXliffTags() );
-        $this->channel->addLast( new LtGtDecode() );
-        $this->channel->addLast( new HtmlToPh() );
-        $this->channel->addLast( new TwigToPh() );
-        $this->channel->addLast( new SprintfToPH() );
-        $this->channel->addLast( new RestoreXliffTagsContent() );
-        $this->channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        $this->channel->addLast( StandardPHToMateCatCustomPH::class );
+        $this->channel->addLast( PlaceHoldXliffTags::class );
+        $this->channel->addLast( LtGtDecode::class );
+        $this->channel->addLast( XmlToPh::class );
+        $this->channel->addLast( TwigToPh::class );
+        $this->channel->addLast( SprintfToPH::class );
+        $this->channel->addLast( RestoreXliffTagsContent::class );
+        $this->channel->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
     }
 
     /**
@@ -48,14 +48,14 @@ class HandlersOrderTest extends TestCase {
      */
     public function testReOrder() {
 
-        $this->channel->remove( new TwigToPh() );
-        $this->channel->remove( new SprintfToPH() );
+        $this->channel->remove( TwigToPh::class );
+        $this->channel->remove( SprintfToPH::class );
 
-        $this->channel->addAfter( new HtmlToPh(), new RubyOnRailsI18n() );
-        $this->channel->addAfter( new RubyOnRailsI18n(), new Percentages() );
-        $this->channel->addAfter( new Percentages(), new SprintfToPH() );
-        $this->channel->addAfter( new SprintfToPH(), new TwigToPh() );
-        $this->channel->addAfter( new TwigToPh(), new SingleCurlyBracketsToPh() );
+        $this->channel->addAfter( XmlToPh::class, RubyOnRailsI18n::class );
+        $this->channel->addAfter( RubyOnRailsI18n::class, DoublePercentages::class );
+        $this->channel->addAfter( DoublePercentages::class, SprintfToPH::class );
+        $this->channel->addAfter( SprintfToPH::class, TwigToPh::class );
+        $this->channel->addAfter( TwigToPh::class, SingleCurlyBracketsToPh::class );
 
         $reflection = new ReflectionClass( $this->channel );
         $property   = $reflection->getProperty( 'handlers' );
@@ -65,9 +65,9 @@ class HandlersOrderTest extends TestCase {
         $this->assertTrue( $handlerList[ 0 ] instanceof StandardPHToMateCatCustomPH );
         $this->assertTrue( $handlerList[ 1 ] instanceof PlaceHoldXliffTags );
         $this->assertTrue( $handlerList[ 2 ] instanceof LtGtDecode );
-        $this->assertTrue( $handlerList[ 3 ] instanceof HtmlToPh );
+        $this->assertTrue( $handlerList[ 3 ] instanceof XmlToPh );
         $this->assertTrue( $handlerList[ 4 ] instanceof RubyOnRailsI18n );
-        $this->assertTrue( $handlerList[ 5 ] instanceof Percentages );
+        $this->assertTrue( $handlerList[ 5 ] instanceof DoublePercentages );
         $this->assertTrue( $handlerList[ 6 ] instanceof SprintfToPH );
         $this->assertTrue( $handlerList[ 7 ] instanceof TwigToPh );
         $this->assertTrue( $handlerList[ 8 ] instanceof SingleCurlyBracketsToPh );
@@ -81,12 +81,12 @@ class HandlersOrderTest extends TestCase {
      */
     public function testReOrder2() {
 
-        $this->channel->remove( new TwigToPh() );
-        $this->channel->remove( new SprintfToPH() );
-        $this->channel->addFirst( new SprintfToPH() );
+        $this->channel->remove( TwigToPh::class );
+        $this->channel->remove( SprintfToPH::class );
+        $this->channel->addFirst( SprintfToPH::class );
 
-        $this->channel->addBefore( new HtmlToPh(), new RubyOnRailsI18n() );
-        $this->channel->remove( new HtmlToPh() );
+        $this->channel->addBefore( XmlToPh::class, RubyOnRailsI18n::class );
+        $this->channel->remove( XmlToPh::class );
 
         $reflection = new ReflectionClass( $this->channel );
         $property   = $reflection->getProperty( 'handlers' );

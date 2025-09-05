@@ -7,35 +7,16 @@ use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DataRefReplace;
 use Matecat\SubFiltering\Filters\DataRefRestore;
-use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
-use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\EmojiToEntity;
 use Matecat\SubFiltering\Filters\EncodeControlCharsInXliff;
-use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\EntityToEmoji;
-use Matecat\SubFiltering\Filters\EquivTextToBase64;
 use Matecat\SubFiltering\Filters\FromLayer2ToRawXML;
-use Matecat\SubFiltering\Filters\HtmlToPh;
-use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
-use Matecat\SubFiltering\Filters\MateCatCustomPHToOriginalValue;
-use Matecat\SubFiltering\Filters\Percentages;
-use Matecat\SubFiltering\Filters\PercentNumberSnail;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RemoveDangerousChars;
-use Matecat\SubFiltering\Filters\RestoreEquivText;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
-use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
-use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SpecialEntitiesToPlaceholdersForView;
-use Matecat\SubFiltering\Filters\SplitPlaceholder;
-use Matecat\SubFiltering\Filters\SprintfToPH;
-use Matecat\SubFiltering\Filters\SquareSprintf;
-use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
-use Matecat\SubFiltering\Filters\StandardXEquivTextToMateCatCustomPH;
-use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\Variables;
 
 /**
  * Class Filter
@@ -50,7 +31,8 @@ use Matecat\SubFiltering\Filters\Variables;
  * - Layer 2 is defined to be the MayeCat UI.
  *
  * # Constraints
- * - We have to maintain the compatibility with PH tags placed inside the XLIff in the form <ph id="[0-9+]" equiv-text="&lt;br/&gt;"/>, those tags are placed into the database as XML
+ * - We have to maintain the compatibility with PH tags placed inside the XLIff in the form <ph id="[0-9+]" equiv-text="&lt;br/&gt;"/> .
+ *     Those tags are placed into the database as XML.
  * - HTML and other variables like android tags and custom features are placed into the database as encoded HTML &lt;br/&gt;
  *
  * - Data sent to the external services like MT/TM are sub-filtered:
@@ -85,9 +67,9 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromLayer1ToLayer2( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new SpecialEntitiesToPlaceholdersForView() );
-        $channel->addLast( new EntityToEmoji() );
-        $channel->addLast( new DataRefReplace() );
+        $channel->addLast( SpecialEntitiesToPlaceholdersForView::class );
+        $channel->addLast( EntityToEmoji::class );
+        $channel->addLast( DataRefReplace::class );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer1ToLayer2', $channel );
@@ -105,13 +87,13 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromLayer2ToLayer1( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
-        $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new FromLayer2TorawXML() );
-        $channel->addLast( new EmojiToEntity() );
-        $channel->addLast( new RestoreXliffTagsContent() );
-        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
-        $channel->addLast( new DataRefRestore() );
+        $channel->addLast( CtrlCharsPlaceHoldToAscii::class );
+        $channel->addLast( PlaceHoldXliffTags::class );
+        $channel->addLast( FromLayer2TorawXML::class );
+        $channel->addLast( EmojiToEntity::class );
+        $channel->addLast( RestoreXliffTagsContent::class );
+        $channel->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
+        $channel->addLast( DataRefRestore::class );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer2ToLayer1', $channel );
@@ -138,63 +120,15 @@ class MateCatFilter extends AbstractFilter {
     }
 
     /**
-     * Used to transform database raw XML content (Layer 0) to the sub-filtered structures, used for server-to-server (Ex: TM/MT) communications (Layer 1)
+     * Transforms content from UI structures (Layer 1) back to database raw XML content (Layer 0).
      *
-     * @param string $segment
+     * @param string $segment The segment of content to be transformed from Layer 1 to Layer 0.
      *
-     * @return string
-     * @throws Exception
-     */
-    public function fromLayer0ToLayer1( string $segment ): string {
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new StandardPHToMateCatCustomPH() );
-        $channel->addLast( new StandardXEquivTextToMateCatCustomPH() );
-        $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new LtGtDecode() );
-        $channel->addLast( new HtmlToPh() );
-        $channel->addLast( new Variables() );
-        $channel->addLast( new TwigToPh() );
-        $channel->addLast( new RubyOnRailsI18n() );
-        $channel->addLast( new Snails() );
-        $channel->addLast( new DoubleSquareBrackets() );
-        $channel->addLast( new DollarCurlyBrackets() );
-        $channel->addLast( new PercentNumberSnail() );
-        $channel->addLast( new Percentages() );
-        $channel->addLast( new SquareSprintf() );
-        $channel->addLast( new SprintfToPH() );
-        $channel->addLast( new RestoreXliffTagsContent() );
-        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
-        $channel->addLast( new EquivTextToBase64() );
-
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromLayer0ToLayer1', $channel );
-
-        return $channel->transform( $segment );
-    }
-
-    /**
-     * Used to transform external server raw XML content (Ex: TM/MT) to allow them to be stored in a database (Layer 0), used for server-to-server communications (Layer 1)
-     *
-     * @param string $segment
-     *
-     * @return string
+     * @return string The resulting transformed content in Layer 0 format.
      * @throws Exception
      */
     public function fromLayer1ToLayer0( string $segment ): string {
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new MateCatCustomPHToOriginalValue() );
-        $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new EncodeToRawXML() );
-        $channel->addLast( new LtGtEncode() );
-        $channel->addLast( new RestoreXliffTagsContent() );
-        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
-        $channel->addLast( new SplitPlaceholder() );
-        $channel->addLast( new RestoreEquivText() );
-
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromLayer1ToLayer0', $channel );
-
-        return $channel->transform( $segment );
+        return parent::fromLayer1ToLayer0( $segment );
     }
 
     /**
@@ -207,11 +141,11 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromRawXliffToLayer0( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new RemoveDangerousChars() );
-        $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new EncodeControlCharsInXliff() );
-        $channel->addLast( new RestoreXliffTagsContent() );
-        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        $channel->addLast( RemoveDangerousChars::class );
+        $channel->addLast( PlaceHoldXliffTags::class );
+        $channel->addLast( EncodeControlCharsInXliff::class );
+        $channel->addLast( RestoreXliffTagsContent::class );
+        $channel->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromRawXliffToLayer0', $channel );
@@ -229,11 +163,11 @@ class MateCatFilter extends AbstractFilter {
      */
     public function fromLayer0ToRawXliff( string $segment ): string {
         $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new RemoveDangerousChars() );
-        $channel->addLast( new RestoreXliffTagsContent() );
-        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
-        $channel->addLast( new LtGtEncode() );
+        $channel->addLast( PlaceHoldXliffTags::class );
+        $channel->addLast( RemoveDangerousChars::class );
+        $channel->addLast( RestoreXliffTagsContent::class );
+        $channel->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
+        $channel->addLast( LtGtEncode::class );
 
         /** @var $channel Pipeline */
         $channel = $this->featureSet->filter( 'fromLayer0ToRawXliff', $channel );

@@ -9,113 +9,85 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\SubFiltering\Filters\Html\CallbacksHandler;
-use Matecat\SubFiltering\Filters\Html\HtmlParser;
 
 /**
  * Class HtmlToPh
+ *
+ * This class converts HTML tags within a string into placeholder tags (<ph>).
+ * It uses an HtmlParser with a set of callbacks to process different parts of the HTML content.
  *
  * @author  domenico domenico@translated.net / ostico@gmail.com
  * @package SubFiltering
  *
  */
-class HtmlToPh extends AbstractHandler {
-
-    use CallbacksHandler;
+class HtmlToPh extends XmlToPh {
 
     /**
-     * @param string $buffer
+     * Converts a generic tag string into a <ph> placeholder.
+     * The original tag is stored in the 'equiv-text' attribute, base64 encoded.
      *
-     * @return string
-     */
-    protected function _finalizePlainText( string $buffer ): string {
-        return $buffer;
-    }
-
-    /**
-     * @param string $buffer
+     * @param string $buffer The tag string to convert.
      *
-     * @return string
-     */
-    protected function _finalizeHTMLTag( string $buffer ): string {
-        //decode attributes by locking <,> first
-        //because a html tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
-        // Ex:
-        // incoming string : <a href="/users/settings?test=123&amp;amp;ciccio=1" target="_blank">
-        // this should be:   <a href="/users/settings?test=123&amp;ciccio=1" target="_blank"> with only one ampersand encoding
-        //
-
-        $buffer = str_replace( [ '<', '>' ], [ '#_lt_#', '#_gt_#' ], $buffer );
-        $buffer = html_entity_decode( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8' );
-        $buffer = str_replace( [ '#_lt_#', '#_gt_#' ], [ '<', '>' ], $buffer );
-
-        return $this->_finalizeTag( $buffer );
-
-    }
-
-    /**
-     * @param string $buffer
-     *
-     * @return string
+     * @return string The resulting <ph> tag.
      */
     protected function _finalizeTag( string $buffer ): string {
         return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**
-     * @param string $buffer
+     * Validates if a given string is a legitimate HTML tag.
      *
-     * @return string
-     */
-    protected function _fixWrongBuffer( string $buffer ): string {
-        $buffer = str_replace( "<", "&lt;", $buffer );
-
-        return str_replace( ">", "&gt;", $buffer );
-    }
-
-    /**
-     * @param string $buffer
+     * This is meant to cover cases where strip_tags might fail, for example with strings like "3<4".
+     * It performs several checks to ensure only valid tags are processed.
      *
-     * @return string
-     */
-    protected function _finalizeScriptTag( string $buffer ): string {
-        return $this->_finalizeTag( $buffer );
-    }
-
-    /**
-     * This is meant to cover the case when strip_tags fails because of a string like these
+     * @param string $buffer The string to validate.
      *
-     * " test 3<4 and test 2>5 " <-- becomes --> " test 35 "
-     *
-     * Only tags should be converted here
-     *
-     * @param string $buffer
-     *
-     * @return bool
+     * @return bool True if the buffer is a valid tag, false otherwise.
      */
     protected function _isTagValid( string $buffer ): bool {
 
-        /*
-         * accept tags start with:
-         * - starting with / ( optional )
-         * - NOT starting with a number
-         * - containing [a-zA-Z0-9\-\._] at least 1
-         * - ending with a letter a-zA-Z0-9 or a quote "' or /
+        /**
+         * HTML5 Tag Matcher and Global Attribute Parser
          *
+         * This module provides a comprehensive approach to matching and validating HTML5 elements
+         * with a focus on global attributes, including `data-*` attributes with complex Unicode names.
+         *
+         * Features:
+         * 1. Matches all valid HTML5 tags, including structural, text, inline, form, multimedia, table,
+         *    script, interactive, and miscellaneous tags.
+         * 2. Supports opening tags, closing tags, and self-closing tags.
+         * 3. Supports global attributes:
+         *    - Standard global attributes: id, class, style, title, lang, dir, hidden, draggable, etc.
+         *    - Data attributes: data-* with Unicode, emoji, or complex characters.
+         *    - ARIA attributes: role, aria-*.
+         *    - Event handlers: on*, e.g., onclick, onmouseover.
+         *    - Deprecated XML attributes: xml:lang, xml:base.
+         * 4. Handles attribute values in double quotes, single quotes, or unquoted.
+         * 5. Example usage includes parsing headings (`h1`-`h6`) with multiple global attributes,
+         *    as well as other HTML5 elements with complex `data-*` attributes.
+         *
+         * Regex Summary:
+         * - Tag matching: matches all HTML5 tags listed in the specification.
+         * - Attribute matching: matches zero or more global attributes including complex `data-*` names.
+         * - Robust to multiple attributes, whitespace, self-closing tags, and Unicode characters.
+         *
+         * Example HTML matched by the regex:
+         * <h1 id="title1" class="main" data-élément-αριθμός="321">Heading</h1>
+         * <img src="image.png" alt="Photo" data-info="📸"/>
+         * <div hidden data-属性名123="有效">Content</div>
+         * <button onclick="alert('Click!')">Click me</button>
+         *
+         * Notes:
+         * - This regex is intended for validation and parsing in contexts that allow Unicode and extended characters.
+         * - For `dataset` access in JavaScript, `getAttribute` is recommended for attributes with non-ASCII names.
          */
-        if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._:]+?(?:\s[:a-z0-9\-\._]+=.+?)?\s*[\/]{0,1}>#is', $buffer ) ) {
-//            if( is_numeric( substr( $buffer, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#is', $buffer ) ){ //H tag are an exception
-//                //tag can not end with a number
-//                return false;
-//            }
+        if ( preg_match( '#<\s*/?\s*(?:html|head|body|header|footer|main|section|article|nav|aside|h1|h2|h3|h4|h5|h6|p|hr|pre|blockquote|ol|ul|li|dl|dt|dd|figure|figcaption|div|a|em|strong|small|s|cite|q|dfn|abbr|ruby|rt|rp|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|bdi|bdo|span|br|wbr|form|label|input|button|select|datalist|optgroup|option|textarea|output|fieldset|legend|meter|progress|img|audio|video|source|track|picture|map|area|iframe|embed|object|param|table|caption|colgroup|col|tbody|thead|tfoot|tr|td|th|script|noscript|template|canvas|link|style|meta|base|title|details|summary|dialog|menu|menuitem|slot|portal)\b(?:\s+(?:accesskey|class|contenteditable|data-[^\s=]+|dir|draggable|enterkeyhint|hidden|id|inert|inputmode|lang|popover|spellcheck|style|tabindex|title|translate|xml:lang|xml:base|role|aria-[^\s=]+|on\w+)(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?)*\s*/?\s*>#ui', $buffer ) ) {
 
-            //this case covers when filters create an xliff tag inside an html tag:
-            //EX:
-            //original:  &lt;a href=\"<x id="1">\"&gt;
-            //  <a href=\"##LESSTHAN##eCBpZD0iMSIv##GREATERTHAN##\">
+            // This case covers when filters create an XLIFF tag inside an HTML tag's attribute.
+            // For example, &lt;a href=\"<x id="1">\"&gt; which becomes <a href=\"##LESSTHAN##...##GREATERTHAN##\">
+            // We must not process this as a valid tag for replacement.
             if ( strpos( $buffer, ConstantEnum::LTPLACEHOLDER ) !== false || strpos( $buffer, ConstantEnum::GTPLACEHOLDER ) !== false ) {
                 return false;
             }
@@ -125,18 +97,6 @@ class HtmlToPh extends AbstractHandler {
 
         return false;
 
-    }
-
-    /**
-     * @param string $segment
-     *
-     * @return string
-     */
-    public function transform( string $segment ): string {
-        $parser = new HtmlParser();
-        $parser->registerCallbacksHandler( $this );
-
-        return $parser->transform( $segment );
     }
 
 }

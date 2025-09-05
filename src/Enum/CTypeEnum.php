@@ -12,12 +12,12 @@ class CTypeEnum {
     const ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT = 'x-original_ph';
     const ORIGINAL_PH_CONTENT                    = 'x-original_ph_content';
     const HTML                                   = 'x-html';
+    const XML                                    = 'x-xml';
     const TWIG                                   = 'x-twig';
     const RUBY_ON_RAILS                          = 'x-ruby-on-rails';
     const SNAILS                                 = 'x-snails';
     const CURLY_BRACKETS                         = 'x-curly-brackets';
-    const PERCENT_SNAILS                         = 'x-percent-snails';
-    const PERCENT_NUMBER_SNAILS                  = 'x-percent-number-snails';
+    const OBJECTIVE_C_NSSTRING                   = 'x-objective-c-ns-string';
     const PERCENTAGES                            = 'x-percentages';
     const SPRINTF                                = 'x-sprintf';
     const PERCENT_VARIABLE                       = 'x-percent-variable';

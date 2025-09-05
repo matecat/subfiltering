@@ -9,102 +9,176 @@
 
 namespace Matecat\SubFiltering\Commons;
 
-use Exception;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 
+/**
+ * Class Pipeline
+ *
+ * Orchestrates a sequence of handler objects for segment transformation,
+ * manages handler order, tracks transformation state, and realigns segment IDs.
+ *
+ * @package Matecat\SubFiltering\Commons
+ */
 class Pipeline {
 
     /**
+     * Registered handler instances that make up the processing pipeline.
+     *
      * @var AbstractHandler[]
      */
     protected array $handlers;
 
     /**
+     * Tracks the current segment/internal ID number for realignment.
+     *
      * @var int
      */
     protected int $id_number = -1;
 
+    /**
+     * The optional source string the Pipeline operates on.
+     *
+     * @var string|null
+     */
     protected ?string $source;
-    protected ?string $target;
-    protected array   $dataRefMap;
 
     /**
+     * The optional target string the Pipeline operates on.
+     *
+     * @var string|null
+     */
+    protected ?string $target;
+
+    /**
+     * A key/value map used for reference during segment processing.
+     *
+     * @var array
+     */
+    protected array $dataRefMap;
+
+    /**
+     * True if the processed segment contains HTML markup.
+     *
      * @var bool
      */
     private bool $segmentContainsHtml = false;
 
+    /**
+     * Constructor.
+     *
+     * @param string|null $source     The source segment, if available.
+     * @param string|null $target     The target segment, if available.
+     * @param array       $dataRefMap Optional reference map relevant to the segment.
+     */
     public function __construct( ?string $source = null, ?string $target = null, array $dataRefMap = [] ) {
         $this->source     = $source;
         $this->target     = $target;
         $this->dataRefMap = $dataRefMap;
     }
 
+    /**
+     * Gets and increments the next unique internal identifier for segment elements.
+     *
+     * @return string The generated identifier.
+     */
     public function getNextId(): string {
         $this->id_number++;
 
         return ConstantEnum::INTERNAL_ATTR_ID_PREFIX . $this->id_number;
     }
 
+    /**
+     * Resets the internal identifier counter to its default before a new transformation.
+     *
+     * @return void
+     */
     public function resetId(): void {
         $this->id_number = -1;
     }
 
     /**
-     * @return bool
+     * Indicates whether the current segment contains HTML code.
+     *
+     * @return bool True if the segment contains HTML, otherwise false.
      */
     public function segmentContainsHtml(): bool {
         return $this->segmentContainsHtml;
     }
 
-
+    /**
+     * Sets the segmentContainsHtml flag for the current segment.
+     *
+     * @return void
+     */
     public function setSegmentContainsHtml() {
         $this->segmentContainsHtml = true;
     }
 
     /**
-     * @return string|null
+     * Returns the configured source segment.
+     *
+     * @return string|null Source segment or null if not set.
      */
     public function getSource(): ?string {
         return $this->source;
     }
 
     /**
-     * @return string|null
+     * Returns the configured target segment.
+     *
+     * @return string|null Target segment or null if not set.
      */
     public function getTarget(): ?string {
         return $this->target;
     }
 
     /**
-     * @return array
+     * Returns the mapping array provided to the pipeline for external reference.
+     *
+     * @return array The data reference map.
      */
     public function getDataRefMap(): array {
         return $this->dataRefMap;
     }
 
     /**
-     * @param AbstractHandler $handler
+     * Checks if a handler of the specified class is already registered in the pipeline.
      *
-     * @return Pipeline
+     * @param class-string<AbstractHandler> $handlerClass The handler
      */
-    public function addFirst( AbstractHandler $handler ): Pipeline {
-        $this->_register( $handler );
-        array_unshift( $this->handlers, $handler );
+    public function contains( string $handlerClass ): bool {
+        return !empty( array_filter( $this->handlers, function ( $handler ) use ( $handlerClass ) {
+            return $handlerClass == $handler->getName();
+        } ) );
+    }
+
+    /**
+     * Prepends a handler instance to the beginning of the pipeline.
+     *
+     * @param class-string<AbstractHandler> $handler Class name (FQN) of the handler to add.
+     *
+     * @return $this This pipeline instance (for method chaining).
+     */
+    public function addFirst( string $handler ): Pipeline {
+        $handlerInstance = $this->_register( $handler );
+        array_unshift( $this->handlers, $handlerInstance );
 
         return $this;
     }
 
     /**
-     * @param AbstractHandler $newPipeline
-     * @param AbstractHandler $before
+     * Inserts a handler into the pipeline before another specified handler.
      *
-     * @return Pipeline
+     * @param class-string<AbstractHandler> $before      Class name (FQN) of the handler before which the new handler will be inserted.
+     * @param class-string<AbstractHandler> $newPipeline Class name (FQN) of the new handler to insert.
+     *
+     * @return $this This pipeline instance (for method chaining).
      */
-    public function addBefore( AbstractHandler $before, AbstractHandler $newPipeline ): Pipeline {
-        $this->_register( $newPipeline );
+    public function addBefore( string $before, string $newPipeline ): Pipeline {
+        $newPipelineHandler = $this->_register( $newPipeline );
         foreach ( $this->handlers as $pos => $handler ) {
-            if ( $handler->getName() == $before->getName() ) {
-                array_splice( $this->handlers, $pos, 0, [ $newPipeline ] );
+            if ( $handler->getName() == $before ) {
+                array_splice( $this->handlers, $pos, 0, [ $newPipelineHandler ] );
                 break;
             }
         }
@@ -114,16 +188,18 @@ class Pipeline {
     }
 
     /**
-     * @param AbstractHandler $newPipeline
-     * @param AbstractHandler $after
+     * Inserts a handler into the pipeline after another specified handler.
      *
-     * @return Pipeline
+     * @param class-string<AbstractHandler> $after       Class name (FQN) of the handler after which the new handler will be inserted.
+     * @param class-string<AbstractHandler> $newPipeline Class name (FQN) of the new handler to insert.
+     *
+     * @return $this This pipeline instance (for method chaining).
      */
-    public function addAfter( AbstractHandler $after, AbstractHandler $newPipeline ): Pipeline {
-        $this->_register( $newPipeline );
+    public function addAfter( string $after, string $newPipeline ): Pipeline {
+        $newPipelineHandler = $this->_register( $newPipeline );
         foreach ( $this->handlers as $pos => $handler ) {
-            if ( $handler->getName() == $after->getName() ) {
-                array_splice( $this->handlers, $pos + 1, 0, [ $newPipeline ] );
+            if ( $handler->getName() == $after ) {
+                array_splice( $this->handlers, $pos + 1, 0, [ $newPipelineHandler ] );
                 break;
             }
         }
@@ -133,15 +209,15 @@ class Pipeline {
     }
 
     /**
-     * Remove handler from pipeline
+     * Removes the specified handler class from the pipeline.
      *
-     * @param AbstractHandler $handlerToDelete
+     * @param class-string<AbstractHandler> $handlerToDelete Handler class name (FQN) to remove.
      *
-     * @return $this
+     * @return $this This pipeline instance (for method chaining).
      */
-    public function remove( AbstractHandler $handlerToDelete ): Pipeline {
+    public function remove( string $handlerToDelete ): Pipeline {
         foreach ( $this->handlers as $pos => $handler ) {
-            if ( $handler->getName() == $handlerToDelete->getName() ) {
+            if ( $handler->getName() == $handlerToDelete ) {
                 unset( $this->handlers[ $pos ] );
                 $this->handlers = array_values( $this->handlers );
                 break;
@@ -152,24 +228,28 @@ class Pipeline {
     }
 
     /**
-     * @param AbstractHandler $handler
+     * Appends a handler instance to the end of the pipeline.
      *
-     * @return Pipeline
+     * @param class-string<AbstractHandler> $handler Class name (FQN) of the handler to add.
+     *
+     * @return $this This pipeline instance (for method chaining).
      */
-    public function addLast( AbstractHandler $handler ): Pipeline {
-        $this->_register( $handler );
-        $this->handlers[] = $handler;
+    public function addLast( string $handler ): Pipeline {
+        $newHandler       = $this->_register( $handler );
+        $this->handlers[] = $newHandler;
 
         return $this;
     }
 
     /**
-     * @param string $segment
+     * Transforms the provided segment by sequentially applying all registered handlers
+     * and realigns IDs afterward.
      *
-     * @return mixed
-     * @throws Exception
+     * @param string $segment The input segment string to process.
+     *
+     * @return string The processed segment after all transformations.
      */
-    public function transform( string $segment ) {
+    public function transform( string $segment ): string {
         $this->id_number = -1;
         foreach ( $this->handlers as $handler ) {
             $segment = $handler->transform( $segment );
@@ -178,7 +258,15 @@ class Pipeline {
         return $this->realignIDs( $segment );
     }
 
-    protected function realignIDs( string $segment ) {
+    /**
+     * Adjusts and realigns ID tags in the provided segment string,
+     * so IDs are sequential and formatted as required.
+     *
+     * @param string $segment The input string containing ID tags to realign.
+     *
+     * @return string The string with realigned and updated ID tags.
+     */
+    protected function realignIDs( string $segment ): string {
         if ( $this->id_number > -1 ) {
             preg_match_all( '/"__mtc_[0-9]+"/', $segment, $html, PREG_SET_ORDER );
             foreach ( $html as $pos => $tag_id ) {
@@ -191,14 +279,18 @@ class Pipeline {
     }
 
     /**
-     * @param AbstractHandler $handler
+     * Instantiates a handler by class name and registers this pipeline with it.
      *
-     * @return $this
+     * @template T of AbstractHandler
+     * @param class-string<T> $handler Handler class name to instantiate.
+     *
+     * @return T An instantiated handler object with the pipeline set.
      */
-    protected function _register( AbstractHandler $handler ): Pipeline {
+    protected function _register( string $handler ): AbstractHandler {
+        $handler = new $handler();
         $handler->setPipeline( $this );
 
-        return $this;
+        return $handler;
     }
 
 }

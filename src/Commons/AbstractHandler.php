@@ -10,8 +10,6 @@
 namespace Matecat\SubFiltering\Commons;
 
 
-use Exception;
-
 abstract class AbstractHandler {
 
     protected string $name;
@@ -26,7 +24,6 @@ abstract class AbstractHandler {
      *
      * @return string
      *
-     * @throws Exception
      */
     public abstract function transform( string $segment ): string;
 
