@@ -11,32 +11,32 @@ class SprintfLocker {
     const POST_LOCK_TAG = '########_____';
 
     /**
-     * @var null
+     * @var string|null
      */
-    private $source;
+    private ?string $source;
 
     /**
-     * @var null
+     * @var string|null
      */
-    private $target;
-
-    /**
-     * @var array
-     */
-    private $notAllowedMap = [];
+    private ?string $target;
 
     /**
      * @var array
      */
-    private $replacementMap = [];
+    private array $notAllowedMap;
+
+    /**
+     * @var array
+     */
+    private array $replacementMap = [];
 
     /**
      * SprintfLocker constructor.
      *
-     * @param null $source
-     * @param null $target
+     * @param string|null $source
+     * @param string|null $target
      */
-    public function __construct( $source = null, $target = null ) {
+    public function __construct( ?string $source = null, ?string $target = null ) {
         $this->source        = $source;
         $this->target        = $target;
         $this->notAllowedMap = $this->createNotAllowedMap();
@@ -45,7 +45,7 @@ class SprintfLocker {
     /**
      * @return array
      */
-    private function createNotAllowedMap() {
+    private function createNotAllowedMap(): array {
         $map = [];
 
         $all = include __DIR__ . "/language/all/not_allowed.php";
@@ -65,11 +65,11 @@ class SprintfLocker {
     }
 
     /**
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      */
-    public function lock( $segment ) {
+    public function lock( string $segment ): string {
         $replacementMap       = $this->createReplacementMap( $segment );
         $this->replacementMap = $replacementMap;
 
@@ -77,11 +77,11 @@ class SprintfLocker {
     }
 
     /**
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      */
-    public function unlock( $segment ) {
+    public function unlock(string $segment ): string {
         $replacementMap = $this->replacementMap;
 
         return str_replace( array_values( $replacementMap ), array_keys( $replacementMap ), $segment );
@@ -90,11 +90,11 @@ class SprintfLocker {
     /**
      * Create the replacement map
      *
-     * @param $segment
+     * @param string $segment
      *
      * @return array
      */
-    private function createReplacementMap( $segment ) {
+    private function createReplacementMap( string $segment ): array {
         $replacementMap = [];
 
         foreach ( $this->notAllowedMap as $item => $details ) {
@@ -120,11 +120,12 @@ class SprintfLocker {
     }
 
     /**
-     * @param $string
+     * @param string $string
      *
      * @return string
      */
-    private function maskString( $string ) {
+    private function maskString( string $string ): string {
         return str_replace( [ '%', '-', '_' ], '', $string );
     }
+
 }

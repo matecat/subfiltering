@@ -28,11 +28,11 @@ class SingleCurlyBracketsToPh extends AbstractHandler {
      *  #}
      * </code>
      *
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
         preg_match_all( '/{[^<>{} ]+?}/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $pos => $twig_variable ) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag

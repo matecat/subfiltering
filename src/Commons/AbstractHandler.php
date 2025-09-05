@@ -10,25 +10,22 @@
 namespace Matecat\SubFiltering\Commons;
 
 
-use Exception;
-
 abstract class AbstractHandler {
 
-    protected $name;
+    protected string $name;
 
     /**
      * @var Pipeline
      */
-    protected $pipeline;
+    protected Pipeline $pipeline;
 
     /**
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      *
-     * @throws Exception
      */
-    public abstract function transform( $segment );
+    public abstract function transform( string $segment ): string;
 
     /**
      * AbstractHandler constructor.
@@ -38,9 +35,9 @@ abstract class AbstractHandler {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getName() {
+    public function getName(): string {
         return $this->name;
     }
 
@@ -54,7 +51,7 @@ abstract class AbstractHandler {
     /**
      * @return Pipeline
      */
-    public function getPipeline() {
+    public function getPipeline(): Pipeline {
         return $this->pipeline;
     }
 

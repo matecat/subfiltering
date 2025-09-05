@@ -9,7 +9,7 @@ class Utils {
      *
      * @return bool
      */
-    public static function array_is_list( $array ) {
+    public static function array_is_list( $array ): bool {
 
         if ( !function_exists( 'array_is_list' ) ) { // since php 8.1
 
@@ -29,7 +29,7 @@ class Utils {
      *
      * @return bool
      */
-    public static function contains( $needle, $haystack ) {
+    public static function contains( string $needle, string $haystack ): bool {
         return strpos( $haystack, $needle ) !== false;
     }
 
@@ -43,7 +43,7 @@ class Utils {
      * @return int
      *
      */
-    public static function fastUnicode2ord( $mb_char ) {
+    public static function fastUnicode2ord( string $mb_char ) {
         switch ( strlen( $mb_char ) ) {
             case 1:
                 return ord( $mb_char );
@@ -65,29 +65,29 @@ class Utils {
     }
 
     /**
-     * @param $str
+     * @param array $str
      *
      * @return string
      */
-    public static function htmlentitiesFromUnicode( $str ) {
+    public static function htmlentitiesFromUnicode( array $str ): string {
         return "&#" . self::fastUnicode2ord( $str[ 1 ] ) . ";";
     }
 
     /**
      * multibyte string manipulation functions
      * source : http://stackoverflow.com/questions/9361303/can-i-get-the-unicode-value-of-a-character-or-vise-versa-with-php
-     * original source : PHPExcel libary (http://phpexcel.codeplex.com/)
-     * get the char from unicode code
+     * original source: PHPExcel libary (http://phpexcel.codeplex.com/)
+     * get the char from Unicode code
      *
-     * @param $o
+     * @param int $o
      *
      * @return string
      */
-    public static function unicode2chr( $o ) {
+    public static function unicode2chr( int $o ): string {
         if ( function_exists( 'mb_convert_encoding' ) ) {
-            return mb_convert_encoding( '&#' . intval( $o ) . ';', 'UTF-8', 'HTML-ENTITIES' );
+            return mb_convert_encoding( '&#' . $o . ';', 'UTF-8', 'HTML-ENTITIES' );
         }
 
-        return chr( intval( $o ) );
+        return chr( $o );
     }
 }

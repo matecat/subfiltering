@@ -51,7 +51,7 @@ class SprintfTest extends TestCase {
             '%d' => CTypeEnum::SPRINTF,
             '%c' => CTypeEnum::SPRINTF,
             '%x' => CTypeEnum::SPRINTF,
-            '%@' => CTypeEnum::PERCENT_SNAILS,
+            '%@' => CTypeEnum::OBJECTIVE_C_NSSTRING,
         ];
 
         $this->runTests($notAllowed, 'he-IL');
@@ -68,7 +68,7 @@ class SprintfTest extends TestCase {
             '%d' => CTypeEnum::SPRINTF,
             '%c' => CTypeEnum::SPRINTF,
             '%x' => CTypeEnum::SPRINTF,
-            '%@' => CTypeEnum::PERCENT_SNAILS,
+            '%@' => CTypeEnum::OBJECTIVE_C_NSSTRING,
         ];
 
         $this->runTests($notAllowed, 'tr-TR');
@@ -83,7 +83,7 @@ class SprintfTest extends TestCase {
     {
         foreach ($notAllowed as $placeholder => $ctype){
 
-            MateCatFilter::destroyInstance();
+
 
             $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', $languageToTest );
 

@@ -12,7 +12,7 @@ class Variables extends AbstractHandler {
      *
      * @return string
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
         /*
          * Examples:
          * - %{{(text-align=center)}}

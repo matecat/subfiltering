@@ -14,7 +14,7 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class RemoveDangerousChars extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         //clean invalid xml entities ( characters with ascii < 32 and different from 0A, 0D and 09
         $regexpHexEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
@@ -26,9 +26,8 @@ class RemoveDangerousChars extends AbstractHandler {
 
         $segment = preg_replace( $regexpAscii, '', $segment );
         $segment = preg_replace( $regexpHexEntity, '', $segment );
-        $segment = preg_replace( $regexpEntity, '', $segment );
 
-        return $segment;
+        return preg_replace( $regexpEntity, '', $segment );
 
     }
 

@@ -14,9 +14,9 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class SpecialEntitiesToPlaceholdersForView extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
-        $segment = str_ireplace(
+        return str_ireplace(
                 [
                         '&#10;', '&#13;', ' ' /* NBSP in ascii value */,
                         '&#x0A;', '&#x0C;',
@@ -35,8 +35,6 @@ class SpecialEntitiesToPlaceholdersForView extends AbstractHandler {
                         ConstantEnum::tabPlaceholder,
                         ConstantEnum::tabPlaceholder,
                 ], $segment );
-
-        return $segment;
 
     }
 

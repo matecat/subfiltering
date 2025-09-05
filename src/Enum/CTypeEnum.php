@@ -12,18 +12,19 @@ class CTypeEnum {
     const ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT = 'x-original_ph';
     const ORIGINAL_PH_CONTENT                    = 'x-original_ph_content';
     const HTML                                   = 'x-html';
+    const XML                                    = 'x-xml';
     const TWIG                                   = 'x-twig';
     const RUBY_ON_RAILS                          = 'x-ruby-on-rails';
     const SNAILS                                 = 'x-snails';
     const CURLY_BRACKETS                         = 'x-curly-brackets';
-    const PERCENT_SNAILS                         = 'x-percent-snails';
-    const PERCENT_NUMBER_SNAILS                  = 'x-percent-number-snails';
+    const OBJECTIVE_C_NSSTRING                   = 'x-objective-c-ns-string';
     const PERCENTAGES                            = 'x-percentages';
     const SPRINTF                                = 'x-sprintf';
     const PERCENT_VARIABLE                       = 'x-percent-variable';
     const SMART_COUNT                            = 'x-smart-count';
     const DOUBLE_SQUARE_BRACKETS                 = 'x-double-square-brackets';
     const DOLLAR_CURLY_BRACKETS                  = 'x-dollar-curly-brackets';
+    const ICU                                    = 'x-icu';
     const SQUARE_SPRINTF                         = 'x-square-sprintf';
 
     // Data Ref Layer 2
@@ -37,13 +38,13 @@ class CTypeEnum {
     const SC_DATA_REF                   = 'x-sc_data_ref';
     const EC_DATA_REF                   = 'x-ec_data_ref';
 
-    protected static $allConstantValues    = [];
-    protected static $layer2ConstantValues = [];
+    protected static array $allConstantValues    = [];
+    protected static array $layer2ConstantValues = [];
 
     /**
      * @return array
      */
-    protected static function getAllConstantValuesMap() {
+    protected static function getAllConstantValuesMap(): array {
         if ( empty( static::$allConstantValues ) ) {
             $reflectedProperty            = ( new ReflectionClass( static::class ) )->getConstants();
             static::$allConstantValues    = array_flip( $reflectedProperty );
@@ -62,7 +63,7 @@ class CTypeEnum {
      *
      * @return bool
      */
-    public static function isMatecatCType( $ctype ) {
+    public static function isMatecatCType( string $ctype ): bool {
         return array_key_exists( $ctype, static::getAllConstantValuesMap()[ 'all' ] );
     }
 
@@ -71,7 +72,7 @@ class CTypeEnum {
      *
      * @return bool
      */
-    public static function isLayer2Constant( $ctype ) {
+    public static function isLayer2Constant( string $ctype ): bool {
         return array_key_exists( $ctype, static::getAllConstantValuesMap()[ 'layer2' ] );
     }
 

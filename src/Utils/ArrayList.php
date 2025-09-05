@@ -28,7 +28,7 @@ class ArrayList extends ArrayObject {
         parent::__construct( $list );
     }
 
-    public static function instance( array $list = [] ) {
+    public static function instance( array $list = [] ): ArrayList {
         return new static( $list );
     }
 
@@ -63,7 +63,7 @@ class ArrayList extends ArrayObject {
      *
      * @return true
      */
-    public function add( $value ) {
+    public function add( $value ): bool {
         parent::append( $value );
         return true;
     }

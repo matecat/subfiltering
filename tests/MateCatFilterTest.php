@@ -3,24 +3,29 @@
 namespace Matecat\SubFiltering\Tests;
 
 use Exception;
+use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
+use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\SprintfToPH;
+use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
+use Matecat\SubFiltering\HandlersSorter;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Tests\Mocks\Features\AirbnbFeature;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
-class MateCatSubFilteringTest extends TestCase {
+class MateCatFilterTest extends TestCase {
     /**
      * @return MateCatFilter
      * @throws Exception
      */
     private function getFilterInstance( array $data_ref_map = [] ) {
-        MateCatFilter::destroyInstance(); // for isolation test
+
 
         /** @var $filter MateCatFilter */
         $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', $data_ref_map );
@@ -28,6 +33,152 @@ class MateCatSubFilteringTest extends TestCase {
         return $filter;
 
     }
+
+
+    /**
+     * @throws Exception
+     */
+    public function testGetInstanceWithDefaultHandlers() {
+        // default $handlerClassNamesForLayer0ToLayer1Transition is an empty array
+        $filter   = MateCatFilter::getInstance( new FeatureSet() );
+        $pipeline = $filter->getFromLayer0ToLayer1Pipeline();
+
+        // check that default handlers are loaded
+        $defaultHandlers = array_keys( HandlersSorter::injectableHandlersOrder );
+        foreach ( $defaultHandlers as $handler ) {
+            $this->assertTrue( $pipeline->contains( $handler ) );
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetInstanceWithNullHandlers() {
+        // Pass null for $handlerClassNamesForLayer0ToLayer1Transition
+        $filter   = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], null );
+        $pipeline = $filter->getFromLayer0ToLayer1Pipeline();
+
+        // check that no injectable handlers are loaded
+        $defaultHandlers = array_keys( HandlersSorter::injectableHandlersOrder );
+        foreach ( $defaultHandlers as $handler ) {
+            $this->assertFalse( $pipeline->contains( $handler ) );
+        }
+
+        // check that basic handlers are still there
+        $this->assertTrue( $pipeline->contains( StandardPHToMateCatCustomPH::class ) );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetInstanceWithCustomHandlers() {
+        // Use a specific handler
+        $customHandlers = [ HtmlToPh::class ];
+
+        $filter   = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], $customHandlers );
+        $pipeline = $filter->getFromLayer0ToLayer1Pipeline();
+
+        // check that the custom handler is loaded
+        $this->assertTrue( $pipeline->contains( HtmlToPh::class ) );
+
+        // check another handler that is in the default set is not loaded
+        $this->assertFalse( $pipeline->contains( SprintfToPH::class ) );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetInstanceWithNullDataRefMap() {
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null );
+
+        $reflection         = new ReflectionClass( AbstractFilter::class );
+        $dataRefMapProperty = $reflection->getProperty( 'dataRefMap' );
+        $dataRefMapProperty->setAccessible( true );
+
+        $this->assertSame( [], $dataRefMapProperty->getValue( $filter ) );
+    }
+
+
+    /**
+     * Test realignIDInLayer1 when source and target have matching tags
+     */
+    public function testRealignIDInLayer1WithMatchingTags(): void {
+
+        $mateCatFilter = new MateCatFilter();
+
+        $source = '<ph id="mtc_1" equiv-text="base64:JTEkcw=="/> <ph id="mtc_2" equiv-text="base64:JTEkcw=="/>';
+        $target = '<ph id="mtc_5" equiv-text="base64:JTEkcw=="/> <ph id="mtc_6" equiv-text="base64:JTEkcw=="/>';
+
+        $expected = '<ph id="mtc_1" equiv-text="base64:JTEkcw=="/> <ph id="mtc_2" equiv-text="base64:JTEkcw=="/>';
+        $result   = $mateCatFilter->realignIDInLayer1( $source, $target );
+
+        $this->assertEquals( $expected, $result );
+    }
+
+    /**
+     * Test realignIDInLayer1 when tags in source and target do not match in number
+     */
+    public function testRealignIDInLayer1WithMismatchedTagCount(): void {
+
+        $mateCatFilter = new MateCatFilter();
+
+        $source = '<ph id="mtc_1" equiv-text="base64:JTEkcw=="/>';
+        $target = '<ph id="mtc_5" equiv-text="base64:JTEkcw=="/> <ph id="mtc_6" equiv-text="base64:JTEkcw=="/>';
+
+        $expected = $target; // When mismatched, target should remain unchanged
+        $result   = $mateCatFilter->realignIDInLayer1( $source, $target );
+
+        $this->assertEquals( $expected, $result );
+    }
+
+    /**
+     * Test realignIDInLayer1 when some tags in target do not match source tags
+     */
+    public function testRealignIDInLayer1WithNonMatchingTags(): void {
+
+        $mateCatFilter = new MateCatFilter();
+
+        $source = '<ph id="mtc_1" equiv-text="base64:JTEkcw=="/> <ph id="mtc_2" equiv-text="base64:abc123=="/>';
+        $target = '<ph id="mtc_5" equiv-text="base64:JTEkcw=="/> <ph id="mtc_6" equiv-text="base64:xyz789=="/>';
+
+        $expected = '<ph id="mtc_1" equiv-text="base64:JTEkcw=="/> <ph id="mtc_6" equiv-text="base64:xyz789=="/>';
+        $result   = $mateCatFilter->realignIDInLayer1( $source, $target );
+
+        $this->assertEquals( $expected, $result );
+    }
+
+    /**
+     * Test realignIDInLayer1 with completely mismatched tags
+     */
+    public function testRealignIDInLayer1WithCompletelyMismatchedTags(): void {
+
+        $mateCatFilter = new MateCatFilter();
+
+        $source = '<ph id="mtc_1" equiv-text="base64:abc123=="/> <ph id="mtc_2" equiv-text="base64:xyz456=="/>';
+        $target = '<ph id="mtc_5" equiv-text="base64:zzz999=="/> <ph id="mtc_6" equiv-text="base64:yyy888=="/>';
+
+        $expected = $target; // Completely mismatched tags, so target remains unchanged
+        $result   = $mateCatFilter->realignIDInLayer1( $source, $target );
+
+        $this->assertEquals( $expected, $result );
+    }
+
+    /**
+     * Test realignIDInLayer1 with no tags in source and target
+     */
+    public function testRealignIDInLayer1WithNoTags(): void {
+
+        $mateCatFilter = new MateCatFilter();
+
+        $source = 'This is a plain text without tags.';
+        $target = 'This is another plain text without tags.';
+
+        $expected = $target; // No tags present, target remains unchanged
+        $result   = $mateCatFilter->realignIDInLayer1( $source, $target );
+
+        $this->assertEquals( $expected, $result );
+    }
+
 
     /**
      * @throws Exception
@@ -77,7 +228,7 @@ class MateCatSubFilteringTest extends TestCase {
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
         //Start test
-        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;lt; <ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3N0cm9uZyZndDs="/>Use professional tools<ph id="mtc_3" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9zdHJvbmcmZ3Q7"/> in your <ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
+        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;lt; <ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3N0cm9uZyZndDs="/>Use professional tools<ph id="mtc_3" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9zdHJvbmcmZ3Q7"/> in your <ph id="mtc_4" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
@@ -93,7 +244,7 @@ class MateCatSubFilteringTest extends TestCase {
     public function testComplexUrls() {
         $filter = $this->getFilterInstance();
 
-        $fromUi       = '<ph id="mtc_14" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iaHR0cHM6Ly9hdXRoLnViZXIuY29tL2xvZ2luLz9icmVlemVfbG9jYWxfem9uZT1kY2ExJmFtcDthbXA7bmV4dF91cmw9aHR0cHMlM0ElMkYlMkZkcml2ZXJzLnViZXIuY29tJTJGcDMlMkYmYW1wO2FtcDtzdGF0ZT00MElLeF9YR0N1OXRobEtrSUkxUmRCOFlhUVRVY0g1aE1uVnllWXJCN0lBJTNEIiZndDs="/>Partner Dashboard<ph id="mtc_15" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> to match the payment document you uploaded';
+        $fromUi       = '<ph id="mtc_14" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iaHR0cHM6Ly9hdXRoLnViZXIuY29tL2xvZ2luLz9icmVlemVfbG9jYWxfem9uZT1kY2ExJmFtcDthbXA7bmV4dF91cmw9aHR0cHMlM0ElMkYlMkZkcml2ZXJzLnViZXIuY29tJTJGcDMlMkYmYW1wO2FtcDtzdGF0ZT00MElLeF9YR0N1OXRobEtrSUkxUmRCOFlhUVRVY0g1aE1uVnllWXJCN0lBJTNEIiZndDs="/>Partner Dashboard<ph id="mtc_15" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> to match the payment document you uploaded';
         $expectedToDb = '&lt;a href="https://auth.uber.com/login/?breeze_local_zone=dca1&amp;amp;next_url=https%3A%2F%2Fdrivers.uber.com%2Fp3%2F&amp;amp;state=40IKx_XGCu9thlKkII1RdB8YaQTUcH5hMnVyeYrB7IA%3D"&gt;Partner Dashboard&lt;/a&gt; to match the payment document you uploaded';
         $toDb         = $filter->fromLayer1ToLayer0( $fromUi );
 
@@ -110,7 +261,7 @@ class MateCatSubFilteringTest extends TestCase {
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
-        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;amp; <ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9InswfSIvPg==" equiv-text="base64:ezB9"/> &amp;quot; &amp;apos;<ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjIiIGVxdWl2LXRleHQ9Ii91c2Vycy9zZXR0aW5ncz90ZXN0PTEyMyZhbXA7Y2ljY2lvPTEiLz4=" equiv-text="base64:L3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDtjaWNjaW89MQ=="/> <ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
+        $string_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> Airbnb &amp;amp; Co. &amp;amp; <ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjEiIGVxdWl2LXRleHQ9InswfSIvPg==" equiv-text="base64:ezB9"/> &amp;quot; &amp;apos;<ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSJQbGFjZUhvbGRlcjIiIGVxdWl2LXRleHQ9Ii91c2Vycy9zZXR0aW5ncz90ZXN0PTEyMyZhbXA7Y2ljY2lvPTEiLz4=" equiv-text="base64:L3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDtjaWNjaW89MQ=="/> <ph id="mtc_4" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs="/>';
 
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
         $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
@@ -148,7 +299,7 @@ class MateCatSubFilteringTest extends TestCase {
     public function testGTagsWithXidAttributes() {
         $filter = $this->getFilterInstance();
 
-        $segment   = 'This is a <g id="43">test</g> (with a <g xid="068cd98d-103c-49fe-92e1-76e863f93bba" equiv-text="test" id="44">g tag with xid attribute</g>).';
+        $segment        = 'This is a <g id="43">test</g> (with a <g xid="068cd98d-103c-49fe-92e1-76e863f93bba" equiv-text="test" id="44">g tag with xid attribute</g>).';
         $string_from_UI = 'This is a <g id="43">test</g> (with a <g xid="068cd98d-103c-49fe-92e1-76e863f93bba" equiv-text="base64:dGVzdA==" id="44">g tag with xid attribute</g>).';
 
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
@@ -287,7 +438,7 @@ class MateCatSubFilteringTest extends TestCase {
         $string_from_UI = '&lt;b&gt;de <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JTEkcw=="/>, &lt;/b&gt;que';
         $this->assertEquals( $expected_segment, $filter->fromLayer2ToLayer0( $string_from_UI ) );
 
-        $string_in_layer1 = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2ImZ3Q7"/>de <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JTEkcw=="/>, <ph id="mtc_3" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9iJmd0Ow=="/>que';
+        $string_in_layer1 = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2ImZ3Q7"/>de <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JTEkcw=="/>, <ph id="mtc_3" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9iJmd0Ow=="/>que';
         $this->assertEquals( $expected_segment, $filter->fromLayer1ToLayer0( $string_in_layer1 ) );
 
     }
@@ -314,7 +465,7 @@ class MateCatSubFilteringTest extends TestCase {
         // &lt;/x&gt; is a html snippet sent as text and encoded inside a xliff
         // &amp;lt;/i&amp;gt; - &amp;nbsp; is html sent as encoded string like a lesson of html on a web page
         $database_segment = '&lt;/a&gt; - &amp;lt;/i&amp;gt; - &amp;nbsp; -      Text <g id="1">pippo</g>';
-        $string_from_UI   = '<ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> - &amp;lt;/i&amp;gt; - &amp;nbsp; - ##$_A0$##    Text <g id="1">pippo</g>';
+        $string_from_UI   = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/> - &amp;lt;/i&amp;gt; - &amp;nbsp; - ##$_A0$##    Text <g id="1">pippo</g>';
 
 
         $this->assertEquals( $string_from_UI, $filter->fromLayer0ToLayer2( $database_segment ) );
@@ -329,7 +480,7 @@ class MateCatSubFilteringTest extends TestCase {
 
     public function testSprintf() {
         $channel = new Pipeline( 'hu-HU', 'az-AZ' );
-        $channel->addLast( new SprintfToPH() );
+        $channel->addLast( SprintfToPH::class );
 
         $segment         = 'Legalább 10%-os befejezett foglalás 20%-dir VAGY';
         $seg_transformed = $channel->transform( $segment );
@@ -342,7 +493,7 @@ class MateCatSubFilteringTest extends TestCase {
         $this->assertEquals( $segment, $seg_transformed );
 
         $channel = new Pipeline( 'hu-HU', 'it-IT' );
-        $channel->addLast( new SprintfToPH() );
+        $channel->addLast( SprintfToPH::class );
 
         $segment         = 'Legalább 10%-aaa befejezett foglalás 20%-bbb VAGY';
         $seg_transformed = $channel->transform( $segment );
@@ -363,15 +514,15 @@ class MateCatSubFilteringTest extends TestCase {
         $xliffTags = [
                 [
                         'db_segment'          => '&lt;g id="1"&gt;',
-                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2cgaWQ9IjEiJmd0Ow=="/>',
+                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2cgaWQ9IjEiJmd0Ow=="/>',
                 ],
                 [
                         'db_segment'          => '&lt;x id="1"/&gt;',
-                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/>',
+                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/>',
                 ],
                 [
                         'db_segment'          => '&lt;pc id="1"&gt;',
-                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3BjIGlkPSIxIiZndDs="/>',
+                        'expected_l1_segment' => '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3BjIGlkPSIxIiZndDs="/>',
                 ],
         ];
 
@@ -475,7 +626,7 @@ class MateCatSubFilteringTest extends TestCase {
         $expected = 'Hi {this strings would not be escaped}. Instead <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t0aGlzIG9uZX19"/> is a valid twig expression. Also <ph id="mtc_2" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyVjaWFvJX0="/> is valid!';
 
         $channel = new Pipeline();
-        $channel->addLast( new TwigToPh() );
+        $channel->addLast( TwigToPh::class );
         $seg_transformed = $channel->transform( $segment );
         $this->assertEquals( $expected, $seg_transformed );
     }
@@ -485,7 +636,7 @@ class MateCatSubFilteringTest extends TestCase {
         $expected = 'Dear <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3tjdXN0b21lci5maXJzdF9uYW1lfX0="/>, This is <ph id="mtc_2" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3thZ2VudC5hbGlhc319"/> with Airbnb.';
 
         $channel = new Pipeline();
-        $channel->addLast( new TwigToPh() );
+        $channel->addLast( TwigToPh::class );
         $seg_transformed = $channel->transform( $segment );
         $this->assertEquals( $expected, $seg_transformed );
     }
@@ -498,7 +649,7 @@ class MateCatSubFilteringTest extends TestCase {
 
     public function testPhWithoutDataRef() {
         $db_segment = 'We can control who sees %s content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
-        $Filter     = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
+        $Filter     = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET' );
 
         $expected_l1_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
         $expected_l2_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> content when with <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>Visibility Constraints.';
@@ -780,12 +931,12 @@ class MateCatSubFilteringTest extends TestCase {
         $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [] );
 
 //        $db_segment          = '&lt;span data-type="hotspot" class="hotspotOnImage" style="position: relative;display: inline-block;max-width: 100%"&gt;&lt;img src="https://files-storage.easygenerator.com/image/a59cc702-b609-483d-89bd-d65084cde0ed.png" alt="" style="max-width:100%"&gt;&lt;span class="spot" style="position: absolute; display: inline-block; width: 608px; height: 373px; top: 22px; left: 15px;" data-text="Fysische besmetting" data-id="b0d02fa9-a022-4258-d0a9-b9b1b5deacc0"&gt;&lt;/span&gt;&lt;span class="spot" style="position: absolute; display: inline-block; width: 591px; height: 340px; top: 55px; left: 675px;" data-text="Besmetting met allergenen" data-id="04e17f73-f836-485d-e2c5-293b0f4ec4ff"&gt;&lt;/span&gt;&lt;span class="spot" style="position: absolute; display: inline-block; width: 601px; height: 357px; top: 479px; left: 26px;" data-text="Microbiologische besmetting" data-id="6afa3766-4d97-4d08-c3d5-ce9281728d01"&gt;&lt;/span&gt;&lt;span class="spot" style="position: absolute; display: inline-block; width: 590px; height: 362px; top: 478px; left: 679px;" data-text="Chemische besmetting" data-id="2918ea16-fb49-409e-d33d-4f2bbcbd4d53"&gt;&lt;/span&gt;&lt;/span&gt;';
-//        $expected_l1_segment = '<ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/><ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2ltZyBzcmM9Imh0dHBzOi8vZmlsZXMtc3RvcmFnZS5lYXN5Z2VuZXJhdG9yLmNvbS9pbWFnZS9hNTljYzcwMi1iNjA5LTQ4M2QtODliZC1kNjUwODRjZGUwZWQucG5nIiBhbHQ9IiIgc3R5bGU9Im1heC13aWR0aDoxMDAlIiZndDs="/><ph id="mtc_3" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwOHB4OyBoZWlnaHQ6IDM3M3B4OyB0b3A6IDIycHg7IGxlZnQ6IDE1cHg7IiBkYXRhLXRleHQ9IkZ5c2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9ImIwZDAyZmE5LWEwMjItNDI1OC1kMGE5LWI5YjFiNWRlYWNjMCImZ3Q7"/><ph id="mtc_4" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_5" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MXB4OyBoZWlnaHQ6IDM0MHB4OyB0b3A6IDU1cHg7IGxlZnQ6IDY3NXB4OyIgZGF0YS10ZXh0PSJCZXNtZXR0aW5nIG1ldCBhbGxlcmdlbmVuIiBkYXRhLWlkPSIwNGUxN2Y3My1mODM2LTQ4NWQtZTJjNS0yOTNiMGY0ZWM0ZmYiJmd0Ow=="/><ph id="mtc_6" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_7" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwMXB4OyBoZWlnaHQ6IDM1N3B4OyB0b3A6IDQ3OXB4OyBsZWZ0OiAyNnB4OyIgZGF0YS10ZXh0PSJNaWNyb2Jpb2xvZ2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjZhZmEzNzY2LTRkOTctNGQwOC1jM2Q1LWNlOTI4MTcyOGQwMSImZ3Q7"/><ph id="mtc_8" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_9" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MHB4OyBoZWlnaHQ6IDM2MnB4OyB0b3A6IDQ3OHB4OyBsZWZ0OiA2NzlweDsiIGRhdGEtdGV4dD0iQ2hlbWlzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjI5MThlYTE2LWZiNDktNDA5ZS1kMzNkLTRmMmJiY2JkNGQ1MyImZ3Q7"/><ph id="mtc_10" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_11" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/>';
-//        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/&gt;&lt;ph id="mtc_2" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O2ltZyBzcmM9Imh0dHBzOi8vZmlsZXMtc3RvcmFnZS5lYXN5Z2VuZXJhdG9yLmNvbS9pbWFnZS9hNTljYzcwMi1iNjA5LTQ4M2QtODliZC1kNjUwODRjZGUwZWQucG5nIiBhbHQ9IiIgc3R5bGU9Im1heC13aWR0aDoxMDAlIiZndDs="/&gt;&lt;ph id="mtc_3" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwOHB4OyBoZWlnaHQ6IDM3M3B4OyB0b3A6IDIycHg7IGxlZnQ6IDE1cHg7IiBkYXRhLXRleHQ9IkZ5c2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9ImIwZDAyZmE5LWEwMjItNDI1OC1kMGE5LWI5YjFiNWRlYWNjMCImZ3Q7"/&gt;&lt;ph id="mtc_4" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_5" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MXB4OyBoZWlnaHQ6IDM0MHB4OyB0b3A6IDU1cHg7IGxlZnQ6IDY3NXB4OyIgZGF0YS10ZXh0PSJCZXNtZXR0aW5nIG1ldCBhbGxlcmdlbmVuIiBkYXRhLWlkPSIwNGUxN2Y3My1mODM2LTQ4NWQtZTJjNS0yOTNiMGY0ZWM0ZmYiJmd0Ow=="/&gt;&lt;ph id="mtc_6" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_7" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwMXB4OyBoZWlnaHQ6IDM1N3B4OyB0b3A6IDQ3OXB4OyBsZWZ0OiAyNnB4OyIgZGF0YS10ZXh0PSJNaWNyb2Jpb2xvZ2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjZhZmEzNzY2LTRkOTctNGQwOC1jM2Q1LWNlOTI4MTcyOGQwMSImZ3Q7"/&gt;&lt;ph id="mtc_8" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_9" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MHB4OyBoZWlnaHQ6IDM2MnB4OyB0b3A6IDQ3OHB4OyBsZWZ0OiA2NzlweDsiIGRhdGEtdGV4dD0iQ2hlbWlzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjI5MThlYTE2LWZiNDktNDA5ZS1kMzNkLTRmMmJiY2JkNGQ1MyImZ3Q7"/&gt;&lt;ph id="mtc_10" ctype="'.CTypeEnum::HTML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_11" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;';
+//        $expected_l1_segment = '<ph id="mtc_1" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/><ph id="mtc_2" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O2ltZyBzcmM9Imh0dHBzOi8vZmlsZXMtc3RvcmFnZS5lYXN5Z2VuZXJhdG9yLmNvbS9pbWFnZS9hNTljYzcwMi1iNjA5LTQ4M2QtODliZC1kNjUwODRjZGUwZWQucG5nIiBhbHQ9IiIgc3R5bGU9Im1heC13aWR0aDoxMDAlIiZndDs="/><ph id="mtc_3" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwOHB4OyBoZWlnaHQ6IDM3M3B4OyB0b3A6IDIycHg7IGxlZnQ6IDE1cHg7IiBkYXRhLXRleHQ9IkZ5c2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9ImIwZDAyZmE5LWEwMjItNDI1OC1kMGE5LWI5YjFiNWRlYWNjMCImZ3Q7"/><ph id="mtc_4" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_5" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MXB4OyBoZWlnaHQ6IDM0MHB4OyB0b3A6IDU1cHg7IGxlZnQ6IDY3NXB4OyIgZGF0YS10ZXh0PSJCZXNtZXR0aW5nIG1ldCBhbGxlcmdlbmVuIiBkYXRhLWlkPSIwNGUxN2Y3My1mODM2LTQ4NWQtZTJjNS0yOTNiMGY0ZWM0ZmYiJmd0Ow=="/><ph id="mtc_6" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_7" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwMXB4OyBoZWlnaHQ6IDM1N3B4OyB0b3A6IDQ3OXB4OyBsZWZ0OiAyNnB4OyIgZGF0YS10ZXh0PSJNaWNyb2Jpb2xvZ2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjZhZmEzNzY2LTRkOTctNGQwOC1jM2Q1LWNlOTI4MTcyOGQwMSImZ3Q7"/><ph id="mtc_8" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_9" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MHB4OyBoZWlnaHQ6IDM2MnB4OyB0b3A6IDQ3OHB4OyBsZWZ0OiA2NzlweDsiIGRhdGEtdGV4dD0iQ2hlbWlzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjI5MThlYTE2LWZiNDktNDA5ZS1kMzNkLTRmMmJiY2JkNGQ1MyImZ3Q7"/><ph id="mtc_10" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_11" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/>';
+//        $expected_l2_segment = '&lt;ph id="mtc_1" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/&gt;&lt;ph id="mtc_2" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O2ltZyBzcmM9Imh0dHBzOi8vZmlsZXMtc3RvcmFnZS5lYXN5Z2VuZXJhdG9yLmNvbS9pbWFnZS9hNTljYzcwMi1iNjA5LTQ4M2QtODliZC1kNjUwODRjZGUwZWQucG5nIiBhbHQ9IiIgc3R5bGU9Im1heC13aWR0aDoxMDAlIiZndDs="/&gt;&lt;ph id="mtc_3" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwOHB4OyBoZWlnaHQ6IDM3M3B4OyB0b3A6IDIycHg7IGxlZnQ6IDE1cHg7IiBkYXRhLXRleHQ9IkZ5c2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9ImIwZDAyZmE5LWEwMjItNDI1OC1kMGE5LWI5YjFiNWRlYWNjMCImZ3Q7"/&gt;&lt;ph id="mtc_4" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_5" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MXB4OyBoZWlnaHQ6IDM0MHB4OyB0b3A6IDU1cHg7IGxlZnQ6IDY3NXB4OyIgZGF0YS10ZXh0PSJCZXNtZXR0aW5nIG1ldCBhbGxlcmdlbmVuIiBkYXRhLWlkPSIwNGUxN2Y3My1mODM2LTQ4NWQtZTJjNS0yOTNiMGY0ZWM0ZmYiJmd0Ow=="/&gt;&lt;ph id="mtc_6" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_7" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwMXB4OyBoZWlnaHQ6IDM1N3B4OyB0b3A6IDQ3OXB4OyBsZWZ0OiAyNnB4OyIgZGF0YS10ZXh0PSJNaWNyb2Jpb2xvZ2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjZhZmEzNzY2LTRkOTctNGQwOC1jM2Q1LWNlOTI4MTcyOGQwMSImZ3Q7"/&gt;&lt;ph id="mtc_8" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_9" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MHB4OyBoZWlnaHQ6IDM2MnB4OyB0b3A6IDQ3OHB4OyBsZWZ0OiA2NzlweDsiIGRhdGEtdGV4dD0iQ2hlbWlzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjI5MThlYTE2LWZiNDktNDA5ZS1kMzNkLTRmMmJiY2JkNGQ1MyImZ3Q7"/&gt;&lt;ph id="mtc_10" ctype="'.CTypeEnum::XML.'" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;&lt;ph id="mtc_11" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/&gt;';
 
         $db_segment          = '&lt;span data-type="hotspot" class="hotspotOnImage" style="position: relative;display: inline-block;max-width: 100%"&gt;';
-        $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/>';
-        $expected_l2_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/>';
+        $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/>';
+        $expected_l2_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/>';
 
 
         $l1_segment = $Filter->fromLayer0ToLayer1( $db_segment );
@@ -941,7 +1092,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %@ is a IOS placeholder %@.';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JUA="/>.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/>.';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -951,7 +1102,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTE0MzQzJEA="/>';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTE0MzQzJEA="/>';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -961,7 +1112,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string contains all these tags: %-4d %@ %12$@ ​%{{|discount|}} {% if count &lt; 3 %} but not this %placeholder%';
-        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JUA="/> <ph id="mtc_3" ctype="' . CTypeEnum::PERCENT_NUMBER_SNAILS . '" equiv-text="base64:JTEyJEA="/> ​<ph id="mtc_4" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:JXt7fGRpc2NvdW50fH19"/> <ph id="mtc_5" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/> but not this %placeholder%';
+        $segment_from_UI = 'This string contains all these tags: <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JS00ZA=="/> <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEyJEA="/> ​<ph id="mtc_4" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:JXt7fGRpc2NvdW50fH19"/> <ph id="mtc_5" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/> but not this %placeholder%';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -1082,7 +1233,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment = 'Test &lt;X&gt; and &lt;/X&gt; fine.';
-        $layer1And2 = 'Test <ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O1gmZ3Q7"/> and <ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0Oy9YJmd0Ow=="/> fine.';
+        $layer1And2 = 'Test <ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O1gmZ3Q7"/> and <ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9YJmd0Ow=="/> fine.';
 
         $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer1( $db_segment ) );
         $this->assertEquals( $layer1And2, $filter->fromLayer0ToLayer2( $db_segment ) );
@@ -1098,7 +1249,7 @@ class MateCatSubFilteringTest extends TestCase {
     public function testSmartCounts() {
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( new SmartCounts() );
+        $pipeline->addLast( SmartCounts::class );
 
         $db_segment = "Test||||and |||| fine.";
 
@@ -1120,7 +1271,7 @@ class MateCatSubFilteringTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $segment    = '<g id="123">&lt;code&gt; &amp;lt;strong&amp;gt; THIS IS TREATED AS TEXT CONTENT EVEN IF IT IS AN HTML &amp;lt;/strong&amp;gt; &lt;/code&gt;</g>';
-        $expectedL1 = '<g id="123"><ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2NvZGUmZ3Q7"/> &amp;lt;strong&amp;gt; THIS IS TREATED AS TEXT CONTENT EVEN IF IT IS AN HTML &amp;lt;/strong&amp;gt; <ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0Oy9jb2RlJmd0Ow=="/></g>';
+        $expectedL1 = '<g id="123"><ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2NvZGUmZ3Q7"/> &amp;lt;strong&amp;gt; THIS IS TREATED AS TEXT CONTENT EVEN IF IT IS AN HTML &amp;lt;/strong&amp;gt; <ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9jb2RlJmd0Ow=="/></g>';
 
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
 
@@ -1474,7 +1625,7 @@ class MateCatSubFilteringTest extends TestCase {
 
         $filter = $this->getFilterInstance( $refMap );
 
-        $segment    = '<pc id="source5" dataRefStart="source5"></pc><ph id="source6" dataRef="source6"/><ph id="source7" dataRef="source7"/><ph id="source8" dataRef="source8"/><ph id="source9" dataRef="source9"/><ph id="source10" dataRef="source10"/><pc id="source11" dataRefStart="source11">Uber is committed to our employees, contractors, customers, and to the communities where we do business by </pc><ph id="source12" dataRef="source12"/><ph id="source13" dataRef="source13"/><pc id="source14" dataRefStart="source14">putting people first</pc><ph id="source15" dataRef="source15"/><ph id="source16" dataRef="source16"/><pc id="source17" dataRefStart="source17">.</pc>';
+        $segment = '<pc id="source5" dataRefStart="source5"></pc><ph id="source6" dataRef="source6"/><ph id="source7" dataRef="source7"/><ph id="source8" dataRef="source8"/><ph id="source9" dataRef="source9"/><ph id="source10" dataRef="source10"/><pc id="source11" dataRefStart="source11">Uber is committed to our employees, contractors, customers, and to the communities where we do business by </pc><ph id="source12" dataRef="source12"/><ph id="source13" dataRef="source13"/><pc id="source14" dataRefStart="source14">putting people first</pc><ph id="source15" dataRef="source15"/><ph id="source16" dataRef="source16"/><pc id="source17" dataRefStart="source17">.</pc>';
 
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );

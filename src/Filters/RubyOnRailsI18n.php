@@ -23,11 +23,11 @@ class RubyOnRailsI18n extends AbstractHandler {
      *  Dear %{person}, This is %{agent.alias} from Customer. %{ this will not locked } e %{ciao}
      * </code>
      *
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         /*
          * Examples:

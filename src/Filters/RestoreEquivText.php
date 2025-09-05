@@ -13,18 +13,18 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class RestoreEquivText extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         // extract equiv-text attribute
-        preg_match_all('/equiv-text=\"(.*?)\"/', $segment, $equiv_tags);
+        preg_match_all( '/equiv-text=\"(.*?)\"/', $segment, $equiv_tags );
 
-        if(!empty($equiv_tags[0])){
-            foreach ($equiv_tags[0] as $index => $equiv_tag){
-                $tag = $equiv_tags[1][$index];
+        if ( !empty( $equiv_tags[ 0 ] ) ) {
+            foreach ( $equiv_tags[ 0 ] as $index => $equiv_tag ) {
+                $tag = $equiv_tags[ 1 ][ $index ];
 
-                if (strpos($tag, "base64:") !== false) {
-                    $b = base64_decode(str_replace("base64:", "", $tag));
-                    $segment = str_replace($equiv_tags[$index], 'equiv-text="'.$b.'"', $segment);
+                if ( strpos( $tag, "base64:" ) !== false ) {
+                    $b       = base64_decode( str_replace( "base64:", "", $tag ) );
+                    $segment = str_replace( $equiv_tags[ $index ], 'equiv-text="' . $b . '"', $segment );
                 }
             }
         }

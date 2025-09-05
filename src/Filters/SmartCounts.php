@@ -11,7 +11,7 @@ class SmartCounts extends AbstractHandler {
      *
      * @return string
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
         /*
          * Examples:
          * - [AIRBNB] Reminder: Reply to %{guest}’s inquiry. |||| [AIRBNB] Reminder: Reply to %{guest}’s inquiry.

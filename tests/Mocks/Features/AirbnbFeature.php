@@ -17,7 +17,7 @@ class AirbnbFeature extends BaseFeature
      */
     public function fromLayer0ToLayer1(Pipeline $channel)
     {
-        $channel->addAfter( new Variables(), new SmartCounts());
+        $channel->addAfter( Variables::class, SmartCounts::class);
 
         return $channel;
     }

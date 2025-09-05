@@ -7,15 +7,14 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class CtrlCharsPlaceHoldToAscii extends AbstractHandler {
 
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         //Replace br placeholders
         $segment = str_replace( ConstantEnum::crlfPlaceholder, "\r\n", $segment );
         $segment = str_replace( ConstantEnum::lfPlaceholder, "\n", $segment );
         $segment = str_replace( ConstantEnum::crPlaceholder, "\r", $segment );
-        $segment = str_replace( ConstantEnum::tabPlaceholder, "\t", $segment );
 
-        return $segment;
+        return str_replace( ConstantEnum::tabPlaceholder, "\t", $segment );
 
     }
 

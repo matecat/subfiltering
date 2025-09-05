@@ -9,7 +9,7 @@ class EncodeControlCharsInXliff extends AbstractHandler {
     /**
      * @inheritDoc
      */
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
         return str_replace(
                 [ "\r\n", "\r", "\n", "\t" ],
                 [

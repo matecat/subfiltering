@@ -13,7 +13,6 @@ use ArrayAccess;
 use ArrayIterator;
 use Countable;
 use DomainException;
-use Generator;
 use IteratorAggregate;
 
 /**
@@ -25,7 +24,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
     /**
      * @var array
      */
-    private $map;
+    private array $map;
 
     public function __construct( array $map ) {
         if ( !empty( $map ) && Utils::array_is_list( $map ) ) {
@@ -37,7 +36,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
     /**
      * @return int
      */
-    public function count() {
+    public function count(): int {
         return sizeof( $this->map );
     }
 
@@ -45,7 +44,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
     /**
      * @return ArrayIterator
      */
-    public function getIterator() {
+    public function getIterator(): ArrayIterator {
         return new ArrayIterator( $this->map );
     }
 
@@ -54,7 +53,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
      *
      * @return bool
      */
-    public function offsetExists( $offset ) {
+    public function offsetExists( $offset ): bool {
         return array_key_exists( $offset, $this->map );
     }
 
@@ -93,7 +92,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
      *
      * @return static
      */
-    public static function instance( array $map = [] ) {
+    public static function instance( array $map = [] ): Map {
         return new static( $map );
     }
 
@@ -134,7 +133,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
         return new static( $this->map );
     }
 
-    public function containsKey( $offset ) {
+    public function containsKey( $offset ): bool {
         return array_key_exists( $offset, $this->map );
     }
 
@@ -146,37 +145,41 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
      *
      * @return boolean
      */
-    public function containsValue( $value ) {
+    public function containsValue( $value ): bool {
         return !empty( array_search( $value, $this->map, true ) );
     }
 
-    /**
-     * Performs the given action for each entry in this map until all entries have been processed or the action throws an exception.
-     * Actions are performed in the order of entry set iteration.
-     *
-     * @param callable $callable
-     *
-     * @return Generator
-     */
-    public function for_each( callable $callable ) {
-        foreach ( $this->map as $k => $v ) {
-            $callable( $k, $v );
-        }
-    }
+/**
+      * Iterates over each entry in the map and applies the given callable function.
+      * The callable function receives the key and value of each entry as arguments.
+      *
+      * Actions are performed in the order of the map's entry set iteration.
+      * If the callable throws an exception, the iteration is stopped, and the exception is propagated.
+      *
+      * @param callable $callable A function to execute for each entry in the map.
+      *                           The function should accept two parameters: the key and the value.
+      *
+      * @return void
+      */
+     public function for_each( callable $callable ) {
+         foreach ( $this->map as $k => $v ) {
+             $callable( $k, $v );
+         }
+     }
 
     /**
      * Returns true if this map contains no key-value mappings.
      *
      * @return bool
      */
-    public function isEmpty() {
+    public function isEmpty(): bool {
         return empty( $this->map );
     }
 
     /**
      * @return string[]
      */
-    public function keySet() {
+    public function keySet(): array {
         return array_keys( $this->map );
     }
 
@@ -231,7 +234,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
      *
      * @return bool true if the value was removed
      */
-    public function remove( $offset ) {
+    public function remove( $offset ): bool {
         $exists = array_key_exists( $offset, $this->map );
         if ( $exists ) {
             unset( $this->map[ $offset ] );
@@ -265,7 +268,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
      *
      * @return boolean true if the value was replaced
      */
-    public function replaceIfEquals( $offset, $newValue, $oldValue ) {
+    public function replaceIfEquals( $offset, $newValue, $oldValue ): bool {
         $exists        = array_key_exists( $offset, $this->map );
         $previousValue = $this->get( $offset );
         if ( $exists && $previousValue === $oldValue ) {
@@ -295,14 +298,14 @@ class Map implements ArrayAccess, IteratorAggregate, Countable {
     /**
      * @return int
      */
-    public function size() {
+    public function size(): int {
         return sizeof( $this->map );
     }
 
     /**
      * @return array
      */
-    public function values() {
+    public function values(): array {
         return array_values( $this->map );
     }
 

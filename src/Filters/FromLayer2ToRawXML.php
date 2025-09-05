@@ -21,9 +21,7 @@ use Matecat\SubFiltering\Utils\Utils;
  */
 class FromLayer2ToRawXML extends AbstractHandler {
 
-    private $brokenHTML = false;
-
-    public function transform( $segment ) {
+    public function transform( string $segment ): string {
 
         //normal control characters must be converted to entities
         $segment = str_replace(
