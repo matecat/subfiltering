@@ -330,7 +330,7 @@ class DataRefReplacer {
                 );
 
                 $realOffset = ( $delta === 0 ) ? $offset : ( $offset + $delta );
-                $string     = substr_replace( $string, $completeTag, $realOffset, $length );
+                $string     = (string)substr_replace( $string, $completeTag, $realOffset, $length );
                 $delta      = $delta + strlen( $completeTag ) - $length;
 
             }
@@ -389,7 +389,7 @@ class DataRefReplacer {
 
             $cType = $nodeAttributesMap->get( 'ctype' );
 
-            if ( CTypeEnum::isLayer2Constant( $cType ) ) {
+            if ( CTypeEnum::isLayer2Constant( $cType ?? '' ) ) {
                 return preg_replace( '/' . preg_quote( $node->node, '/' ) . '/', base64_decode( $nodeAttributesMap->get( 'x-orig' ) ), $string, 1 );
             }
 
