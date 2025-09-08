@@ -200,78 +200,124 @@ class HtmlParser {
 
     /**
      * Handles character processing when in the STATE_HTML.
+     * This method acts as a dispatcher based on the character.
+     * Assumes parser state variables (state, html_buffer, etc.) are now class properties.
      */
     private function handleHtmlState( string $char, int $idx, int $charCount, int &$state, string &$html_buffer, string &$plain_text_buffer, string &$output, string &$in_quote_char ): void {
         switch ( $char ) {
             case '<':
-                // If we found a second less than symbol, the first one IS NOT a tag.
-                // See https://www.w3.org/TR/xml/#charsets
-                $output      .= $this->_fixWrongBuffer( $html_buffer );
-                $html_buffer = $char;
+                $this->onLessThanInHtml( $char, $output, $html_buffer );
                 break;
             case '>':
-                // End of current tag. Special-case for <script> or <style> blocks.
-                if ( $this->isScriptOrStyleTag( $html_buffer ) ) {
-                    $html_buffer .= $char;
-                    $state       = static::STATE_JS_CSS;
-                    break;
-                }
-
-                $in_quote_char = '';
-                $state         = static::STATE_PLAINTEXT;
-                $html_buffer   .= $char;
-
-                // Validate and finalize HTML tag. Invalid tags are corrected/errors handled.
-                if ( $this->_isTagValid( $html_buffer ) ) {
-                    $output .= $this->_finalizeMarkupTag( $html_buffer );
-                    if ( null !== $this->pipeline ) {
-                        $this->_setSegmentContainsMarkup();
-                    }
-                } else {
-                    $output .= $this->_fixWrongBuffer( $html_buffer );
-                }
-                $html_buffer = '';
+                $this->onGreaterThanInHtml( $char, $state, $html_buffer, $output, $in_quote_char );
                 break;
             case '"':
             case '\'':
-                // Track entry/exit into quoted attributes.
-                if ( $char == $in_quote_char ) {
-                    $in_quote_char = ''; // Exiting quote
-                } elseif ( $in_quote_char == '' ) {
-                    $in_quote_char = $char; // Entering quote
-                }
-                $html_buffer .= $char;
+                $this->onQuoteInHtml( $char, $html_buffer, $in_quote_char );
                 break;
             case '-':
-                // Detect HTML comment opening ('<!--').
-                if ( $html_buffer === '<!-' ) {
-                    $state = static::STATE_COMMENT;
-                }
-                $html_buffer .= $char;
+                $this->onDashInHtml( $char, $state, $html_buffer );
                 break;
             case ' ':
             case "\n":
-                // Space or newline immediately after '<' is invalid.
-                if ( $html_buffer === '<' ) {
-                    $state       = static::STATE_PLAINTEXT;
-                    $output      .= $this->_fixWrongBuffer( '<' . $char );
-                    $html_buffer = '';
-                    if ( null !== $this->pipeline ) {
-                        $this->_setSegmentContainsMarkup();
-                    }
-                    break;
-                }
-                $html_buffer .= $char;
+                $this->onWhitespaceInHtml( $char, $state, $html_buffer, $output );
                 break;
             default:
-                $html_buffer .= $char;
-                // End of input: treat buffer as plain text if not a valid tag.
-                if ( $idx === ( $charCount - 1 ) && !$this->_isTagValid( $html_buffer ) ) {
-                    $state             = static::STATE_PLAINTEXT; // Error: not a valid tag
-                    $plain_text_buffer .= $this->_fixWrongBuffer( $html_buffer );
-                    $html_buffer       = '';
-                }
+                $this->onDefaultCharInHtml( $char, $idx, $charCount, $state, $html_buffer, $plain_text_buffer );
                 break;
+        }
+    }
+
+    /**
+     * Handles the '<' character in the HTML state.
+     */
+    private function onLessThanInHtml( string $char, string &$output, string &$html_buffer ): void {
+        // If we found a second less than symbol, the first one IS NOT a tag.
+        // See https://www.w3.org/TR/xml/#charsets
+        $output      .= $this->_fixWrongBuffer( $html_buffer );
+        $html_buffer = $char;
+    }
+
+    /**
+     * Handles the '>' character in the HTML state.
+     */
+    private function onGreaterThanInHtml( string $char, int &$state, string &$html_buffer, string &$output, string &$in_quote_char ): void {
+        // End of current tag. Special-case for <script> or <style> blocks.
+        if ( $this->isScriptOrStyleTag( $html_buffer ) ) {
+            $html_buffer .= $char;
+            $state       = static::STATE_JS_CSS;
+
+            return;
+        }
+
+        $in_quote_char = '';
+        $state         = static::STATE_PLAINTEXT;
+        $html_buffer   .= $char;
+
+        // Validate and finalize HTML tag. Invalid tags are corrected/errors handled.
+        if ( $this->_isTagValid( $html_buffer ) ) {
+            $output .= $this->_finalizeMarkupTag( $html_buffer );
+            if ( null !== $this->pipeline ) {
+                $this->_setSegmentContainsMarkup();
+            }
+        } else {
+            $output .= $this->_fixWrongBuffer( $html_buffer );
+        }
+        $html_buffer = '';
+    }
+
+    /**
+     * Handles quote characters ('"' or "'") in the HTML state.
+     */
+    private function onQuoteInHtml( string $char, string &$html_buffer, string &$in_quote_char ): void {
+        // Track entry/exit into quoted attributes.
+        if ( $char == $in_quote_char ) {
+            $in_quote_char = ''; // Exiting quote
+        } elseif ( $in_quote_char == '' ) {
+            $in_quote_char = $char; // Entering quote
+        }
+        $html_buffer .= $char;
+    }
+
+    /**
+     * Handles the '-' character in the HTML state.
+     */
+    private function onDashInHtml( string $char, int &$state, string &$html_buffer ): void {
+        // Detect HTML comment opening ('<!--').
+        if ( $html_buffer === '<!-' ) {
+            $state = static::STATE_COMMENT;
+        }
+        $html_buffer .= $char;
+    }
+
+    /**
+     * Handles whitespace characters in the HTML state.
+     */
+    private function onWhitespaceInHtml( string $char, int &$state, string &$html_buffer, string &$output ): void {
+        // Space or newline immediately after '<' is invalid.
+        if ( $html_buffer === '<' ) {
+            $state       = static::STATE_PLAINTEXT;
+            $output      .= $this->_fixWrongBuffer( '<' . $char );
+            $html_buffer = '';
+            if ( null !== $this->pipeline ) {
+                $this->_setSegmentContainsMarkup();
+            }
+
+            return;
+        }
+        $html_buffer .= $char;
+    }
+
+    /**
+     * Handles any other default character in the HTML state.
+     */
+    private function onDefaultCharInHtml( string $char, int $idx, int $charCount, int &$state, string &$html_buffer, string &$plain_text_buffer ): void {
+        $html_buffer .= $char;
+        // End of input: treat buffer as plain text if not a valid tag.
+        if ( $idx === ( $charCount - 1 ) && !$this->_isTagValid( $html_buffer ) ) {
+            $state             = static::STATE_PLAINTEXT; // Error: not a valid tag
+            $plain_text_buffer .= $this->_fixWrongBuffer( $html_buffer );
+            $html_buffer       = '';
         }
     }
 
@@ -317,4 +363,5 @@ class HtmlParser {
         // A tag starts with '<script' or '<style'. This also covers variants with spaces or attributes.
         return in_array( substr( $html_buffer, 0, 8 ), [ '<script ', '<style', '<script', '<style ' ] );
     }
+
 }
