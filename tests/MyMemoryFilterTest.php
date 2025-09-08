@@ -133,8 +133,8 @@ class MyMemoryFilterTest extends TestCase {
                 'familysearch (handler already present)'      => [
                         'cid'                  => 'familysearch',
                         'initialHandlers'      => $handlersWithSingleCurly, // this test is to ensure no duplicates
-                        'expectedToContain'    => [ SingleCurlyBracketsToPh::class ],
-                        'expectedToNotContain' => [ TwigToPh::class ]
+                        'expectedToContain'    => [ SingleCurlyBracketsToPh::class, TwigToPh::class ], //Twig should remain because it was already there and we don't remove it if SingleCurlyBracketsToPh is already present
+                        'expectedToNotContain' => []
                 ],
         ];
     }

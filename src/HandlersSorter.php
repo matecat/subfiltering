@@ -108,7 +108,7 @@ class HandlersSorter {
      * @return string[] The sorted list of handler class names based on their priorities.
      */
     private function quickSort( array $handlersList ): array {
-        // Filter the list to include only handlers with a defined priority.
+        // Filter the list to include only valid handlers.
         $filteredHandlers = array_filter( $handlersList, function ( $handler ) {
             return array_key_exists( $handler, $this->defaultInjectedHandlers );
         } );
