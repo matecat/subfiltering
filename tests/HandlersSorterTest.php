@@ -3,7 +3,6 @@
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
-use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\Snails;
@@ -28,12 +27,12 @@ class HandlersSorterTest extends TestCase {
 
         // Expected order by handlersOrder
         $expected = [
-                RubyOnRailsI18n::class,      // 2
-                Snails::class,               // 3
-                DoubleSquareBrackets::class, // 4
-                DollarCurlyBrackets::class,  // 5
-                ObjectiveCNSString::class,   // 6
-                SprintfToPH::class,          // 9
+                RubyOnRailsI18n::class,      // 3
+                Snails::class,               // 4
+                DoubleSquareBrackets::class, // 5
+                DollarCurlyBrackets::class,  // 6
+                ObjectiveCNSString::class,   // 8
+                SprintfToPH::class,          // 11
         ];
 
         $sorter = new HandlersSorter( $unordered );
@@ -56,9 +55,9 @@ class HandlersSorterTest extends TestCase {
         ];
 
         $expected = [
-                Variables::class,   // 0
-                Snails::class,      // 3
-                SprintfToPH::class, // 9
+                Variables::class,   // 1
+                Snails::class,      // 4
+                SprintfToPH::class, // 11
         ];
 
         $sorter = new HandlersSorter( $handlers );

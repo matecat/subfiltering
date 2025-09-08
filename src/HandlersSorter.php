@@ -10,8 +10,10 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
+use Matecat\SubFiltering\Filters\ICUVariables;
 use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
+use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
@@ -38,19 +40,32 @@ class HandlersSorter {
      *
      * @var int[] A map of handler class names to their integer priority.
      */
-    public const injectableHandlersOrder = [
-            XmlToPh::class              => 0,
-            Variables::class            => 1,
-            TwigToPh::class             => 2,
-            RubyOnRailsI18n::class      => 3,
-            Snails::class               => 4,
-            DoubleSquareBrackets::class => 5,
-            DollarCurlyBrackets::class  => 6,
-            ObjectiveCNSString::class   => 7,
-            DoublePercentages::class    => 8,
-            SquareSprintf::class        => 9,
-            SprintfToPH::class          => 10,
+    protected const injectableHandlersOrder = [
+            XmlToPh::class                 => [ 'position' => 0, 'default_enabled' => true ],
+            Variables::class               => [ 'position' => 1, 'default_enabled' => true ],
+            TwigToPh::class                => [ 'position' => 2, 'default_enabled' => true ],
+            RubyOnRailsI18n::class         => [ 'position' => 3, 'default_enabled' => true ],
+            Snails::class                  => [ 'position' => 4, 'default_enabled' => true ],
+            DoubleSquareBrackets::class    => [ 'position' => 5, 'default_enabled' => true ],
+            DollarCurlyBrackets::class     => [ 'position' => 6, 'default_enabled' => true ],
+            ICUVariables::class            => [ 'position' => 7, 'default_enabled' => false ], // Disabled by default because it may conflict with other curly braces handlers
+            SingleCurlyBracketsToPh::class => [ 'position' => 8, 'default_enabled' => false ], // Disabled by default because it may conflict with other curly braces handlers
+            ObjectiveCNSString::class      => [ 'position' => 9, 'default_enabled' => true ],
+            DoublePercentages::class       => [ 'position' => 10, 'default_enabled' => true ],
+            SquareSprintf::class           => [ 'position' => 11, 'default_enabled' => true ],
+            SprintfToPH::class             => [ 'position' => 12, 'default_enabled' => true ],
     ];
+
+    /**
+     * Retrieves the default handlers that are enabled by default from the injectable handlers order.
+     *
+     * @return array The array of handlers that are enabled by default.
+     */
+    public static function getDefaultInjectedHandlers(): array {
+        return array_filter( self::injectableHandlersOrder, function ( $settings ) {
+            return $settings[ 'default_enabled' ];
+        } );
+    }
 
     /**
      * @var array The final map of priorities used for sorting, which may be modified from the default constant.

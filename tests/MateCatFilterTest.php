@@ -9,6 +9,7 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
 use Matecat\SubFiltering\Filters\HtmlToPh;
+use Matecat\SubFiltering\Filters\ICUVariables;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
@@ -25,15 +26,14 @@ use Matecat\SubFiltering\Tests\Mocks\Features\AirbnbFeature;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use ReflectionException;
 
 class MateCatFilterTest extends TestCase {
     /**
+     * @param array $data_ref_map
+     *
      * @return MateCatFilter
-     * @throws Exception
      */
-    private function getFilterInstance( array $data_ref_map = [] ) {
-
+    private function getFilterInstance( array $data_ref_map = [] ): MateCatFilter {
 
         /** @var $filter MateCatFilter */
         $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', $data_ref_map );
@@ -61,7 +61,7 @@ class MateCatFilterTest extends TestCase {
         $orderedHandlers = $orderedHandlersProperty->getValue( $filter );
 
         // check that default handlers are loaded
-        $defaultHandlers = array_keys( HandlersSorter::injectableHandlersOrder );
+        $defaultHandlers = array_keys( HandlersSorter::getDefaultInjectedHandlers() );
         $this->assertEquals( $defaultHandlers, $orderedHandlers );
     }
 
@@ -70,7 +70,6 @@ class MateCatFilterTest extends TestCase {
      * as the handlers' parameter for the layer0 to layer1 transition.
      *
      * @return void
-     * @throws ReflectionException
      */
     public function testGetInstanceWithNullHandlers() {
         // Pass null for $handlerClassNamesForLayer0ToLayer1Transition
@@ -98,13 +97,13 @@ class MateCatFilterTest extends TestCase {
      */
     public function testGetInstanceWithCustomHandlers() {
         // Arrange: Define a custom handler and instantiate the filter.
-        $customHandlers = [ XmlToPh::class ];
+        $customHandlers = [ XmlToPh::class, ICUVariables::class ];
         $filter         = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], $customHandlers );
 
         // Arrange: Create a mock Pipeline to capture calls to addLast.
         $pipelineMock  = $this->createMock( Pipeline::class );
         $addedHandlers = [];
-        $pipelineMock->expects( $this->exactly( 8 ) )
+        $pipelineMock->expects( $this->exactly( 9 ) )
                 ->method( 'addLast' )
                 ->willReturnCallback(
                         function ( $handlerClass ) use ( &$addedHandlers, $pipelineMock ) {
@@ -127,6 +126,7 @@ class MateCatFilterTest extends TestCase {
                 PlaceHoldXliffTags::class,
                 LtGtDecode::class,
                 XmlToPh::class, // Verifies our custom handler is included
+                ICUVariables::class, // Verifies our custom handler is included even if it is not default
                 RestoreXliffTagsContent::class,
                 RestorePlaceHoldersToXLIFFLtGt::class,
                 EquivTextToBase64::class,
@@ -135,6 +135,28 @@ class MateCatFilterTest extends TestCase {
 
         // And assert that a handler not in the custom list is excluded
         $this->assertNotContains( SprintfToPH::class, $addedHandlers );
+    }
+
+    /**
+     *
+     * @throws Exception
+     */
+    public function testICUString() {
+
+        /** @var $filter MateCatFilter */
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ ICUVariables::class, XmlToPh::class, SprintfToPH::class ] );
+
+        $segment   = 'You have {NUM_RESULTS, plural, =0 {no results} one {1 result} other {# results}} for "{SEARCH_TERM}".';
+        $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
+
+        $this->assertEquals( 'You have <ph id="mtc_1" ctype="' . CTypeEnum::ICU . '" equiv-text="base64:e05VTV9SRVNVTFRTLCBwbHVyYWwsID0wIHtubyByZXN1bHRzfSBvbmUgezEgcmVzdWx0fSBvdGhlciB7IyByZXN1bHRzfX0gZm9yICJ7U0VBUkNIX1RFUk19"/>".', $segmentL1 );
+
+        $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
+        $this->assertEquals( $segment, $filter->fromLayer2ToLayer0( $segmentL2 ) );
+        $this->assertEquals( $segmentL2, $filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $filter->fromLayer2ToLayer1( $segmentL2 ) );
     }
 
     /**

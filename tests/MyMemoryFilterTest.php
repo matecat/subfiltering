@@ -69,7 +69,7 @@ class MyMemoryFilterTest extends TestCase {
      * @return array
      */
     public function pipelineConfigurationProvider(): array {
-        $defaultHandlers = $airbnbOverloadedHandlers = array_keys( HandlersSorter::injectableHandlersOrder );
+        $defaultHandlers = $airbnbOverloadedHandlers = array_keys( HandlersSorter::getDefaultInjectedHandlers() );
 
         $airbnbOverloadedHandlers[] = SmartCounts::class;
 

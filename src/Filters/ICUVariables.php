@@ -13,20 +13,20 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
-class ICUVariables extends AbstractHandler {
+class ICUVariables extends AbstractHandler { // TODO
 
     /**
      * @inheritDoc
      */
     public function transform( string $segment ): string {
-        preg_match_all( '/\{(?!<ph )[^{}]+?}/', $segment, $text_content, PREG_SET_ORDER );
-        foreach ( $text_content as $icul_variable ) {
+        preg_match_all( '/{.+}/', $segment, $text_content, PREG_SET_ORDER );
+        foreach ( $text_content as $icu_variable ) {
             //check if inside the variable there is a tag because in this case shouldn't replace the content with PH tag
-            if ( !strstr( $icul_variable[ 0 ], ConstantEnum::GTPLACEHOLDER ) ) {
+            if ( !strstr( $icu_variable[ 0 ], ConstantEnum::GTPLACEHOLDER ) ) {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
-                        '/' . preg_quote( $icul_variable[ 0 ], '/' ) . '/',
-                        '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::ICU . '" equiv-text="base64:' . base64_encode( $icul_variable[ 0 ] ) . '"/>',
+                        '/' . preg_quote( $icu_variable[ 0 ], '/' ) . '/',
+                        '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::ICU . '" equiv-text="base64:' . base64_encode( $icu_variable[ 0 ] ) . '"/>',
                         $segment,
                         1
                 );

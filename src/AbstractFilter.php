@@ -102,7 +102,7 @@ abstract class AbstractFilter {
         // Determine which handlers to use for the Layer 0 to Layer 1 transition.
         if ( is_array( $handlerClassNamesForLayer0ToLayer1Transition ) && empty( $handlerClassNamesForLayer0ToLayer1Transition ) ) {
             // If an empty array is passed, load the default set of handlers from the sorter.
-            $handlerClassNamesForLayer0ToLayer1Transition = array_keys( HandlersSorter::injectableHandlersOrder );
+            $handlerClassNamesForLayer0ToLayer1Transition = array_keys( HandlersSorter::getDefaultInjectedHandlers() );
         } elseif ( is_null( $handlerClassNamesForLayer0ToLayer1Transition ) ) {
             // If null is passed, use no handlers.
             $handlerClassNamesForLayer0ToLayer1Transition = [];
