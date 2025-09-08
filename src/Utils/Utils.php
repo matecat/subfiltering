@@ -85,7 +85,7 @@ class Utils {
      */
     public static function unicode2chr( int $o ): string {
         if ( function_exists( 'mb_convert_encoding' ) ) {
-            return mb_convert_encoding( '&#' . $o . ';', 'UTF-8', 'HTML-ENTITIES' );
+            return (string)mb_convert_encoding( '&#' . $o . ';', 'UTF-8', 'HTML-ENTITIES' );
         }
 
         return chr( $o );
