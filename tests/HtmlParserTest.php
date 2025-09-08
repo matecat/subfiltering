@@ -39,7 +39,6 @@ class HtmlParserTest extends TestCase {
         $parser->registerCallbacksHandler( $invalidHandler );
     }
 
-
     /**
      * @throws Exception
      */
@@ -176,7 +175,7 @@ let elements = document.getElementsByClassName('note');
     public function testTransformWithComplexStringForAllBranches() {
         // This string is designed to exercise as many conditional branches
         // of the HtmlParser::transform method as possible in a single run.
-        $segment = "A>B plain text. <p class='c1'>valid tag</p> <!-- comment --><script>js</script><style>css</style> < invalid-tag> <a<b and finally <u";
+        $segment = "A>B plain text. <p class='c1\"c2'>valid tag</p> <!-- comment --><script>js</script><style>css</style> < invalid-tag> <a<b and finally <u";
 
         $pipeline = new Pipeline();
         // XmlToPh uses HtmlParser internally and provides the necessary callbacks.
@@ -190,7 +189,7 @@ let elements = document.getElementsByClassName('note');
                 'A&gt;B plain text. ' .
 
                 // 2. A valid opening <p> tag, which becomes a placeholder.
-                '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "<p class='c1'>", ENT_NOQUOTES | 16 ) ) . '"/>' .
+                '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "<p class='c1\"c2'>", ENT_NOQUOTES | 16 ) ) . '"/>' .
 
                 // 3. Plain text content of the tag.
                 'valid tag' .
@@ -223,6 +222,21 @@ let elements = document.getElementsByClassName('note');
                 '&lt;u';
 
         $this->assertEquals( $expected, $transformed );
+    }
+
+    /**
+     * @test
+     */
+    public function testTransformWithEmptyString() {
+        $segment  = '';
+        $expected = '';
+
+        $pipeline = new Pipeline();
+        $pipeline->addLast( XmlToPh::class );
+
+        $str = $pipeline->transform( $segment );
+
+        $this->assertEquals( $expected, $str );
     }
 
 

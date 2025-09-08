@@ -187,6 +187,21 @@ class DataReplacerTest extends TestCase {
     /**
      * @test
      */
+    public function idempotent_on_empty_map() {
+        $map = [];
+
+        $string   = 'Hai raccolto <ph id="source1" dataRef="source1"/>  da <ph id="source2" dataRef="source2"/>?';
+        $expected = 'Hai raccolto <ph id="source1" dataRef="source1"/>  da <ph id="source2" dataRef="source2"/>?';
+
+        $dataReplacer = new DataRefReplacer( $map );
+
+        $this->assertEquals( $expected, $dataReplacer->replace( $string ) );
+        $this->assertEquals( $string, $dataReplacer->restore( $expected ) );
+    }
+
+    /**
+     * @test
+     */
     public function can_replace_and_restore_data_test_2() {
         // sample test
         $map = [
@@ -1032,5 +1047,7 @@ class DataReplacerTest extends TestCase {
         $this->assertEquals( $expected, $dataReplacer->replace( $string ) );
         $this->assertEquals( $string, $dataReplacer->restore( $expected ) );
     }
+
+
 
 }

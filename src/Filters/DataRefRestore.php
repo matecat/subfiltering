@@ -2,6 +2,7 @@
 
 namespace Matecat\SubFiltering\Filters;
 
+use Exception;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
@@ -22,6 +23,7 @@ class DataRefRestore extends AbstractHandler {
 
     /**
      * @inheritDoc
+     * @throws Exception
      */
     public function transform( string $segment ): string {
 

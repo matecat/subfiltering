@@ -11,16 +11,12 @@ class Utils {
      */
     public static function array_is_list( $array ): bool {
 
-        if ( !function_exists( 'array_is_list' ) ) { // since php 8.1
-
-            if ( $array === [] ) {
-                return true;
-            }
-
-            return array_keys( $array ) === range( 0, count( $array ) - 1 );
+        if ( $array === [] ) {
+            return true;
         }
 
-        return array_is_list( $array );
+        return array_keys( $array ) === range( 0, count( $array ) - 1 );
+
     }
 
     /**
@@ -84,10 +80,7 @@ class Utils {
      * @return string
      */
     public static function unicode2chr( int $o ): string {
-        if ( function_exists( 'mb_convert_encoding' ) ) {
-            return (string)mb_convert_encoding( '&#' . $o . ';', 'UTF-8', 'HTML-ENTITIES' );
-        }
-
-        return chr( $o );
+        return (string)mb_convert_encoding( '&#' . $o . ';', 'UTF-8', 'HTML-ENTITIES' );
     }
+
 }

@@ -352,7 +352,7 @@ class DataRefReplacer {
     public function restore( string $string ): string {
 
         // if the map is empty return string as is
-        if ( empty( $this->map ) ) {
+        if ( $this->map->isEmpty() ) {
             return $string;
         }
 

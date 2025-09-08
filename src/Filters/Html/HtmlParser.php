@@ -127,184 +127,43 @@ class HtmlParser {
      *
      * @return string         The processed segment, with tags and text handled appropriately.
      */
-    public function transform( string $segment ): string {
 
+    public function transform( string $segment ): string {
         // Split input into Unicode codepoints for accurate char-by-char iteration.
         $originalSplit = preg_split( '//u', $segment, -1, PREG_SPLIT_NO_EMPTY );
+        if ( empty( $originalSplit ) ) {
+            return '';
+        }
 
         $state             = static::STATE_PLAINTEXT;
         $html_buffer       = '';
         $plain_text_buffer = '';
         $in_quote_char     = '';
         $output            = '';
+        $charCount         = count( $originalSplit );
 
         foreach ( $originalSplit as $idx => $char ) {
-
-            if ( $state == static::STATE_PLAINTEXT ) {
-                switch ( $char ) {
-                    case '<':
-                        // Potential new tag starts; finalize plain text so far.
-                        $state             = static::STATE_HTML;
-                        $html_buffer       .= $char;
-                        $output            .= $this->_finalizePlainText( $plain_text_buffer );
-                        $plain_text_buffer = '';
-                        break;
-
-                    case '>':
-                        // Unescaped '>' in plaintext; treat as literal via error handing.
-                        $plain_text_buffer .= $this->_fixWrongBuffer( $char );
-                        break;
-
-                    default:
-                        // Collect as plain text.
-                        $plain_text_buffer .= $char;
-                        break;
-                }
-            } elseif ( $state == static::STATE_HTML ) {
-                // Inside potential HTML tag
-                switch ( $char ) {
-                    case '<':
-                        // If we found a second less than symbol, the first one IS NOT a tag,
-                        // treat the html_buffer as plain text and attach to the output.
-                        // For more info see https://www.w3.org/TR/xml/#charsets
-                        $output      .= $this->_fixWrongBuffer( $html_buffer );
-                        $html_buffer = $char;
-                        break;
-
-                    case '>':
-                        // End of current tag. Special-case for <script> or <style> blocks.
-                        if ( in_array( substr( $html_buffer, 0, 8 ), [ '<script ', '<style', '<script', '<style ' ] ) ) {
-                            $html_buffer .= $char;
-                            $state       = static::STATE_JS_CSS;
-                            break;
-                        }
-
-                        // This is closing the tag in tag_buffer
-                        $in_quote_char = '';
-                        $state         = static::STATE_PLAINTEXT;
-                        $html_buffer   .= $char;
-
-                        // Validate and finalize HTML tag. Invalid tags are corrected/errors handled.
-                        if ( $this->_isTagValid( $html_buffer ) ) {
-                            $output .= $this->_finalizeMarkupTag( $html_buffer );
-                            if ( null !== $this->pipeline ) {
-                                // Mark the segment as containing HTML if required.
-                                $this->_setSegmentContainsMarkup();
-                            }
-                        } else {
-                            $output .= $this->_fixWrongBuffer( $html_buffer );
-                        }
-                        $html_buffer = '';
-                        break;
-
-                    case '"':
-                    case '\'':
-                        // Track entry/exit into quoted attributes inside tag (<tag attr="...">).
-                        // Catch both single and double quotes
-                        if ( $char == $in_quote_char ) {
-                            $in_quote_char = '';
-                        } else {
-                            $in_quote_char = ( !empty( $in_quote_char ) ? $in_quote_char : $char );
-                        }
-
-                        $html_buffer .= $char;
-                        break;
-
-                    case '-':
-                        // Detect HTML comment opening ('<!--').
-                        if ( $html_buffer == '<!-' ) {
-                            $state = static::STATE_COMMENT;
-                        }
-
-                        $html_buffer .= $char;
-                        break;
-
-                    case ' ': // Space or
-                    case '\n': // newline immediately after '<' (invalid)
-                        if ( $html_buffer === '<' ) {
-                            // Lone '<' in text: treat as error, emit as text.
-                            $state       = static::STATE_PLAINTEXT; // But we work in XML text, so encode it
-                            $output      .= $this->_fixWrongBuffer( '< ' );
-                            $html_buffer = '';
-
-                            if ( null !== $this->pipeline ) {
-                                $this->_setSegmentContainsMarkup();
-                            }
-
-                            break;
-                        }
-
-                        $html_buffer .= $char;
-                        break;
-
-                    default:
-
-                        $html_buffer .= $char;
-
-                        // End of input: treat buffer as plain text if not a valid tag.
-                        if ( $idx === ( count( $originalSplit ) - 1 ) ) {
-
-                            // End of input: treat buffer as plain text if not a valid tag.
-                            if ( !$this->_isTagValid( $html_buffer ) ) {
-                                $state             = static::STATE_PLAINTEXT; // Error: not a valid tag
-                                $plain_text_buffer .= $this->_fixWrongBuffer( $html_buffer );
-                                $html_buffer       = '';
-                                break;
-                            }
-
-                        }
-
-                        break;
-                }
-            } elseif ( $state == static::STATE_COMMENT ) {
-                // In an HTML comment block
-                $html_buffer .= $char;
-
-                // Check for the end of a comment: '-->'
-                if ( $char == '>' ) {
-                    if ( substr( $html_buffer, -3 ) == '-->' ) {
-                        // Close the comment
-                        $state       = static::STATE_PLAINTEXT;
-                        $output      .= $this->_finalizeScriptTag( $html_buffer );
-                        $html_buffer = '';
-
-                        if ( null !== $this->pipeline ) {
-                            $this->_setSegmentContainsMarkup();
-                        }
-                    }
-                }
-
-            } elseif ( $state == static::STATE_JS_CSS ) {
-                // In a <script> or <style> tag block (until closing tag)
-                $html_buffer .= $char;
-
-                // Detect close: e.g., '</script>' or '</style>'
-                if ( $char == '>' ) {
-                    if ( in_array( substr( $html_buffer, -6 ), [ 'cript>', 'style>' ] ) ) {
-                        // Close the script/style block
-                        $state = static::STATE_PLAINTEXT;
-                        // Validate and finalize the script/style block
-                        $this->_isTagValid( $html_buffer );
-                        $output      .= $this->_finalizeScriptTag( $html_buffer );
-                        $html_buffer = '';
-
-                        if ( null !== $this->pipeline ) {
-                            $this->_setSegmentContainsMarkup();
-                        }
-
-                    }
-                }
-
+            switch ( $state ) {
+                case static::STATE_PLAINTEXT:
+                    $this->handlePlainTextState( $char, $state, $html_buffer, $plain_text_buffer, $output );
+                    break;
+                case static::STATE_HTML:
+                    $this->handleHtmlState( $char, $idx, $charCount, $state, $html_buffer, $plain_text_buffer, $output, $in_quote_char );
+                    break;
+                case static::STATE_COMMENT:
+                    $this->handleCommentState( $char, $state, $html_buffer, $output );
+                    break;
+                case static::STATE_JS_CSS:
+                    $this->handleJsCssState( $char, $state, $html_buffer, $output );
+                    break;
             }
         }
 
-        //HTML Partial at the end, treat as invalid and preserve the string content
+        // HTML Partial at the end, treat as invalid and preserve the string content
         if ( !empty( $html_buffer ) ) {
-
-            if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
+            if ( $this->_isTagValid( $html_buffer ) && null !== $this->pipeline ) {
                 $this->_setSegmentContainsMarkup();
             }
-
             $output .= $this->_fixWrongBuffer( $html_buffer );
         }
 
@@ -314,6 +173,148 @@ class HtmlParser {
         }
 
         return $output;
+    }
 
+    /**
+     * Handles character processing when in the STATE_PLAINTEXT.
+     */
+    private function handlePlainTextState( string $char, int &$state, string &$html_buffer, string &$plain_text_buffer, string &$output ): void {
+        switch ( $char ) {
+            case '<':
+                // Potential new tag starts; finalize plain text so far.
+                $state             = static::STATE_HTML;
+                $html_buffer       .= $char;
+                $output            .= $this->_finalizePlainText( $plain_text_buffer );
+                $plain_text_buffer = '';
+                break;
+            case '>':
+                // Unescaped '>' in plaintext; treat as literal via error handing.
+                $plain_text_buffer .= $this->_fixWrongBuffer( $char );
+                break;
+            default:
+                // Collect as plain text.
+                $plain_text_buffer .= $char;
+                break;
+        }
+    }
+
+    /**
+     * Handles character processing when in the STATE_HTML.
+     */
+    private function handleHtmlState( string $char, int $idx, int $charCount, int &$state, string &$html_buffer, string &$plain_text_buffer, string &$output, string &$in_quote_char ): void {
+        switch ( $char ) {
+            case '<':
+                // If we found a second less than symbol, the first one IS NOT a tag.
+                // See https://www.w3.org/TR/xml/#charsets
+                $output      .= $this->_fixWrongBuffer( $html_buffer );
+                $html_buffer = $char;
+                break;
+            case '>':
+                // End of current tag. Special-case for <script> or <style> blocks.
+                if ( $this->isScriptOrStyleTag( $html_buffer ) ) {
+                    $html_buffer .= $char;
+                    $state       = static::STATE_JS_CSS;
+                    break;
+                }
+
+                $in_quote_char = '';
+                $state         = static::STATE_PLAINTEXT;
+                $html_buffer   .= $char;
+
+                // Validate and finalize HTML tag. Invalid tags are corrected/errors handled.
+                if ( $this->_isTagValid( $html_buffer ) ) {
+                    $output .= $this->_finalizeMarkupTag( $html_buffer );
+                    if ( null !== $this->pipeline ) {
+                        $this->_setSegmentContainsMarkup();
+                    }
+                } else {
+                    $output .= $this->_fixWrongBuffer( $html_buffer );
+                }
+                $html_buffer = '';
+                break;
+            case '"':
+            case '\'':
+                // Track entry/exit into quoted attributes.
+                if ( $char == $in_quote_char ) {
+                    $in_quote_char = ''; // Exiting quote
+                } elseif ( $in_quote_char == '' ) {
+                    $in_quote_char = $char; // Entering quote
+                }
+                $html_buffer .= $char;
+                break;
+            case '-':
+                // Detect HTML comment opening ('<!--').
+                if ( $html_buffer === '<!-' ) {
+                    $state = static::STATE_COMMENT;
+                }
+                $html_buffer .= $char;
+                break;
+            case ' ':
+            case "\n":
+                // Space or newline immediately after '<' is invalid.
+                if ( $html_buffer === '<' ) {
+                    $state       = static::STATE_PLAINTEXT;
+                    $output      .= $this->_fixWrongBuffer( '<' . $char );
+                    $html_buffer = '';
+                    if ( null !== $this->pipeline ) {
+                        $this->_setSegmentContainsMarkup();
+                    }
+                    break;
+                }
+                $html_buffer .= $char;
+                break;
+            default:
+                $html_buffer .= $char;
+                // End of input: treat buffer as plain text if not a valid tag.
+                if ( $idx === ( $charCount - 1 ) && !$this->_isTagValid( $html_buffer ) ) {
+                    $state             = static::STATE_PLAINTEXT; // Error: not a valid tag
+                    $plain_text_buffer .= $this->_fixWrongBuffer( $html_buffer );
+                    $html_buffer       = '';
+                }
+                break;
+        }
+    }
+
+    /**
+     * Handles character processing when in the STATE_COMMENT.
+     */
+    private function handleCommentState( string $char, int &$state, string &$html_buffer, string &$output ): void {
+        $html_buffer .= $char;
+        // Check for the end of a comment: '-->'
+        if ( $char === '>' && substr( $html_buffer, -3 ) === '-->' ) {
+            $state       = static::STATE_PLAINTEXT;
+            $output      .= $this->_finalizeScriptTag( $html_buffer );
+            $html_buffer = '';
+            if ( null !== $this->pipeline ) {
+                $this->_setSegmentContainsMarkup();
+            }
+        }
+    }
+
+    /**
+     * Handles character processing when in the STATE_JS_CSS.
+     */
+    private function handleJsCssState( string $char, int &$state, string &$html_buffer, string &$output ): void {
+        $html_buffer .= $char;
+        // Detect close: e.g., '</script>' or '</style>'
+        if ( $char === '>' ) {
+            if ( in_array( substr( $html_buffer, -6 ), [ 'cript>', 'style>' ], true ) ) {
+                $state = static::STATE_PLAINTEXT;
+                $this->_isTagValid( $html_buffer );
+                $output      .= $this->_finalizeScriptTag( $html_buffer );
+                $html_buffer = '';
+                if ( null !== $this->pipeline ) {
+                    $this->_setSegmentContainsMarkup();
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if the buffered HTML is the beginning of a script or style tag.
+     */
+    private function isScriptOrStyleTag( string $html_buffer ): bool {
+        // A tag starts with '<script' or '<style'. This also covers variants with spaces or attributes.
+        return in_array( substr( $html_buffer, 0, 8 ), [ '<script ', '<style', '<script', '<style ' ] );
     }
 }
