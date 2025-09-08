@@ -72,40 +72,6 @@ class HandlersSorterTest extends TestCase {
     }
 
     /**
-     * This test verifies that when both HtmlToPh and XmlToPh handlers are provided
-     * to the Sorter, HtmlToPh takes precedence and XmlToPh is excluded.
-     *
-     * @test
-     */
-    public function testHtmlToPhTakesPrecedenceOverXmlToPh() {
-        // NOTE: This test assumes that `HandlersSorter::quickSort` is implemented
-        // in a way that preserves handlers not listed in `injectableHandlersOrder`.
-        // If unknown handlers are discarded, this test may fail.
-
-        $handlers = [
-                DoubleSquareBrackets::class, // A sortable handler
-                HtmlToPh::class,             // A handler that should be kept
-                XmlToPh::class,              // A handler that should be removed due to exclusivity
-                Variables::class,            // Another sortable handler
-        ];
-
-        $sorter         = new HandlersSorter( $handlers );
-        $sortedHandlers = $sorter->getOrderedHandlersClassNames();
-
-        // Assert that HtmlToPh is present and XmlToPh is not.
-        $this->assertContains( HtmlToPh::class, $sortedHandlers );
-        $this->assertNotContains( XmlToPh::class, $sortedHandlers );
-
-        // Assert that other sortable handlers are still present and correctly sorted.
-        $this->assertContains( Variables::class, $sortedHandlers );
-        $this->assertContains( DoubleSquareBrackets::class, $sortedHandlers );
-        $this->assertGreaterThan(
-                array_search( Variables::class, $sortedHandlers ),
-                array_search( DoubleSquareBrackets::class, $sortedHandlers )
-        );
-    }
-
-    /**
      * This test ensures that if only XmlToPh is provided (without HtmlToPh),
      * it is preserved by the sorter.
      *
@@ -122,25 +88,6 @@ class HandlersSorterTest extends TestCase {
         $sortedHandlers = $sorter->getOrderedHandlersClassNames();
 
         $this->assertContains( XmlToPh::class, $sortedHandlers );
-        $this->assertContains( Variables::class, $sortedHandlers );
-    }
-
-    /**
-     * This test ensures that if only HtmlToPh is provided, it is preserved.
-     *
-     * @test
-     */
-    public function testHtmlToPhIsPreservedWhenProvidedAlone() {
-        // NOTE: This test is subject to the same `quickSort` assumption mentioned above.
-        $handlers = [
-                HtmlToPh::class,
-                Variables::class,
-        ];
-
-        $sorter         = new HandlersSorter( $handlers );
-        $sortedHandlers = $sorter->getOrderedHandlersClassNames();
-
-        $this->assertContains( HtmlToPh::class, $sortedHandlers );
         $this->assertContains( Variables::class, $sortedHandlers );
     }
 

@@ -43,6 +43,31 @@ use Matecat\SubFiltering\Filters\SpecialEntitiesToPlaceholdersForView;
  * @package SubFiltering
  */
 class MateCatFilter extends AbstractFilter {
+
+    /**
+     * Transforms database raw XML content (Layer 0) to intermediate structures (Layer 1).
+     *
+     * @param string      $segment The data segment to transform from Layer 0 to Layer 1.
+     * @param string|null $cid     Optional context identifier for the transformation process.
+     *
+     * @return string The transformed segment in Layer 1 format.
+     * @throws Exception If the transformation process fails.
+     */
+    public function fromLayer0ToLayer1( string $segment, ?string $cid = null ): string {
+
+        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
+
+        $this->configureFromLayer0ToLayer1Pipeline( $channel );
+
+        // Allow the feature set to modify the pipeline for this specific transformation.
+        /** @var $channel Pipeline */
+        $channel = $this->featureSet->filter( 'fromLayer0ToLayer1', $channel );
+
+        // Process the segment and return the result.
+        return $channel->transform( $segment );
+
+    }
+
     /**
      * Used to transform database raw XML content (Layer 0) to the UI structures (Layer 2)
      *

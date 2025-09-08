@@ -40,11 +40,11 @@ use RuntimeException;
  * @package Matecat\SubFiltering\Filters\Html
  *
  * @method _isTagValid( string $buffer )            Validate whether $buffer is a correct HTML tag.
- * @method _finalizeHTMLTag( string $buffer )        Handle completion of a valid HTML tag.
+ * @method _finalizeMarkupTag( string $buffer )        Handle completion of a valid HTML tag.
  * @method _fixWrongBuffer( string $buffer )         Correct and process abnormal tag-like input.
  * @method _finalizeScriptTag( string $buffer )      Finalize a <script>/<style> or comment content.
  * @method _finalizePlainText( string $plain_buffer ) Finalize plain text collected so far.
- * @method _setSegmentContainsHtml()                Set a flag on the parent pipeline that HTML has been found.
+ * @method _setSegmentContainsMarkup()                Set a flag on the parent pipeline that HTML has been found.
  */
 class HtmlParser {
 
@@ -186,10 +186,10 @@ class HtmlParser {
 
                         // Validate and finalize HTML tag. Invalid tags are corrected/errors handled.
                         if ( $this->_isTagValid( $html_buffer ) ) {
-                            $output .= $this->_finalizeHTMLTag( $html_buffer );
+                            $output .= $this->_finalizeMarkupTag( $html_buffer );
                             if ( null !== $this->pipeline ) {
                                 // Mark the segment as containing HTML if required.
-                                $this->_setSegmentContainsHtml();
+                                $this->_setSegmentContainsMarkup();
                             }
                         } else {
                             $output .= $this->_fixWrongBuffer( $html_buffer );
@@ -228,7 +228,7 @@ class HtmlParser {
                             $html_buffer = '';
 
                             if ( null !== $this->pipeline ) {
-                                $this->_setSegmentContainsHtml();
+                                $this->_setSegmentContainsMarkup();
                             }
 
                             break;
@@ -252,7 +252,6 @@ class HtmlParser {
                                 break;
                             }
 
-                            break;
                         }
 
                         break;
@@ -270,7 +269,7 @@ class HtmlParser {
                         $html_buffer = '';
 
                         if ( null !== $this->pipeline ) {
-                            $this->_setSegmentContainsHtml();
+                            $this->_setSegmentContainsMarkup();
                         }
                     }
                 }
@@ -283,12 +282,14 @@ class HtmlParser {
                 if ( $char == '>' ) {
                     if ( in_array( substr( $html_buffer, -6 ), [ 'cript>', 'style>' ] ) ) {
                         // Close the script/style block
-                        $state       = static::STATE_PLAINTEXT;
+                        $state = static::STATE_PLAINTEXT;
+                        // Validate and finalize the script/style block
+                        $this->_isTagValid( $html_buffer );
                         $output      .= $this->_finalizeScriptTag( $html_buffer );
                         $html_buffer = '';
 
                         if ( null !== $this->pipeline ) {
-                            $this->_setSegmentContainsHtml();
+                            $this->_setSegmentContainsMarkup();
                         }
 
                     }
@@ -301,7 +302,7 @@ class HtmlParser {
         if ( !empty( $html_buffer ) ) {
 
             if ( $this->_isTagValid( $html_buffer ) and null !== $this->pipeline ) {
-                $this->_setSegmentContainsHtml();
+                $this->_setSegmentContainsMarkup();
             }
 
             $output .= $this->_fixWrongBuffer( $html_buffer );

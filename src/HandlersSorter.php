@@ -10,7 +10,6 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
-use Matecat\SubFiltering\Filters\HtmlToPh;
 use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\Snails;
@@ -77,69 +76,35 @@ class HandlersSorter {
         // Start with the default order of handlers.
         $this->defaultInjectedHandlers = self::injectableHandlersOrder;
 
-        // Special rule: HtmlToPh and XmlToPh are mutually exclusive because HtmlToPh is a
-        // more specific and capable version of XmlToPh. If a user requests HtmlToPh, we
-        // must ensure XmlToPh is not also run to prevent redundant or conflicting processing.
-        if ( in_array( HtmlToPh::class, $injectedHandlers ) ) {
-
-            // Find the key of the XmlToPh handler in the input array.
-            if ( ( $key = array_search( XmlToPh::class, $injectedHandlers ) ) !== false ) {
-                // If found, remove it from the array to be sorted.
-                unset( $injectedHandlers[ $key ] );
-                // Re-index the array to ensure it remains a zero-based, consecutive list.
-                $injectedHandlers = array_values( $injectedHandlers );
-            }
-
-            // To ensure HtmlToPh is placed correctly in the sequence, assign it the same
-            // priority as XmlToPh and remove XmlToPh from the priority map for this instance.
-            $this->defaultInjectedHandlers[ HtmlToPh::class ] = $this->defaultInjectedHandlers[ XmlToPh::class ];
-            unset( $this->defaultInjectedHandlers[ XmlToPh::class ] );
-        }
-
         // Sort the final list of handlers according to their predefined execution order.
         $this->injectedHandlers = $this->quickSort( $injectedHandlers );
+
     }
 
     /**
-     * Sorts the handler's list using the QuickSort algorithm.
+     * Sorts the given list of handlers based on their defined priorities.
      *
-     * It recursively partitions the array of handlers based on their priority values
-     * defined in the `defaultInjectedHandlers` map. Handlers not present in the map are ignored.
+     * This method filters the input array to include only those handlers that have a defined
+     * priority in the `defaultInjectedHandlers` property. It then sorts the filtered list
+     * using a custom comparison function based on the priority values.
      *
-     * @param class-string[] $handlersList The list of handler class names to sort.
+     * @param string[] $handlersList An array of handler class names to be filtered and sorted.
      *
-     * @return class-string[] The sorted list of handlers.
+     * @return string[] The sorted list of handler class names based on their priorities.
      */
     private function quickSort( array $handlersList ): array {
-        $length = count( $handlersList );
+        // Filter the list to include only handlers with a defined priority.
+        $filteredHandlers = array_filter( $handlersList, function ( $handler ) {
+            return array_key_exists( $handler, $this->defaultInjectedHandlers );
+        } );
 
-        // Base case: if the array has 0 or 1 elements, it's already sorted.
-        if ( $length < 2 ) {
-            return $handlersList;
-        }
+        // Sort the handlers based on their priority using a custom comparison function.
+        usort( $filteredHandlers, function ( $a, $b ) {
+            // The spaceship operator (<=>) returns -1, 0, or 1, which is what usort expects.
+            return $this->defaultInjectedHandlers[ $a ] <=> $this->defaultInjectedHandlers[ $b ];
+        } );
 
-        // Select the first element as the pivot.
-        $pivot       = $handlersList[ 0 ];
-        $leftBucket  = []; // Elements with lower or equal priority
-        $rightBucket = []; // Elements with higher priority
-
-        // Partition the rest of the array around the pivot.
-        for ( $i = 1; $i < $length; $i++ ) {
-            // Skip any handler not in our defined priority list.
-            if ( !array_key_exists( $handlersList[ $i ], $this->defaultInjectedHandlers ) ) {
-                continue;
-            }
-
-            // Compare the pivot's priority with the current element's priority.
-            if ( $this->defaultInjectedHandlers[ $pivot ] > $this->defaultInjectedHandlers[ $handlersList[ $i ] ] ) {
-                $leftBucket[] = $handlersList[ $i ];
-            } else {
-                $rightBucket[] = $handlersList[ $i ];
-            }
-        }
-
-        // Recursively sort the partitions and merge them back together with the pivot.
-        return array_merge( $this->quickSort( $leftBucket ), [ $pivot ], $this->quickSort( $rightBucket ) );
+        return $filteredHandlers;
     }
 
     /**
@@ -148,12 +113,7 @@ class HandlersSorter {
      * @return class-string<AbstractHandler>[] An array of handler class names ready to be added to a pipeline.
      */
     public function getOrderedHandlersClassNames(): array {
-        // This creates a copy of the sorted handlers array.
-        $handlers = [];
-        foreach ( $this->injectedHandlers as $handler ) {
-            $handlers[] = $handler;
-        }
-
-        return $handlers;
+        return $this->injectedHandlers;
     }
+
 }

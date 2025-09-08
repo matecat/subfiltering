@@ -63,16 +63,10 @@ abstract class AbstractFilter {
     protected array $dataRefMap = [];
 
     /**
-     * The processing pipeline for transforming content from Layer 0 (e.g., database)
-     * to Layer 1 (e.g., for MT/TM servers).
-     *
-     * This pipeline holds the sequence of filter handlers that are applied to
-     * convert the raw segment into its sub-filtered representation. It is typically
-     * configured once and reused for multiple transformations.
-     *
-     * @var Pipeline
+     * @var class-string[]
+     * An ordered list of handler class names for the Layer 0 to Layer 1 transition.
      */
-    protected Pipeline $fromLayer0ToLayer1Pipeline;
+    protected array $orderedHandlersForLayer0ToLayer1Transition = [];
 
     /**
      * Factory method to create and configure a new instance of the filter.
@@ -115,8 +109,9 @@ abstract class AbstractFilter {
         }
         // Otherwise, use the custom list of handlers provided.
 
-        // Create and configure the processing pipeline for the Layer 0 to Layer 1 transformation.
-        $newInstance->createFromLayer0ToLayer1Pipeline( $source, $target, $dataRefMap ?? [], $handlerClassNamesForLayer0ToLayer1Transition );
+        // Sort the dynamic feature-based handlers.
+        $sorter                                                  = new HandlersSorter( $handlerClassNamesForLayer0ToLayer1Transition );
+        $newInstance->orderedHandlersForLayer0ToLayer1Transition = $sorter->getOrderedHandlersClassNames();
 
         // Return the fully configured filter instance.
         return $newInstance;
@@ -155,46 +150,23 @@ abstract class AbstractFilter {
         return $channel->transform( $segment );
     }
 
+
     /**
-     * Transforms a segment from Layer 0 (database raw XML) to Layer 1 (sub-filtered format).
+     * Transforms a segment from Layer 0 to Layer 1.
      *
-     * This method uses the pre-configured pipeline to process the segment. It also allows
-     * the feature set to apply any final modifications to the pipeline before transformation.
+     * This method performs the conversion of a segment from the input pre-processed stage (Layer 0)
+     * to Layer 1, where additional processing and standardization are applied. It may use various
+     * processing pipelines or handlers to achieve this transformation, depending on the implementation.
      *
-     * @param string      $segment The segment in Layer 0 format.
-     * @param string|null $cid     An optional client/context identifier for further customization.
+     * @param string      $segment The input segment to be transformed from Layer 0 to Layer 1.
+     * @param string|null $cid     An optional identifier for context or further processing specific to the segment.
      *
-     * @return string The transformed segment in Layer 1 format.
-     * @throws Exception If any handler in the pipeline fails.
+     * @return string The transformed segment after processing from Layer 0 to Layer 1.
      */
-    public function fromLayer0ToLayer1( string $segment, ?string $cid = null ): string {
-        // Retrieve the pre-built pipeline for this transformation.
-        $channel = $this->getFromLayer0ToLayer1Pipeline();
-
-        // Allow the feature set to modify the pipeline for this specific transformation.
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromLayer0ToLayer1', $channel );
-
-        // Process the segment and return the result.
-        return $channel->transform( $segment );
-    }
+    public abstract function fromLayer0ToLayer1( string $segment, ?string $cid = null ): string;
 
     /**
-     * Returns the configured pipeline for transforming content from Layer 0 to Layer 1.
-     *
-     * This pipeline is used to process segments as they are transformed from their raw
-     * database representation (Layer 0) to a sub-filtered format suitable for server-to-server
-     * communications (Layer 1). The pipeline consists of a series of handlers that perform
-     * specific transformations on the segment data.
-     *
-     * @return Pipeline The pipeline configured for Layer 0 to Layer 1 transformations.
-     */
-    public function getFromLayer0ToLayer1Pipeline(): Pipeline {
-        return $this->fromLayer0ToLayer1Pipeline;
-    }
-
-    /**
-     * Creates and configures the pipeline for transforming content from Layer 0 to Layer 1.
+     * Configures the pipeline for transforming content from Layer 0 to Layer 1.
      *
      * This is the default configuration method of MateCatFilter for setting up the pipeline that processes segments.
      * MyMemoryFilter or override this method to customize the pipeline as needed.
@@ -203,30 +175,27 @@ abstract class AbstractFilter {
      * It adds a series of standard handlers and then incorporates any custom handlers,
      * ensuring they are correctly ordered via `HandlersSorter`.
      *
-     * @param string|null $source                                       The source language code.
-     * @param string|null $target                                       The target language code.
-     * @param array       $dataRefMap                                   A map for data-ref transformations.
-     * @param array       $handlerClassNamesForLayer0ToLayer1Transition A list of handler classes to include in the pipeline.
+     * @param Pipeline    $channel
+     * @param string|null $cid
      */
-    protected function createFromLayer0ToLayer1Pipeline( ?string $source, ?string $target, array $dataRefMap, array $handlerClassNamesForLayer0ToLayer1Transition ) {
-        // Initialize the pipeline with language and data-ref context.
-        $this->fromLayer0ToLayer1Pipeline = new Pipeline( $source, $target, $dataRefMap );
+    protected function configureFromLayer0ToLayer1Pipeline( Pipeline $channel, ?string $cid = null ): void {
 
         // Add initial handlers for standard XLIFF and placeholder normalization.
-        $this->fromLayer0ToLayer1Pipeline->addLast( StandardPHToMateCatCustomPH::class );
-        $this->fromLayer0ToLayer1Pipeline->addLast( StandardXEquivTextToMateCatCustomPH::class );
-        $this->fromLayer0ToLayer1Pipeline->addLast( PlaceHoldXliffTags::class );
-        $this->fromLayer0ToLayer1Pipeline->addLast( LtGtDecode::class );
+        $channel->addLast( StandardPHToMateCatCustomPH::class );
+        $channel->addLast( StandardXEquivTextToMateCatCustomPH::class );
+        $channel->addLast( PlaceHoldXliffTags::class );
+        $channel->addLast( LtGtDecode::class );
 
-        // Sort and add the dynamic feature-based handlers.
-        $sorter = new HandlersSorter( $handlerClassNamesForLayer0ToLayer1Transition );
-        foreach ( $sorter->getOrderedHandlersClassNames() as $handler ) {
-            $this->fromLayer0ToLayer1Pipeline->addLast( $handler );
+        // Add the dynamic feature-based handlers.
+        foreach ( $this->orderedHandlersForLayer0ToLayer1Transition as $handler ) {
+            $channel->addLast( $handler );
         }
 
         // Add final handlers to restore XLIFF content and encode for the target layer.
-        $this->fromLayer0ToLayer1Pipeline->addLast( RestoreXliffTagsContent::class );
-        $this->fromLayer0ToLayer1Pipeline->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
-        $this->fromLayer0ToLayer1Pipeline->addLast( EquivTextToBase64::class );
+        $channel->addLast( RestoreXliffTagsContent::class );
+        $channel->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
+        $channel->addLast( EquivTextToBase64::class );
+
     }
+
 }

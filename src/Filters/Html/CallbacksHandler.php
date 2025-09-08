@@ -9,6 +9,8 @@
 
 namespace Matecat\SubFiltering\Filters\Html;
 
+use Matecat\SubFiltering\Commons\Pipeline;
+
 /**
  * Trait CallbacksHandler
  *
@@ -25,13 +27,18 @@ namespace Matecat\SubFiltering\Filters\Html;
 trait CallbacksHandler {
 
     /**
+     * @var Pipeline
+     */
+    protected Pipeline $pipeline;
+
+    /**
      * Processes a buffer that has been identified as a valid and complete HTML tag.
      * This method is called by `HtmlParser` when it successfully parses a tag.
      *
      * @param string $buffer The complete HTML tag string (e.g., "<p>", "</div>").
      * @return string The processed result that should replace the tag in the output.
      */
-    abstract protected function _finalizeHTMLTag( string $buffer ): string;
+    abstract protected function _finalizeMarkupTag( string $buffer ): string;
 
     /**
      * Handles buffers that are determined to be invalid or malformed markup.
@@ -75,8 +82,8 @@ trait CallbacksHandler {
      * This method assumes the class using this trait has a `pipeline` property
      * which is an instance of `Matecat\SubFiltering\Commons\Pipeline`.
      */
-    protected function _setSegmentContainsHtml() {
-        $this->pipeline->setSegmentContainsHtml();
+    protected function _setSegmentContainsMarkup() {
+        $this->pipeline->_setSegmentContainsMarkup();
     }
 
 }

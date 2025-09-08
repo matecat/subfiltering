@@ -10,12 +10,35 @@
 namespace Matecat\SubFiltering\Tests;
 
 use Exception;
+use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
+use Matecat\SubFiltering\Filters\Html\HtmlParser;
 use Matecat\SubFiltering\Filters\XmlToPh;
 use PHPUnit\Framework\TestCase;
 
 class HtmlParserTest extends TestCase {
+
+    public function testRegisterInvalidCallbacksHandlerThrowsException() {
+        // Expect the specific exception to be thrown
+        $this->expectException( \RuntimeException::class );
+        $this->expectExceptionMessage( 'Class passed to Matecat\SubFiltering\Filters\Html\HtmlParser::registerCallbacksHandler must use Matecat\SubFiltering\Filters\Html\CallbacksHandler trait.' );
+
+        // Create an instance of the parser
+        $parser = new HtmlParser();
+
+        // Create an anonymous class instance that extends AbstractHandler
+        // but does NOT use the CallbacksHandler trait.
+        $invalidHandler = new class extends AbstractHandler {
+            public function transform( string $segment ): string {
+                return $segment; // Fake implementation
+            }
+        };
+
+        // This call should trigger the RuntimeException
+        $parser->registerCallbacksHandler( $invalidHandler );
+    }
+
 
     /**
      * @throws Exception
@@ -27,7 +50,7 @@ class HtmlParserTest extends TestCase {
         // WARNING the href attribute MUST NOT BE encoded because we want to only extract HTML
         // WARNING the text node inside HTML must remain untouched
         $segment  = "<p> Airbnb &amp;amp; Co. &amp;lt; <strong>Use professional tools</strong> in your <a href=\"/users/settings?test=123&amp;amp;ciccio=1\" target=\"_blank\">";
-        $expected = "<ph id=\"mtc_1\" ctype=\"" . CTypeEnum::XML . "\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> Airbnb &amp;amp; Co. &amp;lt; <ph id=\"mtc_2\" ctype=\"" . CTypeEnum::XML . "\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/>Use professional tools<ph id=\"mtc_3\" ctype=\"" . CTypeEnum::XML . "\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/> in your <ph id=\"mtc_4\" ctype=\"" . CTypeEnum::XML . "\" equiv-text=\"base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs=\"/>";
+        $expected = "<ph id=\"mtc_1\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> Airbnb &amp;amp; Co. &amp;lt; <ph id=\"mtc_2\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/>Use professional tools<ph id=\"mtc_3\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/> in your <ph id=\"mtc_4\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs=\"/>";
 
         $pipeline = new Pipeline();
         $pipeline->addLast( XmlToPh::class );
@@ -50,7 +73,7 @@ class HtmlParserTest extends TestCase {
 h1 {color:blue;}p{color:red;}
 </style>";
 
-        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3N0eWxlJmd0O2JvZHl7YmFja2dyb3VuZC1jb2xvcjpwb3dkZXJibHVlO30gCmgxIHtjb2xvcjpibHVlO31we2NvbG9yOnJlZDt9CiZsdDsvc3R5bGUmZ3Q7"/>';
+        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3N0eWxlJmd0O2JvZHl7YmFja2dyb3VuZC1jb2xvcjpwb3dkZXJibHVlO30gCmgxIHtjb2xvcjpibHVlO31we2NvbG9yOnJlZDt9CiZsdDsvc3R5bGUmZ3Q7"/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast( XmlToPh::class );
@@ -107,7 +130,7 @@ h1 {color:blue;}p{color:red;}
 let elements = document.getElementsByClassName('note');
 </script>";
 
-        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3NjcmlwdCZndDsKbGV0IGVsZW1lbnRzID0gZG9jdW1lbnQuZ2V0RWxlbWVudHNCeUNsYXNzTmFtZSgnbm90ZScpOwombHQ7L3NjcmlwdCZndDs="/>';
+        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3NjcmlwdCZndDsKbGV0IGVsZW1lbnRzID0gZG9jdW1lbnQuZ2V0RWxlbWVudHNCeUNsYXNzTmFtZSgnbm90ZScpOwombHQ7L3NjcmlwdCZndDs="/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast( XmlToPh::class );
@@ -145,5 +168,62 @@ let elements = document.getElementsByClassName('note');
 
         $this->assertEquals( $expected, $str );
     }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function testTransformWithComplexStringForAllBranches() {
+        // This string is designed to exercise as many conditional branches
+        // of the HtmlParser::transform method as possible in a single run.
+        $segment = "A>B plain text. <p class='c1'>valid tag</p> <!-- comment --><script>js</script><style>css</style> < invalid-tag> <a<b and finally <u";
+
+        $pipeline = new Pipeline();
+        // XmlToPh uses HtmlParser internally and provides the necessary callbacks.
+        $pipeline->addLast( XmlToPh::class );
+
+        $transformed = $pipeline->transform( $segment );
+
+        // Manually build the expected output by tracing the parser's logic with the XmlToPh handler.
+        $expected =
+                // 1. Plain text with a stray '>', which gets encoded.
+                'A&gt;B plain text. ' .
+
+                // 2. A valid opening <p> tag, which becomes a placeholder.
+                '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "<p class='c1'>", ENT_NOQUOTES | 16 ) ) . '"/>' .
+
+                // 3. Plain text content of the tag.
+                'valid tag' .
+
+                // 4. A valid closing </p> tag.
+                '<ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "</p>", ENT_NOQUOTES | 16 ) ) . '"/>' .
+
+                // 5. A space.
+                ' ' .
+
+                // 6. A comment block, which becomes a placeholder.
+                '<ph id="mtc_3" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "<!-- comment -->", ENT_NOQUOTES | 16 ) ) . '"/>' .
+
+                // 7. A script block.
+                '<ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "<script>js</script>", ENT_NOQUOTES | 16 ) ) . '"/>' .
+
+                // 8. A style block.
+                '<ph id="mtc_5" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "<style>css</style>", ENT_NOQUOTES | 16 ) ) . '"/>' .
+
+                // 9. Invalid tag start ('< '), invalid tag content, and stray '>'. All are encoded.
+                ' &lt; invalid-tag&gt; ' .
+
+                // 10. A nested '<' and an unclosed tag are encoded.
+                '&lt;a&lt;b' .
+
+                // 11. Plain text.
+                ' and finally ' .
+
+                // 12. The final unclosed tag at the end of the string is encoded.
+                '&lt;u';
+
+        $this->assertEquals( $expected, $transformed );
+    }
+
 
 }

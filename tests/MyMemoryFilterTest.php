@@ -5,9 +5,18 @@ namespace Matecat\SubFiltering\Tests;
 use Exception;
 use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\Commons\EmptyFeatureSet;
+use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
+use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
+use Matecat\SubFiltering\Filters\SmartCounts;
+use Matecat\SubFiltering\Filters\TwigToPh;
+use Matecat\SubFiltering\Filters\Variables;
+use Matecat\SubFiltering\HandlersSorter;
 use Matecat\SubFiltering\MyMemoryFilter;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
 
 class MyMemoryFilterTest extends TestCase {
     /**
@@ -18,6 +27,136 @@ class MyMemoryFilterTest extends TestCase {
 
         return MyMemoryFilter::getInstance( new EmptyFeatureSet(), 'en-US', 'it-IT' );
     }
+
+    /**
+     * @param string|null $cid                  The client ID to test.
+     * @param array       $initialHandlers      The initial set of handlers for the filter.
+     * @param array       $expectedToContain    A list of handlers that should be in the pipeline.
+     * @param array       $expectedToNotContain A list of handlers that should NOT be in the pipeline.
+     *
+     * @test
+     * @dataProvider pipelineConfigurationProvider
+     * @throws ReflectionException
+     */
+    public function testConfigurePipelineCidBranches( ?string $cid, array $initialHandlers, array $expectedToContain, array $expectedToNotContain ) {
+        // Arrange: Create a filter instance with a specific set of initial handlers.
+        $filter  = MyMemoryFilter::getInstance( new EmptyFeatureSet(), 'en-US', 'it-IT', [], $initialHandlers );
+        $channel = new Pipeline();
+
+        // Act: Invoke the protected method to configure the pipeline.
+        $method = new ReflectionMethod( MyMemoryFilter::class, 'configureFromLayer0ToLayer1Pipeline' );
+        $method->setAccessible( true );
+        $method->invoke( $filter, $channel, $cid );
+
+        // Assert: Check the pipeline's contents against expectations.
+        $pipelineHandlers = $this->getPipelineHandlers( $channel );
+
+        // Ensure no duplicates
+        $this->assertSameSize( $pipelineHandlers, array_unique( $pipelineHandlers ) );
+
+        foreach ( $expectedToContain as $handler ) {
+            $this->assertContains( $handler, $pipelineHandlers, "Pipeline should contain $handler for cid '$cid'" );
+        }
+
+        foreach ( $expectedToNotContain as $handler ) {
+            $this->assertNotContains( $handler, $pipelineHandlers, "Pipeline should NOT contain $handler for cid '$cid'" );
+        }
+    }
+
+    /**
+     * Provides test cases for the pipeline configuration based on client ID.
+     *
+     * @return array
+     */
+    public function pipelineConfigurationProvider(): array {
+        $defaultHandlers = $airbnbOverloadedHandlers = array_keys( HandlersSorter::injectableHandlersOrder );
+
+        $airbnbOverloadedHandlers[] = SmartCounts::class;
+
+        // A handler set that is missing the Variables handler, to test the Airbnb 'if' branch
+        $handlersWithoutVariables = array_filter( $defaultHandlers, function ( $handler ) {
+            return $handler !== Variables::class;
+        } );
+
+        // A handler set that already includes SingleCurlyBracketsToPh
+        $handlersWithSingleCurly = array_merge( $defaultHandlers, [ SingleCurlyBracketsToPh::class ] );
+
+        return [
+                'no cid (default pipeline)'                   => [
+                        'cid'                  => null,
+                        'initialHandlers'      => $defaultHandlers,
+                        'expectedToContain'    => [ TwigToPh::class ],
+                        'expectedToNotContain' => [
+                                SmartCounts::class,
+                                SingleCurlyBracketsToPh::class
+                        ]
+                ],
+                'airbnb (Variables handler present)'          => [
+                        'cid'                  => 'airbnb',
+                        'initialHandlers'      => $defaultHandlers,
+                        'expectedToContain'    => [ Variables::class, SmartCounts::class ],
+                        'expectedToNotContain' => []
+                ],
+                'airbnb (Variables handler not present)'      => [
+                        'cid'                  => 'airbnb',
+                        'initialHandlers'      => $handlersWithoutVariables,
+                        'expectedToContain'    => [],
+                        'expectedToNotContain' => [
+                                Variables::class,
+                                SmartCounts::class
+                        ]
+                ],
+                'airbnb (SmartCount handler already present)' => [
+                        'cid'                  => 'airbnb',
+                        'initialHandlers'      => $airbnbOverloadedHandlers, // this test is to ensure no duplicates
+                        'expectedToContain'    => [ Variables::class, SmartCounts::class ],
+                        'expectedToNotContain' => []
+                ],
+                'roblox (default)'                            => [
+                        'cid'                  => 'roblox',
+                        'initialHandlers'      => $defaultHandlers,
+                        'expectedToContain'    => [ SingleCurlyBracketsToPh::class ],
+                        'expectedToNotContain' => []
+                ],
+                'roblox (handler already present)'            => [
+                        'cid'                  => 'roblox',
+                        'initialHandlers'      => $handlersWithSingleCurly,
+                        'expectedToContain'    => [ SingleCurlyBracketsToPh::class ],
+                        'expectedToNotContain' => []
+                ],
+                'familysearch (default)'                      => [
+                        'cid'                  => 'familysearch',
+                        'initialHandlers'      => $defaultHandlers,
+                        'expectedToContain'    => [ SingleCurlyBracketsToPh::class ],
+                        'expectedToNotContain' => [ TwigToPh::class ]
+                ],
+                'familysearch (handler already present)'      => [
+                        'cid'                  => 'familysearch',
+                        'initialHandlers'      => $handlersWithSingleCurly, // this test is to ensure no duplicates
+                        'expectedToContain'    => [ SingleCurlyBracketsToPh::class ],
+                        'expectedToNotContain' => [ TwigToPh::class ]
+                ],
+        ];
+    }
+
+    /**
+     * Helper to get the list of handler class names from a pipeline using reflection.
+     *
+     * @param Pipeline $pipeline
+     *
+     * @return string[]
+     */
+    private function getPipelineHandlers( Pipeline $pipeline ): array {
+        $reflection       = new ReflectionClass( $pipeline );
+        $handlersProperty = $reflection->getProperty( 'handlers' );
+        $handlersProperty->setAccessible( true );
+        $handlers = $handlersProperty->getValue( $pipeline );
+
+        return array_map( function ( $handler ) {
+            return get_class( $handler );
+        }, $handlers );
+    }
+
 
     /**
      **************************
@@ -46,7 +185,7 @@ class MyMemoryFilterTest extends TestCase {
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'Airbnb account.%{\n}%{&lt;br&gt;}%{\n}1) From ';
-        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>1) From ';
+        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>1) From ';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment, 'airbnb' ) );

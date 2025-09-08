@@ -61,7 +61,7 @@ class Utils {
                         ord( $mb_char[ 3 ] ) - 0x80;
         }
 
-        return 20; //as default return a space ( should never happen )
+        return 20; //as default, return a space (should never happen)
     }
 
     /**

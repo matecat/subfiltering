@@ -79,7 +79,7 @@ class SpecialHtmlEntitiesTest extends TestCase {
         $filter              = $this->getFilterInstance();
         $segment             = "These are &lt;p&gt; some chars \n \r\n \t inside an xliff";
         $expected_db_segment = "These are &lt;p&gt; some chars &#10; &#13;&#10; &#09; inside an xliff";
-        $segment_UI          = 'These are <ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> some chars ##$_0A$## ##$_0D$####$_0A$## ##$_09$## inside an xliff';
+        $segment_UI          = 'These are <ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3AmZ3Q7"/> some chars ##$_0A$## ##$_0D$####$_0A$## ##$_09$## inside an xliff';
 
         $database_segment = $filter->fromRawXliffToLayer0( $segment );
         $this->assertEquals( $expected_db_segment, $database_segment );

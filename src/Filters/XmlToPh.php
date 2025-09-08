@@ -29,6 +29,8 @@ class XmlToPh extends AbstractHandler {
 
     use CallbacksHandler;
 
+    protected bool $isHTML = false;
+
     /**
      * Handles plain text content. Returns the buffer unchanged.
      *
@@ -51,7 +53,7 @@ class XmlToPh extends AbstractHandler {
      *
      * @return string The generated <ph> placeholder tag.
      */
-    protected function _finalizeHTMLTag( string $buffer ): string {
+    protected function _finalizeMarkupTag( string $buffer ): string {
         // Decode attributes by locking < and > first
         // Because a HTML tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
         // Ex:
@@ -75,7 +77,7 @@ class XmlToPh extends AbstractHandler {
      * @return string The resulting <ph> tag.
      */
     protected function _finalizeTag( string $buffer ): string {
-        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::XML . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . ( $this->isHTML ? CTypeEnum::HTML : CTypeEnum::XML ) . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**
@@ -118,6 +120,16 @@ class XmlToPh extends AbstractHandler {
      */
     protected function _isTagValid( string $buffer ): bool {
 
+        // This is a safeguard against misinterpreting partially processed strings.
+        // During filtering, inner tags might be replaced by placeholders (e.g., ##LESSTHAN##).
+        // If such placeholders exist within what looks like a tag, it means the tag's
+        // content is not yet restored, so we must not treat it as a valid, final tag.
+        // For example, an original string like '&lt;a href="<x/>"&gt;' could become
+        // '<a href="##LESSTHAN##x/##GREATERTHAN##">', which should not be converted to a <ph> tag.
+        if ( strpos( $buffer, ConstantEnum::LTPLACEHOLDER ) !== false || strpos( $buffer, ConstantEnum::GTPLACEHOLDER ) !== false ) {
+            return false;
+        }
+
         /*
          * accept tags start with:
          * - starting with / ( optional )
@@ -133,14 +145,43 @@ class XmlToPh extends AbstractHandler {
         // (with quoted or unquoted values), and correct opening/closing brackets.
         if ( preg_match( '#</?(?![0-9]+)[a-z0-9\-._:]+?(?:\s+[:a-z0-9\-._]+(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?)*\s*/?>#ui', $buffer ) ) {
 
-            // This is a safeguard against misinterpreting partially processed strings.
-            // During filtering, inner tags might be replaced by placeholders (e.g., ##LESSTHAN##).
-            // If such placeholders exist within what looks like a tag, it means the tag's
-            // content is not yet restored, so we must not treat it as a valid, final tag.
-            // For example, an original string like '&lt;a href="<x/>"&gt;' could become
-            // '<a href="##LESSTHAN##x/##GREATERTHAN##">', which should not be converted to a <ph> tag.
-            if ( strpos( $buffer, ConstantEnum::LTPLACEHOLDER ) !== false || strpos( $buffer, ConstantEnum::GTPLACEHOLDER ) !== false ) {
-                return false;
+            /**
+             * HTML5 Tag Matcher and Global Attribute Parser
+             *
+             * This module provides a comprehensive approach to matching and validating HTML5 elements
+             * with a focus on global attributes, including `data-*` attributes with complex Unicode names.
+             *
+             * Features:
+             * 1. Matches all valid HTML5 tags, including structural, text, inline, form, multimedia, table,
+             *    script, interactive, and miscellaneous tags.
+             * 2. Supports opening tags, closing tags, and self-closing tags.
+             * 3. Supports global attributes:
+             *    - Standard global attributes: id, class, style, title, lang, dir, hidden, draggable, etc.
+             *    - Data attributes: data-* with Unicode, emoji, or complex characters.
+             *    - ARIA attributes: role, aria-*.
+             *    - Event handlers: on*, e.g., onclick, onmouseover.
+             *    - Deprecated XML attributes: xml:lang, xml:base.
+             * 4. Handles attribute values in double quotes, single quotes, or unquoted.
+             * 5. Example usage includes parsing headings (`h1`-`h6`) with multiple global attributes,
+             *    as well as other HTML5 elements with complex `data-*` attributes.
+             *
+             * Regex Summary:
+             * - Tag matching: matches all HTML5 tags listed in the specification.
+             * - Attribute matching: matches zero or more global attributes including complex `data-*` names.
+             * - Robust to multiple attributes, whitespace, self-closing tags, and Unicode characters.
+             *
+             * Example HTML matched by the regex:
+             * <h1 id="title1" class="main" data-élément-αριθμός="321">Heading</h1>
+             * <img src="image.png" alt="Photo" data-info="📸"/>
+             * <div hidden data-属性名123="有效">Content</div>
+             * <button onclick="alert('Click!')">Click me</button>
+             *
+             * Notes:
+             * - This regex is intended for validation and parsing in contexts that allow Unicode and extended characters.
+             * - For `dataset` access in JavaScript, `getAttribute` is recommended for attributes with non-ASCII names.
+             */
+            if ( preg_match( '#<\s*/?\s*(?:html|head|body|header|footer|main|section|article|nav|aside|h1|h2|h3|h4|h5|h6|p|hr|pre|blockquote|ol|ul|li|dl|dt|dd|figure|figcaption|div|a|em|strong|small|s|cite|q|dfn|abbr|ruby|rt|rp|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|bdi|bdo|span|br|wbr|form|label|input|button|select|datalist|optgroup|option|textarea|output|fieldset|legend|meter|progress|img|audio|video|source|track|picture|map|area|iframe|embed|object|param|table|caption|colgroup|col|tbody|thead|tfoot|tr|td|th|script|noscript|template|canvas|link|style|meta|base|title|details|summary|dialog|menu|menuitem|slot|portal)\b(?:\s+(?:accesskey|class|contenteditable|data-[^\s=]+|dir|draggable|enterkeyhint|hidden|id|inert|inputmode|lang|popover|spellcheck|style|tabindex|title|translate|xml:lang|xml:base|role|aria-[^\s=]+|on\w+)(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?)*\s*/?\s*>#ui', $buffer ) ) {
+                $this->isHTML = true;
             }
 
             return true;

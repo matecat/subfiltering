@@ -61,7 +61,7 @@ class Pipeline {
      *
      * @var bool
      */
-    private bool $segmentContainsHtml = false;
+    private bool $segmentContainsMarkup = false;
 
     /**
      * Constructor.
@@ -88,30 +88,12 @@ class Pipeline {
     }
 
     /**
-     * Resets the internal identifier counter to its default before a new transformation.
+     * Sets the segmentContainsMarkup flag for the current segment.
      *
      * @return void
      */
-    public function resetId(): void {
-        $this->id_number = -1;
-    }
-
-    /**
-     * Indicates whether the current segment contains HTML code.
-     *
-     * @return bool True if the segment contains HTML, otherwise false.
-     */
-    public function segmentContainsHtml(): bool {
-        return $this->segmentContainsHtml;
-    }
-
-    /**
-     * Sets the segmentContainsHtml flag for the current segment.
-     *
-     * @return void
-     */
-    public function setSegmentContainsHtml() {
-        $this->segmentContainsHtml = true;
+    public function _setSegmentContainsMarkup() {
+        $this->segmentContainsMarkup = true;
     }
 
     /**
