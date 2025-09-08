@@ -16,7 +16,7 @@ class SpecialEntitiesToPlaceholdersForView extends AbstractHandler {
 
     public function transform( string $segment ): string {
 
-        return str_ireplace(
+        return (string)str_ireplace(
                 [
                         '&#10;', '&#13;', ' ' /* NBSP in ascii value */,
                         '&#x0A;', '&#x0C;',

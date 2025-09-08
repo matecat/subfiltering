@@ -241,7 +241,7 @@ class MateCatFilter extends AbstractFilter {
 
             //replace ONLY ONE element AND the EXACT ONE
             $tag_position_in_string = strpos( $target, $trg_tags[ 0 ][ $trg_tag_position ], $start_offset );
-            $target                 = substr_replace( $target, $src_tags[ 0 ][ $src_tag_position ], $tag_position_in_string, strlen( $trg_tags[ 0 ][ $trg_tag_position ] ) );
+            $target                 = (string)substr_replace( $target, $src_tags[ 0 ][ $src_tag_position ], $tag_position_in_string, strlen( $trg_tags[ 0 ][ $trg_tag_position ] ) );
             $start_offset           = $tag_position_in_string + strlen( $src_tags[ 0 ][ $src_tag_position ] ); // set the next starting point
         }
 
