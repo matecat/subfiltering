@@ -10,7 +10,6 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
-use Matecat\SubFiltering\Filters\ICUVariables;
 use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
@@ -48,12 +47,11 @@ class HandlersSorter {
             Snails::class                  => [ 'position' => 4, 'default_enabled' => true ],
             DoubleSquareBrackets::class    => [ 'position' => 5, 'default_enabled' => true ],
             DollarCurlyBrackets::class     => [ 'position' => 6, 'default_enabled' => true ],
-            ICUVariables::class            => [ 'position' => 7, 'default_enabled' => false ], // Disabled by default because it may conflict with other curly braces handlers
-            SingleCurlyBracketsToPh::class => [ 'position' => 8, 'default_enabled' => false ], // Disabled by default because it may conflict with other curly braces handlers
-            ObjectiveCNSString::class      => [ 'position' => 9, 'default_enabled' => true ],
-            DoublePercentages::class       => [ 'position' => 10, 'default_enabled' => true ],
-            SquareSprintf::class           => [ 'position' => 11, 'default_enabled' => true ],
-            SprintfToPH::class             => [ 'position' => 12, 'default_enabled' => true ],
+            SingleCurlyBracketsToPh::class => [ 'position' => 7, 'default_enabled' => false ], // Disabled by default because it may conflict with other curly braces handlers
+            ObjectiveCNSString::class      => [ 'position' => 8, 'default_enabled' => true ],
+            DoublePercentages::class       => [ 'position' => 9, 'default_enabled' => true ],
+            SquareSprintf::class           => [ 'position' => 10, 'default_enabled' => true ],
+            SprintfToPH::class             => [ 'position' => 11, 'default_enabled' => true ],
     ];
 
     /**

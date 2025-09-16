@@ -9,11 +9,11 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
 use Matecat\SubFiltering\Filters\HtmlToPh;
-use Matecat\SubFiltering\Filters\ICUVariables;
 use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
+use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
@@ -97,7 +97,7 @@ class MateCatFilterTest extends TestCase {
      */
     public function testGetInstanceWithCustomHandlers() {
         // Arrange: Define a custom handler and instantiate the filter.
-        $customHandlers = [ XmlToPh::class, ICUVariables::class ];
+        $customHandlers = [ XmlToPh::class, SingleCurlyBracketsToPh::class ];
         $filter         = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], $customHandlers );
 
         // Arrange: Create a mock Pipeline to capture calls to addLast.
@@ -126,7 +126,7 @@ class MateCatFilterTest extends TestCase {
                 PlaceHoldXliffTags::class,
                 LtGtDecode::class,
                 XmlToPh::class, // Verifies our custom handler is included
-                ICUVariables::class, // Verifies our custom handler is included even if it is not default
+                SingleCurlyBracketsToPh::class, // Verifies our custom handler is included even if it is not default
                 RestoreXliffTagsContent::class,
                 RestorePlaceHoldersToXLIFFLtGt::class,
                 EquivTextToBase64::class,
@@ -144,12 +144,12 @@ class MateCatFilterTest extends TestCase {
     public function testICUString() {
 
         /** @var $filter MateCatFilter */
-        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ ICUVariables::class, XmlToPh::class, SprintfToPH::class ] );
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ SingleCurlyBracketsToPh::class, XmlToPh::class, SprintfToPH::class ] );
 
         $segment   = 'You have {NUM_RESULTS, plural, =0 {no results} one {1 result} other {# results}} for "{SEARCH_TERM}".';
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
 
-        $this->assertEquals( 'You have <ph id="mtc_1" ctype="' . CTypeEnum::ICU . '" equiv-text="base64:e05VTV9SRVNVTFRTLCBwbHVyYWwsID0wIHtubyByZXN1bHRzfSBvbmUgezEgcmVzdWx0fSBvdGhlciB7IyByZXN1bHRzfX0gZm9yICJ7U0VBUkNIX1RFUk19"/>".', $segmentL1 );
+        $this->assertEquals( 'You have {NUM_RESULTS, plural, =0 {no results} one {1 result} other {# results}} for "<ph id="mtc_1" ctype="' . CTypeEnum::CURLY_BRACKETS . '" equiv-text="base64:e1NFQVJDSF9URVJNfQ=="/>".', $segmentL1 );
 
         $segmentL2 = $filter->fromLayer0ToLayer2( $segment );
 
