@@ -4,17 +4,54 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/matecat/subfiltering/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/matecat/subfiltering/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/matecat/subfiltering/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/matecat/subfiltering/?branch=master)
 
-Subfiltering is a component used by Matecat and MyMemory for converting strings between the database, external services, and the UI layers. It provides a pipeline of filters to safely transform content across these layers while preserving XLIFF tags, HTML placeholders, and special entities.
+Subfiltering is a component used by Matecat and MyMemory for converting strings between the database, external services, and the UI layers. 
+It provides a pipeline of filters to safely transform content across these layers while preserving XLIFF tags, HTML placeholders, and special entities.
 
-## What it does
+## Overview
+Embedding XML in a REST JSON payload is notoriously hard to render safely and legibly in a web browser. 
+Browsers, frameworks, and JSON serializers all have opinions about angle brackets, entities, and special characters. 
+The result is typically a mix of double-encoding, broken markup, or inline codes that translators can accidentally damage.
+
+This library solves that by introducing reversible “layers” and a transformation pipeline that makes XML- and XLIFF-rich content safe for transport and UI display, while guaranteeing you can restore the exact original.
+
+What makes XML in JSON hard for the browser
+- Angle brackets and entities: Raw < and > conflict with HTML, and HTML/JS frameworks may escape or re-escape entities differently than you expect.
+- Inline codes in text: XLIFF inline tags (ph, pc, etc.), HTML/XML snippets, ICU, or sprintf tokens can be misinterpreted or edited improperly when shown as-is.
+- Safety vs. readability: You need to prevent XSS and layout breakage, but you also need a UI where users can read and edit the text around inline codes.
+
+- Use it when:
+  - Your source text includes variables, placeholders, XML, or HTML tags.
+  - You must accept user edits while preventing structural damage to tags.
+
+- What it gives you:
+    - Converts inline tags to robust placeholders with base64 “memory” of the original, then restores exactly after the round-trip.
+    - Prevents double-encoding and protects structural elements.
+
+In short, this library is a bridge between “XML-correct” and “browser-safe,” letting you serve and accept JSON payloads that are straightforward to display and edit in the web UI,
+while guaranteeing that your original XML/XLIFF structure is preserved perfectly end to end.
+
+## How the library addresses it
 
 - Normalizes and preserves XLIFF tags across transformations.
 - Encodes/decodes special characters and placeholders for safe round-trips.
 - Converts between three processing layers:
-    - Layer 0: Database storage format
-    - Layer 1: External services (e.g., MT/TM) format
-    - Layer 2: Matecat UI format
+  - Layer 0 (Database): A database-safe XML form, suitable for persistence, export, and exact reconstruction.
+  - Layer 1 (External services): A transport-safe form tailored for MT/TM systems that aren’t XML-aware.
+  - Layer 2 (UI): A browser/UI-friendly form that replaces raw tags with safe placeholders and base64-backed metadata.
+
+- UI-friendly placeholders
+  - XML/XLIFF/HTML tags are converted to stable placeholders with an embedded, base64-encoded “memory” of the original tag.
+  - The UI can display and move placeholders without exposing raw markup, reducing the risk of accidental tag damage.
+
+- Reversible roundtrips
+  - When the browser sends edited text back, the library restores Layer 2 content to Layer 0, reconstructing the exact original tags from the placeholders.
+  - The same applies for Layer 0 ↔ Layer 1 when calling external services.
+
+
 - Supports XLIFF 2.x dataRef replacement, aligning inline codes from `<originalData>` with inline tags in segments.
+  - If your XLIFF uses originalData with dataRef/dataRefStart/dataRefEnd, the library will create meaningful placeholders for the UI and then restore real XLIFF tags afterward.
+  - This keeps both the JSON payload and browser rendering safe without losing fidelity.
+
 
 ## Installation
 
@@ -165,7 +202,7 @@ use Matecat\SubFiltering\MateCatFilter;use Matecat\SubFiltering\Mocks\FeatureSet
 
 $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'de-DE', []);
 
-$layer0 = 'Text with <ph id="1" equiv-text="&lt;br/&gt;"/> and placeholders.';
+$layer0 = 'Text with <ph id="1" equiv-text="&amp;lt;br/&amp;gt;"/> and placeholders.';
 
 // Prepare for MT/TM
 $layer1 = $filter->fromLayer0ToLayer1($layer0);
@@ -242,9 +279,11 @@ $filterNoInjectables = MateCatFilter::getInstance(
     null // no injectable handlers
 );
 
-$input = 'Plain text without custom injectable handlers.';
+$string    = 'This is &amp;lt;b&amp;gt;bold&amp;lt;/b&amp;gt; text.';
 
-$l1_no = $filterNoInjectables->fromLayer0ToLayer1($input);
+$l1_no = $filter->fromLayer0ToLayer1($input);
+// 'This is &amp;lt;b&amp;gt;bold&amp;lt;/b&amp;gt; text.'
+
 $l2_no = $filterNoInjectables->fromLayer0ToLayer2($input);
 ````
 
