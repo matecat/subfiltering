@@ -14,7 +14,6 @@ use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
-use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\LtGtEncode;
 use Matecat\SubFiltering\Filters\MateCatCustomPHToOriginalValue;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
@@ -184,7 +183,7 @@ abstract class AbstractFilter {
         $channel->addLast( StandardPHToMateCatCustomPH::class );
         $channel->addLast( StandardXEquivTextToMateCatCustomPH::class );
         $channel->addLast( PlaceHoldXliffTags::class );
-        $channel->addLast( LtGtDecode::class );
+//        $channel->addLast( LtGtDecode::class );
 
         // Add the dynamic feature-based handlers.
         foreach ( $this->orderedHandlersForLayer0ToLayer1Transition as $handler ) {

@@ -10,8 +10,6 @@
 namespace Matecat\SubFiltering\Tests;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\XmlToPh;
-use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
@@ -21,6 +19,7 @@ use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
+use Matecat\SubFiltering\Filters\XmlToPh;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -35,7 +34,6 @@ class PipelineOrderTest extends TestCase {
         $this->channel = new Pipeline( 'it-IT', 'en-US', [] );
         $this->channel->addLast( StandardPHToMateCatCustomPH::class );
         $this->channel->addLast( PlaceHoldXliffTags::class );
-        $this->channel->addLast( LtGtDecode::class );
         $this->channel->addLast( XmlToPh::class );
         $this->channel->addLast( TwigToPh::class );
         $this->channel->addLast( SprintfToPH::class );
@@ -64,15 +62,14 @@ class PipelineOrderTest extends TestCase {
 
         $this->assertTrue( $handlerList[ 0 ] instanceof StandardPHToMateCatCustomPH );
         $this->assertTrue( $handlerList[ 1 ] instanceof PlaceHoldXliffTags );
-        $this->assertTrue( $handlerList[ 2 ] instanceof LtGtDecode );
-        $this->assertTrue( $handlerList[ 3 ] instanceof XmlToPh );
-        $this->assertTrue( $handlerList[ 4 ] instanceof RubyOnRailsI18n );
-        $this->assertTrue( $handlerList[ 5 ] instanceof DoublePercentages );
-        $this->assertTrue( $handlerList[ 6 ] instanceof SprintfToPH );
-        $this->assertTrue( $handlerList[ 7 ] instanceof TwigToPh );
-        $this->assertTrue( $handlerList[ 8 ] instanceof SingleCurlyBracketsToPh );
-        $this->assertTrue( $handlerList[ 9 ] instanceof RestoreXliffTagsContent );
-        $this->assertTrue( $handlerList[ 10 ] instanceof RestorePlaceHoldersToXLIFFLtGt );
+        $this->assertTrue( $handlerList[ 2 ] instanceof XmlToPh );
+        $this->assertTrue( $handlerList[ 3 ] instanceof RubyOnRailsI18n );
+        $this->assertTrue( $handlerList[ 4 ] instanceof DoublePercentages );
+        $this->assertTrue( $handlerList[ 5 ] instanceof SprintfToPH );
+        $this->assertTrue( $handlerList[ 6 ] instanceof TwigToPh );
+        $this->assertTrue( $handlerList[ 7 ] instanceof SingleCurlyBracketsToPh );
+        $this->assertTrue( $handlerList[ 8 ] instanceof RestoreXliffTagsContent );
+        $this->assertTrue( $handlerList[ 9 ] instanceof RestorePlaceHoldersToXLIFFLtGt );
 
     }
 
@@ -96,10 +93,9 @@ class PipelineOrderTest extends TestCase {
         $this->assertTrue( $handlerList[ 0 ] instanceof SprintfToPH );
         $this->assertTrue( $handlerList[ 1 ] instanceof StandardPHToMateCatCustomPH );
         $this->assertTrue( $handlerList[ 2 ] instanceof PlaceHoldXliffTags );
-        $this->assertTrue( $handlerList[ 3 ] instanceof LtGtDecode );
-        $this->assertTrue( $handlerList[ 4 ] instanceof RubyOnRailsI18n );
-        $this->assertTrue( $handlerList[ 5 ] instanceof RestoreXliffTagsContent );
-        $this->assertTrue( $handlerList[ 6 ] instanceof RestorePlaceHoldersToXLIFFLtGt );
+        $this->assertTrue( $handlerList[ 3 ] instanceof RubyOnRailsI18n );
+        $this->assertTrue( $handlerList[ 4 ] instanceof RestoreXliffTagsContent );
+        $this->assertTrue( $handlerList[ 5 ] instanceof RestorePlaceHoldersToXLIFFLtGt );
 
     }
 

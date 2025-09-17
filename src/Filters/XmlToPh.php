@@ -202,6 +202,11 @@ class XmlToPh extends AbstractHandler {
      * @return string The transformed segment.
      */
     public function transform( string $segment ): string {
+
+        // restore < e >
+        $segment = str_replace( "&lt;", "<", $segment );
+        $segment = str_replace( "&gt;", ">", $segment );
+
         $parser = new HtmlParser();
         $parser->registerCallbacksHandler( $this );
 

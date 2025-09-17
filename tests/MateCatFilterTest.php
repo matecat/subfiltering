@@ -8,8 +8,6 @@ use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
-use Matecat\SubFiltering\Filters\HtmlToPh;
-use Matecat\SubFiltering\Filters\LtGtDecode;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
@@ -103,7 +101,7 @@ class MateCatFilterTest extends TestCase {
         // Arrange: Create a mock Pipeline to capture calls to addLast.
         $pipelineMock  = $this->createMock( Pipeline::class );
         $addedHandlers = [];
-        $pipelineMock->expects( $this->exactly( 9 ) )
+        $pipelineMock->expects( $this->exactly( 8 ) )
                 ->method( 'addLast' )
                 ->willReturnCallback(
                         function ( $handlerClass ) use ( &$addedHandlers, $pipelineMock ) {
@@ -124,7 +122,6 @@ class MateCatFilterTest extends TestCase {
                 StandardPHToMateCatCustomPH::class,
                 StandardXEquivTextToMateCatCustomPH::class,
                 PlaceHoldXliffTags::class,
-                LtGtDecode::class,
                 XmlToPh::class, // Verifies our custom handler is included
                 SingleCurlyBracketsToPh::class, // Verifies our custom handler is included even if it is not default
                 RestoreXliffTagsContent::class,
@@ -135,6 +132,20 @@ class MateCatFilterTest extends TestCase {
 
         // And assert that a handler not in the custom list is excluded
         $this->assertNotContains( SprintfToPH::class, $addedHandlers );
+    }
+
+    public function testFromLayer0ToLayer1WithNoHandlers() {
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], null );
+
+        $string    = 'This is &lt;b&gt;bold&lt;/b&gt; text.';
+        $segmentL1 = $filter->fromLayer0ToLayer1( $string );
+        $this->assertEquals( $string, $segmentL1 );
+
+        // test 2
+        $string    = 'Text with <ph id="1" equiv-text="&lt;br/&gt;"/> and placeholders &lt;b&gt;.';
+        $segmentL1 = $filter->fromLayer0ToLayer1( $string );
+        $this->assertEquals( 'Text with <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="PHBoIGlkPSIxIiBlcXVpdi10ZXh0PSImbHQ7YnIvJmd0OyIvPg==" equiv-text="base64:Jmx0O2JyLyZndDs="/> and placeholders &lt;b&gt;.', $segmentL1 );
+
     }
 
     /**
