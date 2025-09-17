@@ -37,7 +37,7 @@ class HandlersSorter {
      * For example, generic XML/HTML tag conversion should happen before more specific
      * variable substitutions that might be present within those tags.
      *
-     * @var int[] A map of handler class names to their integer priority.
+     * @var array[] A map of handler class names to their integer priority and whether they are enabled by default.
      */
     protected const injectableHandlersOrder = [
             XmlToPh::class                 => [ 'position' => 0, 'default_enabled' => true ],
