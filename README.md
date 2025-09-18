@@ -230,8 +230,7 @@ Example:
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
-use Matecat\SubFiltering\Filters\XmlToPh;
-use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 
 // Example 1: enable only a subset of supported injectable handlers.
 // Only handlers known to the sorter will be kept and ordered.
@@ -243,8 +242,8 @@ $filter = MateCatFilter::getInstance(
     'it-IT',
     [], // dataRef map
     [
-        Matecat\SubFiltering\Enum\InjectableFiltersTags::xml,          // supported
-        Matecat\SubFiltering\Enum\InjectableFiltersTags::single_curly, // supported (disabled by default, but its injection is allowed and thus, enabled here)
+        InjectableFiltersTags::xml,          // supported
+        InjectableFiltersTags::single_curly, // supported (disabled by default, but its injection is allowed and thus, enabled here)
         'foobar'                                                       // any unsupported class would be ignored
     ]
 );
