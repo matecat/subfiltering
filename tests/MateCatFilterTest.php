@@ -7,7 +7,7 @@ use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\SubFiltering\Enum\FiltersTagsEnum;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
@@ -98,7 +98,7 @@ class MateCatFilterTest extends TestCase {
      */
     public function testGetInstanceWithCustomHandlers() {
         // Arrange: Define a custom handler and instantiate the filter.
-        $customHandlers = [ FiltersTagsEnum::xml, FiltersTagsEnum::single_curly ];
+        $customHandlers = [ InjectableFiltersTags::xml, InjectableFiltersTags::single_curly ];
         $filter         = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], $customHandlers );
 
         // Arrange: Create a mock Pipeline to capture calls to addLast.
@@ -138,7 +138,7 @@ class MateCatFilterTest extends TestCase {
     }
 
     /**
-     * Build handlers from valid and wrong string tags via FiltersTagsEnum and pass them to MateCatFilter.
+     * Build handlers from valid and wrong string tags via InjectableFiltersTags and pass them to MateCatFilter.
      * Wrong strings must be ignored; valid ones must be ordered correctly.
      */
     public function testBuildHandlersFromStringTags_ValueAndWrongStrings() {
@@ -173,7 +173,7 @@ class MateCatFilterTest extends TestCase {
     }
 
     /**
-     * Build handlers from only invalid string tags via FiltersTagsEnum and pass them to MateCatFilter.
+     * Build handlers from only invalid string tags via InjectableFiltersTags and pass them to MateCatFilter.
      * Since only 'unknown' values are produced, the resulting ordered handlers must be empty.
      */
     public function testBuildHandlersFromStringTags_OnlyInvalidStringsResultsDefaultNoHandlers() {
@@ -212,7 +212,7 @@ class MateCatFilterTest extends TestCase {
     public function testICUString() {
 
         /** @var $filter MateCatFilter */
-        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ FiltersTagsEnum::single_curly, FiltersTagsEnum::xml, FiltersTagsEnum::sprintf ] );
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ InjectableFiltersTags::single_curly, InjectableFiltersTags::xml, InjectableFiltersTags::sprintf ] );
 
         $segment   = 'You have {NUM_RESULTS, plural, =0 {no results} one {1 result} other {# results}} for "{SEARCH_TERM}".';
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );

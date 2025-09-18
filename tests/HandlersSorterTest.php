@@ -1,6 +1,6 @@
 <?php
 
-use Matecat\SubFiltering\Enum\FiltersTagsEnum;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
@@ -121,22 +121,22 @@ class HandlersSorterTest extends TestCase {
     }
 
     /**
-     * Ensure HandlersSorter can consume handlers provided via FiltersTagsEnum
+     * Ensure HandlersSorter can consume handlers provided via InjectableFiltersTags
      * and that unknown tag names are ignored.
      */
     public function testProvideHandlersFromFiltersTagsEnumAndIgnoreUnknown() {
         // Prepare a mixed set of known tags and an unknown one
         $tags = [
-                FiltersTagsEnum::double_percent,
+                InjectableFiltersTags::double_percent,
                 'non_existing_tag', // unknown
-                FiltersTagsEnum::ruby_on_rails,
-                FiltersTagsEnum::double_square,
-                FiltersTagsEnum::sprintf,
-                FiltersTagsEnum::dollar_curly,
+                InjectableFiltersTags::ruby_on_rails,
+                InjectableFiltersTags::double_square,
+                InjectableFiltersTags::sprintf,
+                InjectableFiltersTags::dollar_curly,
         ];
 
         // Map tags to handler class names using the enum
-        $handlers = FiltersTagsEnum::classesForArrayTagNames( $tags );
+        $handlers = InjectableFiltersTags::classesForArrayTagNames( $tags );
 
         // Build sorter with the resolved class names
         $sorter      = new HandlersSorter( $handlers );
@@ -169,7 +169,7 @@ class HandlersSorterTest extends TestCase {
         ];
 
         // Build sorter with the resolved class names
-        $sorter      = new HandlersSorter( FiltersTagsEnum::classesForArrayTagNames( $input ) );
+        $sorter      = new HandlersSorter( InjectableFiltersTags::classesForArrayTagNames( $input ) );
         $orderedList = $sorter->getOrderedHandlersClassNames();
 
         // Unknown must be ignored (not present in the ordered list)

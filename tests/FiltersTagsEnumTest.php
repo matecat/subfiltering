@@ -1,6 +1,6 @@
 <?php
 
-use Matecat\SubFiltering\Enum\FiltersTagsEnum;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\SprintfToPH;
@@ -22,9 +22,9 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_forNameReturnsCorrectClassForValidTag() {
-        $this->assertEquals( XmlToPh::class, FiltersTagsEnum::classForTagName( 'xml' ) );
-        $this->assertEquals( PercentDoubleCurlyBrackets::class, FiltersTagsEnum::classForTagName( 'percent_double_curly' ) );
-        $this->assertEquals( TwigToPh::class, FiltersTagsEnum::classForTagName( 'twig' ) );
+        $this->assertEquals( XmlToPh::class, InjectableFiltersTags::classForTagName( 'xml' ) );
+        $this->assertEquals( PercentDoubleCurlyBrackets::class, InjectableFiltersTags::classForTagName( 'percent_double_curly' ) );
+        $this->assertEquals( TwigToPh::class, InjectableFiltersTags::classForTagName( 'twig' ) );
     }
 
     /**
@@ -32,7 +32,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_forNameReturnsUnknownForInvalidTag() {
-        $this->assertEquals( null, FiltersTagsEnum::classForTagName( 'non_existent_tag' ) );
+        $this->assertEquals( null, InjectableFiltersTags::classForTagName( 'non_existent_tag' ) );
     }
 
     /**
@@ -40,7 +40,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_forNameHandlesEmptyString() {
-        $this->assertEquals( null, FiltersTagsEnum::classForTagName( '' ) );
+        $this->assertEquals( null, InjectableFiltersTags::classForTagName( '' ) );
     }
 
     /**
@@ -48,7 +48,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_forNameHandlesNullInput() {
-        $this->assertEquals( null, FiltersTagsEnum::classForTagName( null ) );
+        $this->assertEquals( null, InjectableFiltersTags::classForTagName( null ) );
     }
 
     /**
@@ -70,7 +70,7 @@ class FiltersTagsEnumTest extends TestCase {
                 SprintfToPH::class,
         ];
 
-        $this->assertSame( $expected, FiltersTagsEnum::classesForArrayTagNames( $input ) );
+        $this->assertSame( $expected, InjectableFiltersTags::classesForArrayTagNames( $input ) );
     }
 
     /**
@@ -78,7 +78,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_forArrayNamesWithNoArgumentsReturnsEmptyArray() {
-        $this->assertSame( [], FiltersTagsEnum::classesForArrayTagNames() );
+        $this->assertSame( [], InjectableFiltersTags::classesForArrayTagNames() );
     }
 
     /**
@@ -86,7 +86,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_forArrayNamesWithNullArgumentReturnsNull() {
-        $this->assertSame( null, FiltersTagsEnum::classesForArrayTagNames( null ) );
+        $this->assertSame( null, InjectableFiltersTags::classesForArrayTagNames( null ) );
     }
 
     /**
@@ -94,8 +94,8 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_tagForClassNameReturnsCorrectTagForValidClass() {
-        $this->assertSame( 'xml', FiltersTagsEnum::tagForClassName( XmlToPh::class ) );
-        $this->assertSame( 'percent_double_curly', FiltersTagsEnum::    tagForClassName( PercentDoubleCurlyBrackets::class ) );
+        $this->assertSame( 'xml', InjectableFiltersTags::tagForClassName( XmlToPh::class ) );
+        $this->assertSame( 'percent_double_curly', InjectableFiltersTags::    tagForClassName( PercentDoubleCurlyBrackets::class ) );
     }
 
     /**
@@ -104,7 +104,7 @@ class FiltersTagsEnumTest extends TestCase {
      */
     public function test_tagForClassNameReturnsNullForUnknownClass() {
         // Not present in the reverse map
-        $this->assertNull( FiltersTagsEnum::tagForClassName( stdClass::class ) );
+        $this->assertNull( InjectableFiltersTags::tagForClassName( stdClass::class ) );
     }
 
     /**
@@ -127,7 +127,7 @@ class FiltersTagsEnumTest extends TestCase {
                 'percent_double_curly',
         ];
 
-        $this->assertSame( $expected, FiltersTagsEnum::tagNamesForArrayClasses( $input ) );
+        $this->assertSame( $expected, InjectableFiltersTags::tagNamesForArrayClasses( $input ) );
     }
 
     /**
@@ -135,7 +135,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_tagNamesForArrayClassesWithDefaultArgumentReturnsEmptyArray() {
-        $this->assertSame( [], FiltersTagsEnum::tagNamesForArrayClasses() );
+        $this->assertSame( [], InjectableFiltersTags::tagNamesForArrayClasses() );
     }
 
     /**
@@ -143,7 +143,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_tagNamesForArrayClassesWithNullReturnsNull() {
-        $this->assertNull( FiltersTagsEnum::tagNamesForArrayClasses( null ) );
+        $this->assertNull( InjectableFiltersTags::tagNamesForArrayClasses( null ) );
     }
 
     /**
@@ -152,21 +152,21 @@ class FiltersTagsEnumTest extends TestCase {
      */
     public function test_getTagsReturnsAllTagKeysInOrder() {
         $expected = [
-                FiltersTagsEnum::xml,
-                FiltersTagsEnum::percent_double_curly,
-                FiltersTagsEnum::twig,
-                FiltersTagsEnum::ruby_on_rails,
-                FiltersTagsEnum::double_snail,
-                FiltersTagsEnum::double_square,
-                FiltersTagsEnum::dollar_curly,
-                FiltersTagsEnum::single_curly,
-                FiltersTagsEnum::objective_c_ns,
-                FiltersTagsEnum::double_percent,
-                FiltersTagsEnum::square_sprintf,
-                FiltersTagsEnum::sprintf,
+                InjectableFiltersTags::xml,
+                InjectableFiltersTags::percent_double_curly,
+                InjectableFiltersTags::twig,
+                InjectableFiltersTags::ruby_on_rails,
+                InjectableFiltersTags::double_snail,
+                InjectableFiltersTags::double_square,
+                InjectableFiltersTags::dollar_curly,
+                InjectableFiltersTags::single_curly,
+                InjectableFiltersTags::objective_c_ns,
+                InjectableFiltersTags::double_percent,
+                InjectableFiltersTags::square_sprintf,
+                InjectableFiltersTags::sprintf,
         ];
 
-        $this->assertSame($expected, FiltersTagsEnum::getTags());
+        $this->assertSame($expected, InjectableFiltersTags::getTags());
     }
 
 }

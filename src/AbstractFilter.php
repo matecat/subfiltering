@@ -12,7 +12,7 @@ namespace Matecat\SubFiltering;
 use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
-use Matecat\SubFiltering\Enum\FiltersTagsEnum;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
 use Matecat\SubFiltering\Filters\LtGtEncode;
@@ -101,7 +101,7 @@ abstract class AbstractFilter {
         // Use the null coalescing operator to default to an empty array if $dataRefMap is null.
         $newInstance->dataRefMap = $dataRefMap ?? [];
 
-        $handlerClassNamesForLayer0ToLayer1Transition = FiltersTagsEnum::classesForArrayTagNames( $handlerTagNamesForLayer0ToLayer1Transition );
+        $handlerClassNamesForLayer0ToLayer1Transition = InjectableFiltersTags::classesForArrayTagNames( $handlerTagNamesForLayer0ToLayer1Transition );
 
         // Determine which handlers to use for the Layer 0 to Layer 1 transition.
         if ( is_array( $handlerClassNamesForLayer0ToLayer1Transition ) && empty( $handlerClassNamesForLayer0ToLayer1Transition ) ) {

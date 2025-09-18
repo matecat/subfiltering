@@ -7,7 +7,7 @@ use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\Commons\EmptyFeatureSet;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\SubFiltering\Enum\FiltersTagsEnum;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
@@ -70,17 +70,17 @@ class MyMemoryFilterTest extends TestCase {
      * @return array
      */
     public function pipelineConfigurationProvider(): array {
-        $defaultHandlers = $airbnbOverloadedHandlers = FiltersTagsEnum::tagNamesForArrayClasses( array_keys( HandlersSorter::getDefaultInjectedHandlers() ) );
+        $defaultHandlers = $airbnbOverloadedHandlers = InjectableFiltersTags::tagNamesForArrayClasses( array_keys( HandlersSorter::getDefaultInjectedHandlers() ) );
 
         $airbnbOverloadedHandlers[] = SmartCounts::class;
 
         // A handler set that is missing the PercentDoubleCurlyBrackets handler, to test the Airbnb 'if' branch
         $handlersWithoutVariables = array_filter( $defaultHandlers, function ( $handler ) {
-            return $handler !== FiltersTagsEnum::percent_double_curly;
+            return $handler !== InjectableFiltersTags::percent_double_curly;
         } );
 
         // A handler set that already includes SingleCurlyBracketsToPh
-        $handlersWithSingleCurly = array_merge( $defaultHandlers, [ FiltersTagsEnum::single_curly ] );
+        $handlersWithSingleCurly = array_merge( $defaultHandlers, [ InjectableFiltersTags::single_curly ] );
 
         return [
                 [

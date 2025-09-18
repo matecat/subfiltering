@@ -22,7 +22,7 @@ use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\Filters\XmlToPh;
 
-class FiltersTagsEnum {
+class InjectableFiltersTags {
 
     public const  xml                  = 'xml';
     public const  percent_double_curly = 'percent_double_curly';
