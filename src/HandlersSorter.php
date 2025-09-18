@@ -17,7 +17,7 @@ use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\Variables;
+use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\XmlToPh;
 
 /**
@@ -40,18 +40,18 @@ class HandlersSorter {
      * @var array[] A map of handler class names to their integer priority and whether they are enabled by default.
      */
     protected const injectableHandlersOrder = [
-            XmlToPh::class                 => [ 'position' => 0, 'default_enabled' => true ],
-            Variables::class               => [ 'position' => 1, 'default_enabled' => true ],
-            TwigToPh::class                => [ 'position' => 2, 'default_enabled' => true ],
-            RubyOnRailsI18n::class         => [ 'position' => 3, 'default_enabled' => true ],
-            Snails::class                  => [ 'position' => 4, 'default_enabled' => true ],
-            DoubleSquareBrackets::class    => [ 'position' => 5, 'default_enabled' => true ],
-            DollarCurlyBrackets::class     => [ 'position' => 6, 'default_enabled' => true ],
-            SingleCurlyBracketsToPh::class => [ 'position' => 7, 'default_enabled' => false ], // Disabled by default because it may conflict with other curly braces handlers
-            ObjectiveCNSString::class      => [ 'position' => 8, 'default_enabled' => true ],
-            DoublePercentages::class       => [ 'position' => 9, 'default_enabled' => true ],
-            SquareSprintf::class           => [ 'position' => 10, 'default_enabled' => true ],
-            SprintfToPH::class             => [ 'position' => 11, 'default_enabled' => true ],
+            XmlToPh::class                    => [ 'position' => 0, 'default_enabled' => true ],
+            PercentDoubleCurlyBrackets::class => [ 'position' => 1, 'default_enabled' => true ],
+            TwigToPh::class                   => [ 'position' => 2, 'default_enabled' => true ],
+            RubyOnRailsI18n::class            => [ 'position' => 3, 'default_enabled' => true ],
+            Snails::class                     => [ 'position' => 4, 'default_enabled' => true ],
+            DoubleSquareBrackets::class       => [ 'position' => 5, 'default_enabled' => true ],
+            DollarCurlyBrackets::class        => [ 'position' => 6, 'default_enabled' => true ],
+            SingleCurlyBracketsToPh::class    => [ 'position' => 7, 'default_enabled' => false ], // Disabled by default because it may conflict with other curly braces handlers
+            ObjectiveCNSString::class         => [ 'position' => 8, 'default_enabled' => true ],
+            DoublePercentages::class          => [ 'position' => 9, 'default_enabled' => true ],
+            SquareSprintf::class              => [ 'position' => 10, 'default_enabled' => true ],
+            SprintfToPH::class                => [ 'position' => 11, 'default_enabled' => true ],
     ];
 
     /**

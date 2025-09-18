@@ -5,7 +5,7 @@ namespace Matecat\SubFiltering\Filters;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
-class Variables extends AbstractHandler {
+class PercentDoubleCurlyBrackets extends AbstractHandler {
 
     /**
      * @param $segment

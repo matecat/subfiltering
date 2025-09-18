@@ -7,6 +7,9 @@ use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
+use Matecat\SubFiltering\Enum\FiltersTagsEnum;
+use Matecat\SubFiltering\Filters\DoublePercentages;
+use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
@@ -95,7 +98,7 @@ class MateCatFilterTest extends TestCase {
      */
     public function testGetInstanceWithCustomHandlers() {
         // Arrange: Define a custom handler and instantiate the filter.
-        $customHandlers = [ XmlToPh::class, SingleCurlyBracketsToPh::class ];
+        $customHandlers = [ FiltersTagsEnum::xml, FiltersTagsEnum::single_curly ];
         $filter         = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], $customHandlers );
 
         // Arrange: Create a mock Pipeline to capture calls to addLast.
@@ -134,6 +137,60 @@ class MateCatFilterTest extends TestCase {
         $this->assertNotContains( SprintfToPH::class, $addedHandlers );
     }
 
+    /**
+     * Build handlers from valid and wrong string tags via FiltersTagsEnum and pass them to MateCatFilter.
+     * Wrong strings must be ignored; valid ones must be ordered correctly.
+     */
+    public function testBuildHandlersFromStringTags_ValueAndWrongStrings() {
+        $tags = [
+                'double_percent',     // valid -> DoublePercentages::class
+                'non_existing_tag',   // wrong -> 'unknown'
+                'xml',                // valid -> XmlToPh::class
+                'sprintf',            // valid -> SprintfToPH::class
+                'made_up_tag',        // wrong -> 'unknown'
+                'double_square',      // valid -> DoubleSquareBrackets::class
+        ];
+
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], $tags );
+
+        $reflection              = new ReflectionClass( AbstractFilter::class );
+        $orderedHandlersProperty = $reflection->getProperty( 'orderedHandlersForLayer0ToLayer1Transition' );
+        $orderedHandlersProperty->setAccessible( true );
+        $orderedHandlers = $orderedHandlersProperty->getValue( $filter );
+
+        // Ensure 'unknown' is not part of the resulting ordered list
+        $this->assertNotContains( 'unknown', $orderedHandlers );
+
+        // Expected order according to HandlersSorter::injectableHandlersOrder
+        $expected = [
+                XmlToPh::class,              // position 0
+                DoubleSquareBrackets::class, // position 5
+                DoublePercentages::class,    // position 9
+                SprintfToPH::class,          // position 11
+        ];
+        $this->assertSame( $expected, $orderedHandlers );
+        $this->assertCount( 4, $orderedHandlers );
+    }
+
+    /**
+     * Build handlers from only invalid string tags via FiltersTagsEnum and pass them to MateCatFilter.
+     * Since only 'unknown' values are produced, the resulting ordered handlers must be empty.
+     */
+    public function testBuildHandlersFromStringTags_OnlyInvalidStringsResultsDefaultNoHandlers() {
+        $tags = [ 'foo_bar', 'does_not_exist', '', 'another_wrong' ];
+
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], $tags );
+
+        $reflection              = new ReflectionClass( AbstractFilter::class );
+        $orderedHandlersProperty = $reflection->getProperty( 'orderedHandlersForLayer0ToLayer1Transition' );
+        $orderedHandlersProperty->setAccessible( true );
+        $orderedHandlers = $orderedHandlersProperty->getValue( $filter );
+
+        // check that default handlers are loaded
+        $defaultHandlers = array_keys( HandlersSorter::getDefaultInjectedHandlers() );
+        $this->assertEquals( $defaultHandlers, $orderedHandlers );
+    }
+
     public function testFromLayer0ToLayer1WithNoHandlers() {
         $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], null );
 
@@ -155,7 +212,7 @@ class MateCatFilterTest extends TestCase {
     public function testICUString() {
 
         /** @var $filter MateCatFilter */
-        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ SingleCurlyBracketsToPh::class, XmlToPh::class, SprintfToPH::class ] );
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ FiltersTagsEnum::single_curly, FiltersTagsEnum::xml, FiltersTagsEnum::sprintf ] );
 
         $segment   = 'You have {NUM_RESULTS, plural, =0 {no results} one {1 result} other {# results}} for "{SEARCH_TERM}".';
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );

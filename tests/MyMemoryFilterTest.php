@@ -7,10 +7,11 @@ use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\Commons\EmptyFeatureSet;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
+use Matecat\SubFiltering\Enum\FiltersTagsEnum;
+use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\Variables;
 use Matecat\SubFiltering\HandlersSorter;
 use Matecat\SubFiltering\MyMemoryFilter;
 use PHPUnit\Framework\TestCase;
@@ -38,7 +39,7 @@ class MyMemoryFilterTest extends TestCase {
      * @dataProvider pipelineConfigurationProvider
      * @throws ReflectionException
      */
-    public function testConfigurePipelineCidBranches( ?string $cid, array $initialHandlers, array $expectedToContain, array $expectedToNotContain ) {
+    public function testConfigurePipelineCidBranches( ?string $cid, array $initialHandlers, array $expectedToContain, array $expectedToNotContain, string $name ) {
         // Arrange: Create a filter instance with a specific set of initial handlers.
         $filter  = MyMemoryFilter::getInstance( new EmptyFeatureSet(), 'en-US', 'it-IT', [], $initialHandlers );
         $channel = new Pipeline();
@@ -55,11 +56,11 @@ class MyMemoryFilterTest extends TestCase {
         $this->assertSameSize( $pipelineHandlers, array_unique( $pipelineHandlers ) );
 
         foreach ( $expectedToContain as $handler ) {
-            $this->assertContains( $handler, $pipelineHandlers, "Pipeline should contain $handler for cid '$cid'" );
+            $this->assertContains( $handler, $pipelineHandlers, "Pipeline '$name' should contain $handler for cid '$cid'" );
         }
 
         foreach ( $expectedToNotContain as $handler ) {
-            $this->assertNotContains( $handler, $pipelineHandlers, "Pipeline should NOT contain $handler for cid '$cid'" );
+            $this->assertNotContains( $handler, $pipelineHandlers, "Pipeline '$name' should NOT contain $handler for cid '$cid'" );
         }
     }
 
@@ -69,72 +70,80 @@ class MyMemoryFilterTest extends TestCase {
      * @return array
      */
     public function pipelineConfigurationProvider(): array {
-        $defaultHandlers = $airbnbOverloadedHandlers = array_keys( HandlersSorter::getDefaultInjectedHandlers() );
+        $defaultHandlers = $airbnbOverloadedHandlers = FiltersTagsEnum::tagNamesForArrayClasses( array_keys( HandlersSorter::getDefaultInjectedHandlers() ) );
 
         $airbnbOverloadedHandlers[] = SmartCounts::class;
 
-        // A handler set that is missing the Variables handler, to test the Airbnb 'if' branch
+        // A handler set that is missing the PercentDoubleCurlyBrackets handler, to test the Airbnb 'if' branch
         $handlersWithoutVariables = array_filter( $defaultHandlers, function ( $handler ) {
-            return $handler !== Variables::class;
+            return $handler !== FiltersTagsEnum::percent_double_curly;
         } );
 
         // A handler set that already includes SingleCurlyBracketsToPh
-        $handlersWithSingleCurly = array_merge( $defaultHandlers, [ SingleCurlyBracketsToPh::class ] );
+        $handlersWithSingleCurly = array_merge( $defaultHandlers, [ FiltersTagsEnum::single_curly ] );
 
         return [
-                'no cid (default pipeline)'                   => [
+                [
                         'cid'                  => null,
                         'initialHandlers'      => $defaultHandlers,
                         'expectedToContain'    => [ TwigToPh::class ],
                         'expectedToNotContain' => [
                                 SmartCounts::class,
                                 SingleCurlyBracketsToPh::class
-                        ]
+                        ],
+                        'name'                 => 'no cid (default pipeline)'
                 ],
-                'airbnb (Variables handler present)'          => [
+                [
                         'cid'                  => 'airbnb',
                         'initialHandlers'      => $defaultHandlers,
-                        'expectedToContain'    => [ Variables::class, SmartCounts::class ],
-                        'expectedToNotContain' => []
+                        'expectedToContain'    => [ PercentDoubleCurlyBrackets::class, SmartCounts::class ],
+                        'expectedToNotContain' => [],
+                        'name'                 => 'airbnb (PercentDoubleCurlyBrackets handler present)'
                 ],
-                'airbnb (Variables handler not present)'      => [
+                [
                         'cid'                  => 'airbnb',
                         'initialHandlers'      => $handlersWithoutVariables,
                         'expectedToContain'    => [],
                         'expectedToNotContain' => [
-                                Variables::class,
+                                PercentDoubleCurlyBrackets::class,
                                 SmartCounts::class
-                        ]
+                        ],
+                        'name'                 => 'airbnb (PercentDoubleCurlyBrackets handler not present)'
                 ],
-                'airbnb (SmartCount handler already present)' => [
+                [
                         'cid'                  => 'airbnb',
                         'initialHandlers'      => $airbnbOverloadedHandlers, // this test is to ensure no duplicates
-                        'expectedToContain'    => [ Variables::class, SmartCounts::class ],
-                        'expectedToNotContain' => []
+                        'expectedToContain'    => [ PercentDoubleCurlyBrackets::class, SmartCounts::class ],
+                        'expectedToNotContain' => [],
+                        'name'                 => 'airbnb (SmartCount handler already present)'
                 ],
-                'roblox (default)'                            => [
+                [
                         'cid'                  => 'roblox',
                         'initialHandlers'      => $defaultHandlers,
                         'expectedToContain'    => [ SingleCurlyBracketsToPh::class ],
-                        'expectedToNotContain' => []
+                        'expectedToNotContain' => [],
+                        'name'                 => 'roblox (default)'
                 ],
-                'roblox (handler already present)'            => [
+                [
                         'cid'                  => 'roblox',
                         'initialHandlers'      => $handlersWithSingleCurly,
                         'expectedToContain'    => [ SingleCurlyBracketsToPh::class ],
-                        'expectedToNotContain' => []
+                        'expectedToNotContain' => [],
+                        'name'                 => 'roblox (handler already present)'
                 ],
-                'familysearch (default)'                      => [
+                [
                         'cid'                  => 'familysearch',
                         'initialHandlers'      => $defaultHandlers,
                         'expectedToContain'    => [ SingleCurlyBracketsToPh::class ],
-                        'expectedToNotContain' => [ TwigToPh::class ]
+                        'expectedToNotContain' => [ TwigToPh::class ],
+                        'name'                 => 'familysearch (default)'
                 ],
-                'familysearch (handler already present)'      => [
+                [
                         'cid'                  => 'familysearch',
                         'initialHandlers'      => $handlersWithSingleCurly, // this test is to ensure no duplicates
                         'expectedToContain'    => [ SingleCurlyBracketsToPh::class, TwigToPh::class ], //Twig should remain because it was already there and we don't remove it if SingleCurlyBracketsToPh is already present
-                        'expectedToNotContain' => []
+                        'expectedToNotContain' => [],
+                        'name'                 => 'familysearch (handler already present)'
                 ],
         ];
     }

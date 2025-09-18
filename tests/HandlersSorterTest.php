@@ -1,5 +1,6 @@
 <?php
 
+use Matecat\SubFiltering\Enum\FiltersTagsEnum;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
@@ -7,13 +8,17 @@ use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SprintfToPH;
-use Matecat\SubFiltering\Filters\Variables;
+use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\XmlToPh;
 use Matecat\SubFiltering\HandlersSorter;
 use PHPUnit\Framework\TestCase;
 
 class HandlersSorterTest extends TestCase {
 
+    /**
+     * This test ensures that the sorter correctly handles and reorder instances of the
+     * `Matecat\SubFiltering\Filters\AbstractFilter` class.
+     */
     public function testInjectedHandlersAreSortedProperly() {
         // Provide a shuffled list of valid handlers
         $unordered = [
@@ -45,17 +50,21 @@ class HandlersSorterTest extends TestCase {
         $this->assertSame( $expected, $actual );
     }
 
+    /**
+     * This test ensures that the sorter correctly handles and reorder instances of the
+     * `Matecat\SubFiltering\Filters\AbstractFilter` class, ignoring unknown handlers.
+     */
     public function testInjectedHandlersIgnoresUnknownHandlers() {
         $unknownClass = stdClass::class;
         $handlers     = [
                 Snails::class,
-                $unknownClass,
-                Variables::class,
                 SprintfToPH::class,
+                $unknownClass,
+                PercentDoubleCurlyBrackets::class,
         ];
 
         $expected = [
-                Variables::class,   // 1
+                PercentDoubleCurlyBrackets::class,   // 1
                 Snails::class,      // 4
                 SprintfToPH::class, // 11
         ];
@@ -71,26 +80,34 @@ class HandlersSorterTest extends TestCase {
     }
 
     /**
-     * This test ensures that if only XmlToPh is provided (without HtmlToPh),
-     * it is preserved by the sorter.
+     * This test ensures that the sorter correctly handles and reorder instances of the
+     * `Matecat\SubFiltering\Filters\AbstractFilter` class.
      *
      * @test
      */
-    public function testXmlToPhIsPreservedWhenProvidedAlone() {
+    public function testGetInjectedHandlersInstances_1() {
         // NOTE: This test is subject to the same `quickSort` assumption mentioned above.
         $handlers = [
                 XmlToPh::class,
-                Variables::class,
+                PercentDoubleCurlyBrackets::class,
         ];
 
         $sorter         = new HandlersSorter( $handlers );
         $sortedHandlers = $sorter->getOrderedHandlersClassNames();
 
         $this->assertContains( XmlToPh::class, $sortedHandlers );
-        $this->assertContains( Variables::class, $sortedHandlers );
+        $this->assertContains( PercentDoubleCurlyBrackets::class, $sortedHandlers );
+        $this->assertEquals( XmlToPh::class, $sortedHandlers[ 0 ] );
+        $this->assertEquals( PercentDoubleCurlyBrackets::class, $sortedHandlers[ 1 ] );
     }
 
-    public function testGetInjectedHandlersInstances() {
+    /**
+     * This test ensures that the sorter correctly handles and reorder instances of the
+     * `Matecat\SubFiltering\Filters\AbstractFilter` class.
+     *
+     * @test
+     */
+    public function testGetInjectedHandlersInstances_2() {
         $handlers  = [
                 DoublePercentages::class,
                 SprintfToPH::class,
@@ -102,4 +119,74 @@ class HandlersSorterTest extends TestCase {
         $this->assertEquals( DoublePercentages::class, $instances[ 0 ] );
         $this->assertEquals( SprintfToPH::class, $instances[ 1 ] );
     }
+
+    /**
+     * Ensure HandlersSorter can consume handlers provided via FiltersTagsEnum
+     * and that unknown tag names are ignored.
+     */
+    public function testProvideHandlersFromFiltersTagsEnumAndIgnoreUnknown() {
+        // Prepare a mixed set of known tags and an unknown one
+        $tags = [
+                FiltersTagsEnum::double_percent,
+                'non_existing_tag', // unknown
+                FiltersTagsEnum::ruby_on_rails,
+                FiltersTagsEnum::double_square,
+                FiltersTagsEnum::sprintf,
+                FiltersTagsEnum::dollar_curly,
+        ];
+
+        // Map tags to handler class names using the enum
+        $handlers = FiltersTagsEnum::classesForArrayTagNames( $tags );
+
+        // Build sorter with the resolved class names
+        $sorter      = new HandlersSorter( $handlers );
+        $orderedList = $sorter->getOrderedHandlersClassNames();
+
+        // Unknown must be ignored (not present in the ordered list)
+        $this->assertNotContains( 'unknown', $orderedList );
+
+        // Expected order according to HandlersSorter::injectableHandlersOrder
+        $expected = [
+                RubyOnRailsI18n::class,      // position 3
+                DoubleSquareBrackets::class, // position 5
+                DollarCurlyBrackets::class,  // position 6
+                DoublePercentages::class,    // position 9
+                SprintfToPH::class,          // position 11
+        ];
+
+        $this->assertSame( $expected, $orderedList );
+        $this->assertCount( 5, $orderedList );
+    }
+
+    public function test_forArrayNamesMapsTagsToClassesAndUnknown() {
+        $input = [
+                'xml',
+                'non_existent_tag',   // should become null and filtered out
+                'double_percent',
+                'ruby_on_rails',
+                'double_square',
+                'sprintf',
+        ];
+
+        // Build sorter with the resolved class names
+        $sorter      = new HandlersSorter( FiltersTagsEnum::classesForArrayTagNames( $input ) );
+        $orderedList = $sorter->getOrderedHandlersClassNames();
+
+        // Unknown must be ignored (not present in the ordered list)
+        $this->assertNotContains( 'unknown', $orderedList );
+        $this->assertNotContains( null, $orderedList );
+
+        // Expected order according to HandlersSorter::injectableHandlersOrder
+        $expected = [
+                XmlToPh::class,              // position 1
+                RubyOnRailsI18n::class,      // position 3
+                DoubleSquareBrackets::class, // position 5
+                DoublePercentages::class,    // position 9
+                SprintfToPH::class,          // position 11
+        ];
+
+        $this->assertSame( $expected, $orderedList );
+
+    }
+
 }

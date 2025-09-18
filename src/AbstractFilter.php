@@ -12,6 +12,7 @@ namespace Matecat\SubFiltering;
 use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
+use Matecat\SubFiltering\Enum\FiltersTagsEnum;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
 use Matecat\SubFiltering\Filters\LtGtEncode;
@@ -79,15 +80,17 @@ abstract class AbstractFilter {
      * - `null` clears the handler list, meaning no handlers will be used.
      * - A specific array of class names will be used as the handler list.
      *
+     * @template T of static
+     *
      * @param FeatureSetInterface $featureSet                                   The feature set to apply.
      * @param string|null         $source                                       The source language code (e.g., 'en-US').
      * @param string|null         $target                                       The target language code (e.g., 'it-IT').
      * @param array|null          $dataRefMap                                   A map for data-ref transformations, or null for an empty map.
-     * @param array|null          $handlerClassNamesForLayer0ToLayer1Transition A list of handler classes, an empty array for defaults, or null for none.
+     * @param array|null          $handlerTagNamesForLayer0ToLayer1Transition   A list of handler tag names for the Layer 0 to Layer 1 transition.
      *
-     * @return AbstractFilter The configured instance of the filter.
+     * @return T The configured instance of the filter.
      */
-    public static function getInstance( FeatureSetInterface $featureSet, ?string $source = null, ?string $target = null, ?array $dataRefMap = [], ?array $handlerClassNamesForLayer0ToLayer1Transition = [] ): ?AbstractFilter {
+    public static function getInstance( FeatureSetInterface $featureSet, ?string $source = null, ?string $target = null, ?array $dataRefMap = [], ?array $handlerTagNamesForLayer0ToLayer1Transition = [] ): ?AbstractFilter {
         // Create a new instance of the specific filter class (e.g., MateCatFilter).
         $newInstance = new static();
 
@@ -97,6 +100,8 @@ abstract class AbstractFilter {
         $newInstance->target     = $target;
         // Use the null coalescing operator to default to an empty array if $dataRefMap is null.
         $newInstance->dataRefMap = $dataRefMap ?? [];
+
+        $handlerClassNamesForLayer0ToLayer1Transition = FiltersTagsEnum::classesForArrayTagNames( $handlerTagNamesForLayer0ToLayer1Transition );
 
         // Determine which handlers to use for the Layer 0 to Layer 1 transition.
         if ( is_array( $handlerClassNamesForLayer0ToLayer1Transition ) && empty( $handlerClassNamesForLayer0ToLayer1Transition ) ) {
@@ -183,7 +188,6 @@ abstract class AbstractFilter {
         $channel->addLast( StandardPHToMateCatCustomPH::class );
         $channel->addLast( StandardXEquivTextToMateCatCustomPH::class );
         $channel->addLast( PlaceHoldXliffTags::class );
-//        $channel->addLast( LtGtDecode::class );
 
         // Add the dynamic feature-based handlers.
         foreach ( $this->orderedHandlersForLayer0ToLayer1Transition as $handler ) {
