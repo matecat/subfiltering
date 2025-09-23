@@ -12,6 +12,7 @@ namespace Matecat\SubFiltering\Enum;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
+use Matecat\SubFiltering\Filters\MarkupToPh;
 use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
@@ -20,11 +21,10 @@ use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\XmlToPh;
 
 class InjectableFiltersTags {
 
-    public const  xml                  = 'xml';
+    public const  markup               = 'markup';
     public const  percent_double_curly = 'percent_double_curly';
     public const  twig                 = 'twig';
     public const  ruby_on_rails        = 'ruby_on_rails';
@@ -38,7 +38,7 @@ class InjectableFiltersTags {
     public const  sprintf              = 'sprintf';
 
     protected const tagsMap = [
-            self::xml                  => XmlToPh::class,
+            self::markup               => MarkupToPh::class,
             self::percent_double_curly => PercentDoubleCurlyBrackets::class,
             self::twig                 => TwigToPh::class,
             self::ruby_on_rails        => RubyOnRailsI18n::class,
@@ -53,7 +53,7 @@ class InjectableFiltersTags {
     ];
 
     protected const reverseTagMap = [
-            self::tagsMap[ self::xml ]                  => self::xml,
+            self::tagsMap[ self::markup ]               => self::markup,
             self::tagsMap[ self::percent_double_curly ] => self::percent_double_curly,
             self::tagsMap[ self::twig ]                 => self::twig,
             self::tagsMap[ self::ruby_on_rails ]        => self::ruby_on_rails,

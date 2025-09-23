@@ -9,7 +9,7 @@ use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
-use Matecat\SubFiltering\Filters\XmlToPh;
+use Matecat\SubFiltering\Filters\MarkupToPh;
 use Matecat\SubFiltering\HandlersSorter;
 use PHPUnit\Framework\TestCase;
 
@@ -88,16 +88,16 @@ class HandlersSorterTest extends TestCase {
     public function testGetInjectedHandlersInstances_1() {
         // NOTE: This test is subject to the same `quickSort` assumption mentioned above.
         $handlers = [
-                XmlToPh::class,
+                MarkupToPh::class,
                 PercentDoubleCurlyBrackets::class,
         ];
 
         $sorter         = new HandlersSorter( $handlers );
         $sortedHandlers = $sorter->getOrderedHandlersClassNames();
 
-        $this->assertContains( XmlToPh::class, $sortedHandlers );
+        $this->assertContains( MarkupToPh::class, $sortedHandlers );
         $this->assertContains( PercentDoubleCurlyBrackets::class, $sortedHandlers );
-        $this->assertEquals( XmlToPh::class, $sortedHandlers[ 0 ] );
+        $this->assertEquals( MarkupToPh::class, $sortedHandlers[ 0 ] );
         $this->assertEquals( PercentDoubleCurlyBrackets::class, $sortedHandlers[ 1 ] );
     }
 
@@ -160,7 +160,7 @@ class HandlersSorterTest extends TestCase {
 
     public function test_forArrayNamesMapsTagsToClassesAndUnknown() {
         $input = [
-                'xml',
+                'markup',
                 'non_existent_tag',   // should become null and filtered out
                 'double_percent',
                 'ruby_on_rails',
@@ -178,7 +178,7 @@ class HandlersSorterTest extends TestCase {
 
         // Expected order according to HandlersSorter::injectableHandlersOrder
         $expected = [
-                XmlToPh::class,              // position 1
+                MarkupToPh::class,              // position 1
                 RubyOnRailsI18n::class,      // position 3
                 DoubleSquareBrackets::class, // position 5
                 DoublePercentages::class,    // position 9

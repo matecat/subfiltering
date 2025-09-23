@@ -2,10 +2,10 @@
 
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
+use Matecat\SubFiltering\Filters\MarkupToPh;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\XmlToPh;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -22,7 +22,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_forNameReturnsCorrectClassForValidTag() {
-        $this->assertEquals( XmlToPh::class, InjectableFiltersTags::classForTagName( 'xml' ) );
+        $this->assertEquals( MarkupToPh::class, InjectableFiltersTags::classForTagName( 'markup' ) );
         $this->assertEquals( PercentDoubleCurlyBrackets::class, InjectableFiltersTags::classForTagName( 'percent_double_curly' ) );
         $this->assertEquals( TwigToPh::class, InjectableFiltersTags::classForTagName( 'twig' ) );
     }
@@ -58,14 +58,14 @@ class FiltersTagsEnumTest extends TestCase {
      */
     public function test_forArrayNamesMapsTagsToClassesAndUnknown() {
         $input = [
-                'xml',
+                'markup',
                 'non_existent_tag',   // should become null and filtered out
                 'double_square',
                 'sprintf',
         ];
 
         $expected = [
-                XmlToPh::class,
+                MarkupToPh::class,
                 DoubleSquareBrackets::class,
                 SprintfToPH::class,
         ];
@@ -94,7 +94,7 @@ class FiltersTagsEnumTest extends TestCase {
      * @test
      */
     public function test_tagForClassNameReturnsCorrectTagForValidClass() {
-        $this->assertSame( 'xml', InjectableFiltersTags::tagForClassName( XmlToPh::class ) );
+        $this->assertSame( 'markup', InjectableFiltersTags::tagForClassName( MarkupToPh::class ) );
         $this->assertSame( 'percent_double_curly', InjectableFiltersTags::    tagForClassName( PercentDoubleCurlyBrackets::class ) );
     }
 
@@ -116,14 +116,14 @@ class FiltersTagsEnumTest extends TestCase {
         $input = [
                 PercentDoubleCurlyBrackets::class,         // percent_double_curly
                 SprintfToPH::class,                        // sprintf
-                XmlToPh::class,                            // xml
+                MarkupToPh::class,                            // xml
                 PercentDoubleCurlyBrackets::class,         // duplicate -> kept, mapping is deterministic
         ];
 
         $expected = [
                 'percent_double_curly',
                 'sprintf',
-                'xml',
+                'markup',
                 'percent_double_curly',
         ];
 
@@ -152,7 +152,7 @@ class FiltersTagsEnumTest extends TestCase {
      */
     public function test_getTagsReturnsAllTagKeysInOrder() {
         $expected = [
-                InjectableFiltersTags::xml,
+                InjectableFiltersTags::markup,
                 InjectableFiltersTags::percent_double_curly,
                 InjectableFiltersTags::twig,
                 InjectableFiltersTags::ruby_on_rails,
@@ -166,7 +166,7 @@ class FiltersTagsEnumTest extends TestCase {
                 InjectableFiltersTags::sprintf,
         ];
 
-        $this->assertSame($expected, InjectableFiltersTags::getTags());
+        $this->assertSame( $expected, InjectableFiltersTags::getTags() );
     }
 
 }

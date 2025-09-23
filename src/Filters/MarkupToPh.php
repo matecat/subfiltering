@@ -25,7 +25,7 @@ use Matecat\SubFiltering\Filters\Html\HtmlParser;
  * @package SubFiltering
  *
  */
-class XmlToPh extends AbstractHandler {
+class MarkupToPh extends AbstractHandler {
 
     use CallbacksHandler;
 
@@ -77,7 +77,10 @@ class XmlToPh extends AbstractHandler {
      * @return string The resulting <ph> tag.
      */
     protected function _finalizeTag( string $buffer ): string {
-        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . ( $this->isHTML ? CTypeEnum::HTML : CTypeEnum::XML ) . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+        $isHTML       = $this->isHTML;
+        $this->isHTML = false;
+
+        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . ( $isHTML ? CTypeEnum::HTML : CTypeEnum::XML ) . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**
@@ -105,18 +108,16 @@ class XmlToPh extends AbstractHandler {
     }
 
     /**
-     * Validates if a given string is a legitimate XML or HTML-like tag.
+     * Validates a given tag string based on specific criteria for HTML5 and XML tags.
      *
-     * This method provides a robust way to identify tags, avoiding the common pitfalls of
-     * simpler tools like `strip_tags` which can fail with strings such as "3 < 4". It uses a
-     * two-step validation process:
-     * 1. A regular expression checks for a valid tag structure (name, attributes, brackets).
-     * 2. A check ensures the string doesn't contain internal placeholders, which would indicate
-     *    it's a partially processed string and not a single, complete tag.
+     * The method determines whether a given tag string is valid by:
+     * 1. Ensuring there are no placeholder markers (e.g., `##LESSTHAN##`, `##GREATERTHAN##`).
+     * 2. Matching against a comprehensive HTML5 tag and attribute structure using regex.
+     * 3. Optionally performing a stricter validation for XML tag structures.
      *
-     * @param string $buffer The string to validate.
+     * @param string $buffer The string representation of a tag to be validated.
      *
-     * @return bool True if the buffer is a valid tag, false otherwise.
+     * @return bool Returns true if the tag is considered valid; false otherwise.
      */
     protected function _isTagValid( string $buffer ): bool {
 
@@ -130,60 +131,59 @@ class XmlToPh extends AbstractHandler {
             return false;
         }
 
-        /*
-         * accept tags start with:
-         * - starting with / ( optional )
-         * - NOT starting with a number
-         * - containing [a-zA-Z0-9\-\._] at least 1
-         * - ending with a letter a-zA-Z0-9 or a quote "' or /
+        /**
+         * Validates if the given buffer contains a valid HTML5 tag.
          *
-         * Not accept Unicode letters in attributes
-         * @see https://regex101.com/r/fZGsUT/1
+         * This method uses a regular expression to match and validate HTML5 tags, including their attributes.
+         * It supports a wide range of HTML5 elements and global attributes, ensuring that the buffer adheres
+         * to the HTML5 specification.
+         *
+         * Features:
+         * - Matches all valid HTML5 tags, including opening, closing, and self-closing tags.
+         * - Handles global attributes such as id, class, style, data-* attributes, ARIA attributes, and event handlers.
+         * - Supports attribute values in double quotes, single quotes, or unquoted.
+         * - Robust to multiple attributes, whitespace, and Unicode characters.
+         *
+         * Example HTML matched by the regex:
+         * - `<div class="example" data-info="123">Content</div>`
+         * - `<img src="image.png" alt="Image" />`
+         * - `<button onclick="alert('Click!')">Click me</button>`
+         *
+         * @see https://regex101.com/r/o546zS/2
+         *
+         * @param string $buffer The string to validate as an HTML5 tag.
+         *
+         * @return bool Returns true if the buffer contains a valid HTML5 tag; false otherwise.
          */
-        // This regex validates the general structure of an XML/HTML tag.
-        // It checks for a valid tag name (not starting with a number), optional attributes
-        // (with quoted or unquoted values), and correct opening/closing brackets.
-        if ( preg_match( '#</?(?![0-9]+)[a-z0-9\-._:]+?(?:\s+[:a-z0-9\-._]+(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?)*\s*/?>#ui', $buffer ) ) {
+        if ( preg_match( '#</?(?:a|abbr|address|area|article|aside|audio|b|base|bdi|bdo|blockquote|body|br|button|canvas|caption|cite|code|col|colgroup|data|datalist|dd|del|details|dfn|dialog|div|dl|dt|em|embed|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|head|header|hr|html|i|iframe|img|input|ins|kbd|label|legend|li|link|main|map|mark|menu|meta|meter|nav|noscript|object|ol|optgroup|option|output|p|param|picture|pre|progress|q|rb|rp|rt|rtc|ruby|s|samp|script|section|select|slot|small|source|span|strong|style|sub|summary|sup|table|tbody|td|template|textarea|tfoot|th|thead|time|title|tr|track|u|ul|var|video|wbr)(?:\s+[:a-z0-9\-._]+(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?)*\s*/?>#ui', $buffer ) ) {
+            $this->isHTML = true;
 
-            /**
-             * HTML5 Tag Matcher and Global Attribute Parser
-             *
-             * This module provides a comprehensive approach to matching and validating HTML5 elements
-             * with a focus on global attributes, including `data-*` attributes with complex Unicode names.
-             *
-             * Features:
-             * 1. Matches all valid HTML5 tags, including structural, text, inline, form, multimedia, table,
-             *    script, interactive, and miscellaneous tags.
-             * 2. Supports opening tags, closing tags, and self-closing tags.
-             * 3. Supports global attributes:
-             *    - Standard global attributes: id, class, style, title, lang, dir, hidden, draggable, etc.
-             *    - Data attributes: data-* with Unicode, emoji, or complex characters.
-             *    - ARIA attributes: role, aria-*.
-             *    - Event handlers: on*, e.g., onclick, onmouseover.
-             *    - Deprecated XML attributes: xml:lang, xml:base.
-             * 4. Handles attribute values in double quotes, single quotes, or unquoted.
-             * 5. Example usage includes parsing headings (`h1`-`h6`) with multiple global attributes,
-             *    as well as other HTML5 elements with complex `data-*` attributes.
-             *
-             * Regex Summary:
-             * - Tag matching: matches all HTML5 tags listed in the specification.
-             * - Attribute matching: matches zero or more global attributes including complex `data-*` names.
-             * - Robust to multiple attributes, whitespace, self-closing tags, and Unicode characters.
-             *
-             * Example HTML matched by the regex:
-             * <h1 id="title1" class="main" data-élément-αριθμός="321">Heading</h1>
-             * <img src="image.png" alt="Photo" data-info="📸"/>
-             * <div hidden data-属性名123="有效">Content</div>
-             * <button onclick="alert('Click!')">Click me</button>
-             *
-             * Notes:
-             * - This regex is intended for validation and parsing in contexts that allow Unicode and extended characters.
-             * - For `dataset` access in JavaScript, `getAttribute` is recommended for attributes with non-ASCII names.
-             */
-            if ( preg_match( '#<\s*/?\s*(?:html|head|body|header|footer|main|section|article|nav|aside|h1|h2|h3|h4|h5|h6|p|hr|pre|blockquote|ol|ul|li|dl|dt|dd|figure|figcaption|div|a|em|strong|small|s|cite|q|dfn|abbr|ruby|rt|rp|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|bdi|bdo|span|br|wbr|form|label|input|button|select|datalist|optgroup|option|textarea|output|fieldset|legend|meter|progress|img|audio|video|source|track|picture|map|area|iframe|embed|object|param|table|caption|colgroup|col|tbody|thead|tfoot|tr|td|th|script|noscript|template|canvas|link|style|meta|base|title|details|summary|dialog|menu|menuitem|slot|portal)\b(?:\s+(?:accesskey|class|contenteditable|data-[^\s=]+|dir|draggable|enterkeyhint|hidden|id|inert|inputmode|lang|popover|spellcheck|style|tabindex|title|translate|xml:lang|xml:base|role|aria-[^\s=]+|on\w+)(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?)*\s*/?\s*>#ui', $buffer ) ) {
-                $this->isHTML = true;
-            }
+            return true;
+        }
 
+        /**
+         * Validates the general structure of an XML tag using a stricter regex.
+         *
+         * This validation ensures that the XML tag adheres to the following rules:
+         * - The tag may optionally start with a '/' character.
+         * - The tag name must NOT start with a number or a hyphen.
+         * - The tag name can only contain alphanumeric characters, hyphens (-), dots (.), and underscores (_).
+         * - The tag name must have at least one character.
+         * - The tag must end with a letter, a digit, a single quote ('), a double quote ("), or a forward slash (/).
+         * - Attributes must be defined with an equal sign and quoted values (either single or double quotes).
+         *
+         * Notes:
+         * - Unicode letters in element and attribute names are not allowed.
+         * - This validation is stricter than the HTML5 validation and is tailored for XML documents.
+         * - For more details, see the XML specification: https://www.w3.org/TR/xml/#NT-Attribute
+         *
+         * @see https://regex101.com/r/hsk9KU/4
+         *
+         * @param string $buffer The string representation of the tag to validate.
+         *
+         * @return bool Returns true if the tag matches the stricter XML structure; false otherwise.
+         */
+        if ( preg_match( '#</?(?![0-9\-]+)[a-z0-9\-._:]+?(?:\s+[:a-z0-9\-._]+=(?:"[^"]*"|\'[^\']*\'))*\s*/?>#ui', $buffer ) ) {
             return true;
         }
 

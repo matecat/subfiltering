@@ -11,6 +11,7 @@ use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
+use Matecat\SubFiltering\Filters\MarkupToPh;
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
@@ -20,7 +21,6 @@ use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\StandardXEquivTextToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\XmlToPh;
 use Matecat\SubFiltering\HandlersSorter;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Tests\Mocks\Features\AirbnbFeature;
@@ -98,7 +98,7 @@ class MateCatFilterTest extends TestCase {
      */
     public function testGetInstanceWithCustomHandlers() {
         // Arrange: Define a custom handler and instantiate the filter.
-        $customHandlers = [ InjectableFiltersTags::xml, InjectableFiltersTags::single_curly ];
+        $customHandlers = [ InjectableFiltersTags::markup, InjectableFiltersTags::single_curly ];
         $filter         = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', [], $customHandlers );
 
         // Arrange: Create a mock Pipeline to capture calls to addLast.
@@ -125,7 +125,7 @@ class MateCatFilterTest extends TestCase {
                 StandardPHToMateCatCustomPH::class,
                 StandardXEquivTextToMateCatCustomPH::class,
                 PlaceHoldXliffTags::class,
-                XmlToPh::class, // Verifies our custom handler is included
+                MarkupToPh::class, // Verifies our custom handler is included
                 SingleCurlyBracketsToPh::class, // Verifies our custom handler is included even if it is not default
                 RestoreXliffTagsContent::class,
                 RestorePlaceHoldersToXLIFFLtGt::class,
@@ -145,7 +145,7 @@ class MateCatFilterTest extends TestCase {
         $tags = [
                 'double_percent',     // valid -> DoublePercentages::class
                 'non_existing_tag',   // wrong -> 'unknown'
-                'xml',                // valid -> XmlToPh::class
+                'markup',             // valid -> MarkupToPh::class
                 'sprintf',            // valid -> SprintfToPH::class
                 'made_up_tag',        // wrong -> 'unknown'
                 'double_square',      // valid -> DoubleSquareBrackets::class
@@ -163,7 +163,7 @@ class MateCatFilterTest extends TestCase {
 
         // Expected order according to HandlersSorter::injectableHandlersOrder
         $expected = [
-                XmlToPh::class,              // position 0
+                MarkupToPh::class,              // position 0
                 DoubleSquareBrackets::class, // position 5
                 DoublePercentages::class,    // position 9
                 SprintfToPH::class,          // position 11
@@ -212,7 +212,7 @@ class MateCatFilterTest extends TestCase {
     public function testICUString() {
 
         /** @var $filter MateCatFilter */
-        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ InjectableFiltersTags::single_curly, InjectableFiltersTags::xml, InjectableFiltersTags::sprintf ] );
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', null, [ InjectableFiltersTags::single_curly, InjectableFiltersTags::markup, InjectableFiltersTags::sprintf ] );
 
         $segment   = 'You have {NUM_RESULTS, plural, =0 {no results} one {1 result} other {# results}} for "{SEARCH_TERM}".';
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );

@@ -18,14 +18,14 @@ use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
-use Matecat\SubFiltering\Filters\XmlToPh;
+use Matecat\SubFiltering\Filters\MarkupToPh;
 
 /**
  * Manages the sorting of filter handlers according to a predefined execution order.
  *
  * This class takes an array of handler class names and sorts them based on the
  * priorities defined in the `injectableHandlersOrder` constant. It also handles
- * special cases, such as the mutual exclusivity of `XmlToPh` and `HtmlToPh`,
+ * special cases, such as the mutual exclusivity of `MarkupToPh` and `HtmlToPh`,
  * ensuring the pipeline is built in the correct sequence.
  */
 class HandlersSorter {
@@ -40,7 +40,7 @@ class HandlersSorter {
      * @var array[] A map of handler class names to their integer priority and whether they are enabled by default.
      */
     protected const injectableHandlersOrder = [
-            XmlToPh::class                    => [ 'position' => 0, 'default_enabled' => true ],
+            MarkupToPh::class                 => [ 'position' => 0, 'default_enabled' => true ],
             PercentDoubleCurlyBrackets::class => [ 'position' => 1, 'default_enabled' => true ],
             TwigToPh::class                   => [ 'position' => 2, 'default_enabled' => true ],
             RubyOnRailsI18n::class            => [ 'position' => 3, 'default_enabled' => true ],
@@ -80,7 +80,7 @@ class HandlersSorter {
      *
      * Initializes the sorter with a given list of handlers. It sorts the handlers according
      * to the `injectableHandlersOrder` and handles special rules, like giving `HtmlToPh`
-     * precedence over `XmlToPh`.
+     * precedence over `MarkupToPh`.
      *
      * @param class-string[] $injectedHandlers An array of handler class names to be sorted.
      */

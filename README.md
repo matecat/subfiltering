@@ -242,7 +242,7 @@ $filter = MateCatFilter::getInstance(
     'it-IT',
     [], // dataRef map
     [
-        InjectableFiltersTags::xml,          // supported
+        InjectableFiltersTags::markup,       // supported
         InjectableFiltersTags::single_curly, // supported (disabled by default, but its injection is allowed and thus, enabled here)
         'foobar'                             // any unsupported class would be ignored
     ]

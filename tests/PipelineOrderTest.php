@@ -19,7 +19,7 @@ use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\XmlToPh;
+use Matecat\SubFiltering\Filters\MarkupToPh;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -34,7 +34,7 @@ class PipelineOrderTest extends TestCase {
         $this->channel = new Pipeline( 'it-IT', 'en-US', [] );
         $this->channel->addLast( StandardPHToMateCatCustomPH::class );
         $this->channel->addLast( PlaceHoldXliffTags::class );
-        $this->channel->addLast( XmlToPh::class );
+        $this->channel->addLast( MarkupToPh::class );
         $this->channel->addLast( TwigToPh::class );
         $this->channel->addLast( SprintfToPH::class );
         $this->channel->addLast( RestoreXliffTagsContent::class );
@@ -49,7 +49,7 @@ class PipelineOrderTest extends TestCase {
         $this->channel->remove( TwigToPh::class );
         $this->channel->remove( SprintfToPH::class );
 
-        $this->channel->addAfter( XmlToPh::class, RubyOnRailsI18n::class );
+        $this->channel->addAfter( MarkupToPh::class, RubyOnRailsI18n::class );
         $this->channel->addAfter( RubyOnRailsI18n::class, DoublePercentages::class );
         $this->channel->addAfter( DoublePercentages::class, SprintfToPH::class );
         $this->channel->addAfter( SprintfToPH::class, TwigToPh::class );
@@ -62,7 +62,7 @@ class PipelineOrderTest extends TestCase {
 
         $this->assertTrue( $handlerList[ 0 ] instanceof StandardPHToMateCatCustomPH );
         $this->assertTrue( $handlerList[ 1 ] instanceof PlaceHoldXliffTags );
-        $this->assertTrue( $handlerList[ 2 ] instanceof XmlToPh );
+        $this->assertTrue( $handlerList[ 2 ] instanceof MarkupToPh );
         $this->assertTrue( $handlerList[ 3 ] instanceof RubyOnRailsI18n );
         $this->assertTrue( $handlerList[ 4 ] instanceof DoublePercentages );
         $this->assertTrue( $handlerList[ 5 ] instanceof SprintfToPH );
@@ -82,8 +82,8 @@ class PipelineOrderTest extends TestCase {
         $this->channel->remove( SprintfToPH::class );
         $this->channel->addFirst( SprintfToPH::class );
 
-        $this->channel->addBefore( XmlToPh::class, RubyOnRailsI18n::class );
-        $this->channel->remove( XmlToPh::class );
+        $this->channel->addBefore( MarkupToPh::class, RubyOnRailsI18n::class );
+        $this->channel->remove( MarkupToPh::class );
 
         $reflection = new ReflectionClass( $this->channel );
         $property   = $reflection->getProperty( 'handlers' );

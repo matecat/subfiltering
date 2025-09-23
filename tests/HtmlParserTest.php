@@ -13,8 +13,16 @@ use Exception;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
+use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\Html\HtmlParser;
-use Matecat\SubFiltering\Filters\XmlToPh;
+use Matecat\SubFiltering\Filters\LtGtEncode;
+use Matecat\SubFiltering\Filters\MateCatCustomPHToOriginalValue;
+use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
+use Matecat\SubFiltering\Filters\RestoreEquivText;
+use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
+use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
+use Matecat\SubFiltering\Filters\SplitPlaceholder;
+use Matecat\SubFiltering\Filters\MarkupToPh;
 use PHPUnit\Framework\TestCase;
 
 class HtmlParserTest extends TestCase {
@@ -52,7 +60,7 @@ class HtmlParserTest extends TestCase {
         $expected = "<ph id=\"mtc_1\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> Airbnb &amp;amp; Co. &amp;lt; <ph id=\"mtc_2\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/>Use professional tools<ph id=\"mtc_3\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/> in your <ph id=\"mtc_4\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs=\"/>";
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( XmlToPh::class );
+        $pipeline->addLast( MarkupToPh::class );
         $str = $pipeline->transform( $segment );
 
         $this->assertEquals( $expected, $str );
@@ -75,7 +83,7 @@ h1 {color:blue;}p{color:red;}
         $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3N0eWxlJmd0O2JvZHl7YmFja2dyb3VuZC1jb2xvcjpwb3dkZXJibHVlO30gCmgxIHtjb2xvcjpibHVlO31we2NvbG9yOnJlZDt9CiZsdDsvc3R5bGUmZ3Q7"/>';
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( XmlToPh::class );
+        $pipeline->addLast( MarkupToPh::class );
 
         $str = $pipeline->transform( $segment );
 
@@ -91,7 +99,7 @@ h1 {color:blue;}p{color:red;}
         $expected = "&lt;style&gt;body{background-color:powderblue;} h1 {color:blue;}p{color:red;}";
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( XmlToPh::class );
+        $pipeline->addLast( MarkupToPh::class );
 
         $str = $pipeline->transform( $segment );
 
@@ -108,7 +116,7 @@ h1 {color:blue;}p{color:red;}
         $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3N0eWxlMCZndDs="/>this is a test text inside a custom XML tag similar to a style HTML tag<ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9zdHlsZTAmZ3Q7"/>';
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( XmlToPh::class );
+        $pipeline->addLast( MarkupToPh::class );
 
         $str = $pipeline->transform( $segment );
 
@@ -132,7 +140,7 @@ let elements = document.getElementsByClassName('note');
         $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3NjcmlwdCZndDsKbGV0IGVsZW1lbnRzID0gZG9jdW1lbnQuZ2V0RWxlbWVudHNCeUNsYXNzTmFtZSgnbm90ZScpOwombHQ7L3NjcmlwdCZndDs="/>';
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( XmlToPh::class );
+        $pipeline->addLast( MarkupToPh::class );
 
         $str = $pipeline->transform( $segment );
 
@@ -149,7 +157,7 @@ let elements = document.getElementsByClassName('note');
         $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3NjcmlwdGluZyZndDs="/>let elements = document.getElementsByClassName(\'note\');<ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9zY3JpcHRpbmcmZ3Q7"/>';
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( XmlToPh::class );
+        $pipeline->addLast( MarkupToPh::class );
 
         $str = $pipeline->transform( $segment );
 
@@ -161,7 +169,7 @@ let elements = document.getElementsByClassName('note');
         $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2w6c3R5bGUxJmd0Ow=="/>test<ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9sOnN0eWxlMSZndDs="/>';
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( XmlToPh::class );
+        $pipeline->addLast( MarkupToPh::class );
 
         $str = $pipeline->transform( $segment );
 
@@ -175,15 +183,15 @@ let elements = document.getElementsByClassName('note');
     public function testTransformWithComplexStringForAllBranches() {
         // This string is designed to exercise as many conditional branches
         // of the HtmlParser::transform method as possible in a single run.
-        $segment = "A>B plain text. <p class='c1\"c2'>valid tag</p> <!-- comment --><script>js</script><style>css</style> < invalid-tag> <a<b and finally <u";
+        $segment = "A&gt;B plain text. &lt;p class='c1\"c2'&gt;valid tag&lt;/p&gt; &lt;!-- comment --&gt;&lt;script&gt;js&lt;/script&gt;&lt;style&gt;css&lt;/style&gt; &lt; invalid-tag&gt; &lt;a&lt;b and finally &lt;u";
 
         $pipeline = new Pipeline();
-        // XmlToPh uses HtmlParser internally and provides the necessary callbacks.
-        $pipeline->addLast( XmlToPh::class );
+        // MarkupToPh uses HtmlParser internally and provides the necessary callbacks.
+        $pipeline->addLast( MarkupToPh::class );
 
         $transformed = $pipeline->transform( $segment );
 
-        // Manually build the expected output by tracing the parser's logic with the XmlToPh handler.
+        // Manually build the expected output by tracing the parser's logic with the MarkupToPh handler.
         $expected =
                 // 1. Plain text with a stray '>', which gets encoded.
                 'A&gt;B plain text. ' .
@@ -201,7 +209,7 @@ let elements = document.getElementsByClassName('note');
                 ' ' .
 
                 // 6. A comment block, which becomes a placeholder.
-                '<ph id="mtc_3" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "<!-- comment -->", ENT_NOQUOTES | 16 ) ) . '"/>' .
+                '<ph id="mtc_3" ctype="' . CTypeEnum::XML . '" equiv-text="base64:' . base64_encode( htmlentities( "<!-- comment -->", ENT_NOQUOTES | 16 ) ) . '"/>' .
 
                 // 7. A script block.
                 '<ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode( htmlentities( "<script>js</script>", ENT_NOQUOTES | 16 ) ) . '"/>' .
@@ -222,6 +230,14 @@ let elements = document.getElementsByClassName('note');
                 '&lt;u';
 
         $this->assertEquals( $expected, $transformed );
+
+        $pipeline = new Pipeline();
+        // MarkupToPh uses HtmlParser internally and provides the necessary callbacks.
+        $pipeline->addLast( MateCatCustomPHToOriginalValue::class ); // Restore original PH values
+        $backTransformed = $pipeline->transform( $expected );
+
+        $this->assertEquals( $segment, $backTransformed );
+
     }
 
     /**
@@ -232,12 +248,23 @@ let elements = document.getElementsByClassName('note');
         $expected = '';
 
         $pipeline = new Pipeline();
-        $pipeline->addLast( XmlToPh::class );
+        $pipeline->addLast( MarkupToPh::class );
 
         $str = $pipeline->transform( $segment );
 
         $this->assertEquals( $expected, $str );
     }
 
+    public function testNotXMLContentShouldRemainUntouched(){
+
+        $segment = 'Test for the &lt;original shipment date&gt; which is not a valid XML content';
+        $pipeline = new Pipeline();
+        // MarkupToPh uses HtmlParser internally and provides the necessary callbacks.
+        $pipeline->addLast( MarkupToPh::class );
+
+        $transformed = $pipeline->transform( $segment );
+
+        $this->assertEquals( $segment, $transformed );
+    }
 
 }
