@@ -42,7 +42,7 @@ class InjectableFiltersTags {
             self::percent_double_curly => PercentDoubleCurlyBrackets::class,
             self::twig                 => TwigToPh::class,
             self::ruby_on_rails        => RubyOnRailsI18n::class,
-            self::double_snail         => SNails::class,
+            self::double_snail         => Snails::class,
             self::double_square        => DoubleSquareBrackets::class,
             self::dollar_curly         => DollarCurlyBrackets::class,
             self::single_curly         => SingleCurlyBracketsToPh::class,
