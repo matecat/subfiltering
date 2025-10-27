@@ -55,10 +55,10 @@ trait CallbacksHandler {
      * `HtmlParser` uses this to decide whether to call `_finalizeHTMLTag` or `_fixWrongBuffer`.
      *
      * @param string $buffer The buffer to be validated.
-     * @return string A truthy value if the tag is valid, falsy otherwise.
+     * @return bool A truthy value if the tag is valid, falsy otherwise.
      *                (Note: The return type is string for legacy reasons but is treated as a boolean).
      */
-    abstract protected function _isTagValid( string $buffer ): string;
+    abstract protected function _isTagValid( string $buffer ): bool;
 
     /**
      * Processes a buffer containing plain text found between or outside of HTML tags.
