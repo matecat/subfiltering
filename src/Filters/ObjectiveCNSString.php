@@ -37,10 +37,10 @@ class ObjectiveCNSString extends AbstractHandler {
      */
     public function transform( string $segment ): string {
 
-        $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
+//        $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
 
-        // placeholding
-        $segment = $sprintfLocker->lock( $segment );
+//         placeholding
+//        $segment = $sprintfLocker->lock( $segment );
 
 
         preg_match_all( '/%\d+\$@|%@/', $segment, $html, PREG_SET_ORDER );
@@ -55,6 +55,9 @@ class ObjectiveCNSString extends AbstractHandler {
         }
 
         //revert placeholding
-        return $sprintfLocker->unlock( $segment );
+//        return $sprintfLocker->unlock( $segment );
+
+        return $segment;
+
     }
 }

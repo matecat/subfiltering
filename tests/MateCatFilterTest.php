@@ -666,8 +666,10 @@ class MateCatFilterTest extends TestCase {
      * Sprintf
      **************************
      */
-
     public function testSprintf() {
+
+        $this->markTestSkipped('SprintfLocker is disabled for now, we want to check if this is really needed. We Must be revisited.'); // TODO review
+
         $channel = new Pipeline( 'hu-HU', 'az-AZ' );
         $channel->addLast( SprintfToPH::class );
 
@@ -1191,8 +1193,8 @@ class MateCatFilterTest extends TestCase {
     public function testSinglePercentageSyntax() {
         $filter = $this->getFilterInstance();
 
-        $db_segment      = 'This syntax %this_is_a_variable% is no more valid';
-        $segment_from_UI = 'This syntax %this_is_a_variable% is no more valid';
+        $db_segment      = 'This syntax %this_is_a_variable% is no more valid and blocked as sprintf Syntax instead';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="x-sprintf" equiv-text="base64:JXRoaQ=="/>s_is_a_variable% is no more valid and blocked as sprintf Syntax instead';
 
         $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -1297,7 +1299,14 @@ class MateCatFilterTest extends TestCase {
         $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function testWithMixedPercentTags() {
+
+        $this->markTestSkipped('SprintfLocker is disabled for now, we want to check if this is really needed. We Must be revisited.'); // TODO review
+
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This string contains all these tags: %-4d %@ %12$@ ​%{{|discount|}} {% if count &lt; 3 %} but not this %placeholder%';

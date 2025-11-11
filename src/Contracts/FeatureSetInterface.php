@@ -13,8 +13,6 @@ interface FeatureSetInterface {
      *
      * @return mixed
      *
-     * FIXME: this is not a real filter since the input params are not passed
-     * modified in cascade to the next function in the queue.
      * @throws Exception
      */
     public function filter( $method, $filterable );

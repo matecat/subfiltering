@@ -42,13 +42,14 @@ class SprintfToPH extends AbstractHandler {
      */
     public function transform( string $segment ): string {
 
-        $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
+          // disabled for now, we want to check if this is really needed
+//        $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
 
         // placeholding
-        $segment = $sprintfLocker->lock( $segment );
+//        $segment = $sprintfLocker->lock( $segment );
 
         // Octal parsing is disabled due to Hungarian percentages 20%-os
-        $regex = '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|[+-]?\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?((?:[hjlqtzL]{0,2}[ac-giopsuxAC-GOSUX]{1})(?![\d\w])|(?:#@[\w]+@)|(?:@)))/';
+        $regex = '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^)]+)\))?(?:\+)?(?:0|[+-]?\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?((?:[hjlqtzL]{0,2}[a-iopsuxAC-HOSUX])))/';
 
 
         preg_match_all( $regex, $segment, $vars, PREG_SET_ORDER );
@@ -64,7 +65,9 @@ class SprintfToPH extends AbstractHandler {
         }
 
         //revert placeholding
-        return $sprintfLocker->unlock( $segment );
+//        return $sprintfLocker->unlock( $segment );
+        return $segment;
+
     }
 
 }

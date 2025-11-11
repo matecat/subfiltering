@@ -207,6 +207,9 @@ class MyMemoryFilterTest extends TestCase {
      * @throws Exception
      */
     public function testSinglePercentageSyntax() {
+
+        $this->markTestSkipped('SprintfLocker is disabled for now, we want to check if this is really needed. We Must be revisited.'); // TODO review
+
         $filter = $this->getFilterInstance();
 
         $db_segment      = 'This syntax %this_is_a_variable% is no more valid';

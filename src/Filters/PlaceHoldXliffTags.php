@@ -25,8 +25,8 @@ class PlaceHoldXliffTags extends AbstractHandler {
         $segment = preg_replace( '|<(/g)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
 
         $segment = preg_replace( '|<(x .*?/?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '#<(bx[ ]{0,}/?|bx .*?/?)>#si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
-        $segment = preg_replace( '#<(ex[ ]{0,}/?   |ex .*?/?)>#si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '#<(bx */?|bx .*?/?)>#si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
+        $segment = preg_replace( '#<(ex */?|ex .*?/?)>#si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(bpt\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(/bpt)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(ept\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );

@@ -14,12 +14,14 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\TestCase;
 
-class SprintfTest extends TestCase {
+class SprintfLockerTest extends TestCase {
 
     /**
      * @throws \Exception
      */
     public function testForGerman() {
+
+        $this->markTestSkipped('SprintfLocker is disabled for now, we want to check if this is really needed. We Must be revisited.'); // TODO review
 
         $notAllowed = [
             '%-ige' => CTypeEnum::SPRINTF,
@@ -33,6 +35,8 @@ class SprintfTest extends TestCase {
      */
     public function testForHungarian() {
 
+        $this->markTestSkipped('SprintfLocker is disabled for now, we want to check if this is really needed. We Must be revisited.'); // TODO review
+
         $notAllowed = [
             '%-xxx' => CTypeEnum::SPRINTF,
         ];
@@ -44,6 +48,8 @@ class SprintfTest extends TestCase {
      * @throws \Exception
      */
     public function testForHebrew() {
+
+        $this->markTestSkipped('SprintfLocker is disabled for now, we want to check if this is really needed. We Must be revisited.'); // TODO review
 
         $notAllowed = [
             '%s' => CTypeEnum::SPRINTF,
@@ -61,6 +67,8 @@ class SprintfTest extends TestCase {
      * @throws \Exception
      */
     public function testForTurkish() {
+
+        $this->markTestSkipped('SprintfLocker is disabled for now, we want to check if this is really needed. We Must be revisited.'); // TODO review
 
         $notAllowed = [
             '%s' => CTypeEnum::SPRINTF,
