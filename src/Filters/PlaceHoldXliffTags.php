@@ -44,7 +44,7 @@ class PlaceHoldXliffTags extends AbstractHandler {
         $segment = preg_replace( '|<(mrk\s*.*?)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
         $segment = preg_replace( '|<(/mrk)>|si', ConstantEnum::LTPLACEHOLDER . "$1" . ConstantEnum::GTPLACEHOLDER, $segment );
 
-        return preg_replace_callback( '/' . ConstantEnum::LTPLACEHOLDER . '(.*?)' . ConstantEnum::GTPLACEHOLDER . '/u',
+        return preg_replace_callback( '/' . ConstantEnum::LTPLACEHOLDER . '(.*?)' . ConstantEnum::GTPLACEHOLDER . '/',
                 function ( $matches ) {
                     return ConstantEnum::LTPLACEHOLDER . base64_encode( $matches[ 1 ] ) . ConstantEnum::GTPLACEHOLDER;
                 }, $segment
