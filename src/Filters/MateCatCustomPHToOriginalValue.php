@@ -11,14 +11,18 @@ namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 
-class MateCatCustomPHToOriginalValue extends AbstractHandler {
+class MateCatCustomPHToOriginalValue extends AbstractHandler
+{
 
-    public function transform( string $segment ): string {
+    /**
+     * @param string $segment
+     * @return string
+     */
+    public function transform(string $segment): string
+    {
+        $segment = $this->restoreOriginalTags($segment);
 
-        $segment = $this->restoreOriginalTags( $segment );
-
-        return $this->restoreFilteredContent( $segment );
-
+        return $this->restoreFilteredContent($segment);
     }
 
     /**
@@ -28,15 +32,19 @@ class MateCatCustomPHToOriginalValue extends AbstractHandler {
      *
      * @return string
      */
-    private function restoreOriginalTags( string $segment ): string {
-
-        preg_match_all( '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']([^"\']+)["\'] x-orig\s*=\s*["\']([^"\']+)["\'] equiv-text\s*=\s*["\']base64:[^"\']+["\']\s*/>|iU', $segment, $html, PREG_SET_ORDER ); // Ungreedy
-        foreach ( $html as $subfilter_tag ) {
-            $segment = str_replace( $subfilter_tag[ 0 ], base64_decode( $subfilter_tag[ 2 ] ), $segment );
+    private function restoreOriginalTags(string $segment): string
+    {
+        preg_match_all(
+            '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']([^"\']+)["\'] x-orig\s*=\s*["\']([^"\']+)["\'] equiv-text\s*=\s*["\']base64:[^"\']+["\']\s*/>|iU',
+            $segment,
+            $html,
+            PREG_SET_ORDER
+        ); // Ungreedy
+        foreach ($html as $subfilter_tag) {
+            $segment = str_replace($subfilter_tag[0], base64_decode($subfilter_tag[2]), $segment);
         }
 
         return $segment;
-
     }
 
     /**
@@ -47,18 +55,22 @@ class MateCatCustomPHToOriginalValue extends AbstractHandler {
      *
      * @return string
      */
-    private function restoreFilteredContent( string $segment ): string {
+    private function restoreFilteredContent(string $segment): string
+    {
         // pipeline for restore PH tag of subfiltering to original encoded HTML
-        preg_match_all( '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']([0-9a-zA-Z\-_]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/>|iU', $segment, $html, PREG_SET_ORDER ); // Ungreedy
+        preg_match_all(
+            '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']([0-9a-zA-Z\-_]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/>|iU',
+            $segment,
+            $html,
+            PREG_SET_ORDER
+        ); // Ungreedy
 
-        foreach ( $html as $subfilter_tag ) {
-
+        foreach ($html as $subfilter_tag) {
             /*
              * This code tries to handle xliff/html tags (encoded) inside an xliff.
              */
-            $value   = base64_decode( $subfilter_tag[ 2 ] );
-            $segment = str_replace( $subfilter_tag[ 0 ], $value, $segment );
-
+            $value = base64_decode($subfilter_tag[2]);
+            $segment = str_replace($subfilter_tag[0], $value, $segment);
         }
 
         return $segment;

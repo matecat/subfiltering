@@ -4,16 +4,17 @@ namespace Matecat\SubFiltering\Contracts;
 
 use Exception;
 
-interface FeatureSetInterface {
+interface FeatureSetInterface
+{
     /**
      * Returns the filtered subject variable passed to all enabled features.
      *
-     * @param $method
-     * @param $filterable
+     * @param string $method
+     * @param mixed $filterable
      *
      * @return mixed
      *
      * @throws Exception
      */
-    public function filter( $method, $filterable );
+    public function filter(string $method, mixed $filterable): mixed;
 }

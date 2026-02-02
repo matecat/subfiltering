@@ -6,13 +6,9 @@ namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\SubFiltering\Filters\Sprintf\SprintfLocker;
 
-class SprintfToPH extends AbstractHandler {
-
-    public function __construct() {
-        parent::__construct();
-    }
+class SprintfToPH extends AbstractHandler
+{
 
     /**
      * TestSet:
@@ -30,7 +26,7 @@ class SprintfToPH extends AbstractHandler {
      * 20%-zar - ignored
      *</code>
      *
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      * @see
@@ -38,36 +34,25 @@ class SprintfToPH extends AbstractHandler {
      * - https://en.cppreference.com/w/c/io/fprintf
      * - https://www.php.net/manual/en/function.sprintf.php
      * - https://www.w3resource.com/c-programming/stdio/c_library_method_sprintf.php
-     *
      */
-    public function transform( string $segment ): string {
-
-          // disabled for now, we want to check if this is really needed
-//        $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
-
-        // placeholding
-//        $segment = $sprintfLocker->lock( $segment );
-
+    public function transform(string $segment): string
+    {
         // Octal parsing is disabled due to Hungarian percentages 20%-os
         $regex = '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^)]+)\))?(?:\+)?(?:0|[+-]?\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?((?:[hjlqtzL]{0,2}[a-iopsuxAC-HOSUX])))/';
 
 
-        preg_match_all( $regex, $segment, $vars, PREG_SET_ORDER );
-        foreach ( $vars as $variable ) {
-
+        preg_match_all($regex, $segment, $vars, PREG_SET_ORDER);
+        foreach ($vars as $variable) {
             //replace subsequent elements excluding already encoded
             $segment = preg_replace(
-                    '/' . preg_quote( $variable[ 0 ], '/' ) . '/',
-                    '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:' . base64_encode( $variable[ 0 ] ) . '"/>',
-                    $segment,
-                    1
+                '/' . preg_quote($variable[0], '/') . '/',
+                '<ph id="' . $this->getPipeline()->getNextId(
+                ) . '" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:' . base64_encode($variable[0]) . '"/>',
+                $segment,
+                1
             );
         }
-
-        //revert placeholding
-//        return $sprintfLocker->unlock( $segment );
         return $segment;
-
     }
 
 }

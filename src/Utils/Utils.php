@@ -2,22 +2,8 @@
 
 namespace Matecat\SubFiltering\Utils;
 
-class Utils {
-
-    /**
-     * @param $array
-     *
-     * @return bool
-     */
-    public static function array_is_list( $array ): bool {
-
-        if ( $array === [] ) {
-            return true;
-        }
-
-        return array_keys( $array ) === range( 0, count( $array ) - 1 );
-
-    }
+class Utils
+{
 
     /**
      * @param string $needle
@@ -25,8 +11,9 @@ class Utils {
      *
      * @return bool
      */
-    public static function contains( string $needle, string $haystack ): bool {
-        return strpos( $haystack, $needle ) !== false;
+    public static function contains(string $needle, string $haystack): bool
+    {
+        return str_contains($haystack, $needle);
     }
 
     /**
@@ -39,34 +26,32 @@ class Utils {
      * @return int
      *
      */
-    public static function fastUnicode2ord( string $mb_char ) {
-        switch ( strlen( $mb_char ) ) {
-            case 1:
-                return ord( $mb_char );
-            case 2:
-                return ( ord( $mb_char[ 0 ] ) - 0xC0 ) * 0x40 +
-                        ord( $mb_char[ 1 ] ) - 0x80;
-            case 3:
-                return ( ord( $mb_char[ 0 ] ) - 0xE0 ) * 0x1000 +
-                        ( ord( $mb_char[ 1 ] ) - 0x80 ) * 0x40 +
-                        ord( $mb_char[ 2 ] ) - 0x80;
-            case 4:
-                return ( ord( $mb_char[ 0 ] ) - 0xF0 ) * 0x40000 +
-                        ( ord( $mb_char[ 1 ] ) - 0x80 ) * 0x1000 +
-                        ( ord( $mb_char[ 2 ] ) - 0x80 ) * 0x40 +
-                        ord( $mb_char[ 3 ] ) - 0x80;
-        }
-
-        return 20; //as default, return a space (should never happen)
+    public static function fastUnicode2ord(string $mb_char): int
+    {
+        return match (strlen($mb_char)) {
+            1 => ord($mb_char),
+            2 => (ord($mb_char[0]) - 0xC0) * 0x40 +
+                ord($mb_char[1]) - 0x80,
+            3 => (ord($mb_char[0]) - 0xE0) * 0x1000 +
+                (ord($mb_char[1]) - 0x80) * 0x40 +
+                ord($mb_char[2]) - 0x80,
+            4 => (ord($mb_char[0]) - 0xF0) * 0x40000 +
+                (ord($mb_char[1]) - 0x80) * 0x1000 +
+                (ord($mb_char[2]) - 0x80) * 0x40 +
+                ord($mb_char[3]) - 0x80,
+            default => 20,
+        };
+        //as default, return a space (should never happen)
     }
 
     /**
-     * @param array $str
+     * @param array<int,string> $str
      *
      * @return string
      */
-    public static function htmlentitiesFromUnicode( array $str ): string {
-        return "&#" . self::fastUnicode2ord( $str[ 1 ] ) . ";";
+    public static function htmlentitiesFromUnicode(array $str): string
+    {
+        return "&#" . self::fastUnicode2ord($str[1]) . ";";
     }
 
     /**
@@ -79,8 +64,9 @@ class Utils {
      *
      * @return string
      */
-    public static function unicode2chr( int $o ): string {
-        return (string)mb_convert_encoding( '&#' . $o . ';', 'UTF-8', 'HTML-ENTITIES' );
+    public static function unicode2chr(int $o): string
+    {
+        return (string)mb_convert_encoding('&#' . $o . ';', 'UTF-8', 'HTML-ENTITIES');
     }
 
 }

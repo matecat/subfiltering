@@ -42,30 +42,30 @@ use Matecat\SubFiltering\Filters\SpecialEntitiesToPlaceholdersForView;
  *
  * @package SubFiltering
  */
-class MateCatFilter extends AbstractFilter {
+class MateCatFilter extends AbstractFilter
+{
 
     /**
      * Transforms database raw XML content (Layer 0) to intermediate structures (Layer 1).
      *
-     * @param string      $segment The data segment to transform from Layer 0 to Layer 1.
-     * @param string|null $cid     Optional context identifier for the transformation process.
+     * @param string $segment The data segment to transform from Layer 0 to Layer 1.
+     * @param string|null $cid Optional context identifier for the transformation process.
      *
      * @return string The transformed segment in Layer 1 format.
      * @throws Exception If the transformation process fails.
      */
-    public function fromLayer0ToLayer1( string $segment, ?string $cid = null ): string {
+    public function fromLayer0ToLayer1(string $segment, ?string $cid = null): string
+    {
+        $channel = new Pipeline($this->source, $this->target, $this->dataRefMap);
 
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-
-        $this->configureFromLayer0ToLayer1Pipeline( $channel );
+        $this->configureFromLayer0ToLayer1Pipeline($channel);
 
         // Allow the feature set to modify the pipeline for this specific transformation.
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromLayer0ToLayer1', $channel );
+        /** @type $channel Pipeline */
+        $channel = $this->featureSet->filter('fromLayer0ToLayer1', $channel);
 
         // Process the segment and return the result.
-        return $channel->transform( $segment );
-
+        return $channel->transform($segment);
     }
 
     /**
@@ -76,9 +76,10 @@ class MateCatFilter extends AbstractFilter {
      * @return string
      * @throws Exception
      */
-    public function fromLayer0ToLayer2( string $segment ): string {
+    public function fromLayer0ToLayer2(string $segment): string
+    {
         return $this->fromLayer1ToLayer2(
-                $this->fromLayer0ToLayer1( $segment )
+            $this->fromLayer0ToLayer1($segment)
         );
     }
 
@@ -90,16 +91,17 @@ class MateCatFilter extends AbstractFilter {
      * @return string
      * @throws Exception
      */
-    public function fromLayer1ToLayer2( string $segment ): string {
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( SpecialEntitiesToPlaceholdersForView::class );
-        $channel->addLast( EntityToEmoji::class );
-        $channel->addLast( DataRefReplace::class );
+    public function fromLayer1ToLayer2(string $segment): string
+    {
+        $channel = new Pipeline($this->source, $this->target, $this->dataRefMap);
+        $channel->addLast(SpecialEntitiesToPlaceholdersForView::class);
+        $channel->addLast(EntityToEmoji::class);
+        $channel->addLast(DataRefReplace::class);
 
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromLayer1ToLayer2', $channel );
+        /** @type $channel Pipeline */
+        $channel = $this->featureSet->filter('fromLayer1ToLayer2', $channel);
 
-        return $channel->transform( $segment );
+        return $channel->transform($segment);
     }
 
     /**
@@ -110,20 +112,21 @@ class MateCatFilter extends AbstractFilter {
      * @return string
      * @throws Exception
      */
-    public function fromLayer2ToLayer1( string $segment ): string {
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( CtrlCharsPlaceHoldToAscii::class );
-        $channel->addLast( PlaceHoldXliffTags::class );
-        $channel->addLast( FromLayer2TorawXML::class );
-        $channel->addLast( EmojiToEntity::class );
-        $channel->addLast( RestoreXliffTagsContent::class );
-        $channel->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
-        $channel->addLast( DataRefRestore::class );
+    public function fromLayer2ToLayer1(string $segment): string
+    {
+        $channel = new Pipeline($this->source, $this->target, $this->dataRefMap);
+        $channel->addLast(CtrlCharsPlaceHoldToAscii::class);
+        $channel->addLast(PlaceHoldXliffTags::class);
+        $channel->addLast(FromLayer2TorawXML::class);
+        $channel->addLast(EmojiToEntity::class);
+        $channel->addLast(RestoreXliffTagsContent::class);
+        $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
+        $channel->addLast(DataRefRestore::class);
 
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromLayer2ToLayer1', $channel );
+        /** @type $channel Pipeline */
+        $channel = $this->featureSet->filter('fromLayer2ToLayer1', $channel);
 
-        return $channel->transform( $segment );
+        return $channel->transform($segment);
     }
 
     /**
@@ -138,9 +141,10 @@ class MateCatFilter extends AbstractFilter {
      * @return string
      * @throws Exception
      */
-    public function fromLayer2ToLayer0( string $segment ): string {
+    public function fromLayer2ToLayer0(string $segment): string
+    {
         return $this->fromLayer1ToLayer0(
-                $this->fromLayer2ToLayer1( $segment )
+            $this->fromLayer2ToLayer1($segment)
         );
     }
 
@@ -152,8 +156,9 @@ class MateCatFilter extends AbstractFilter {
      * @return string The resulting transformed content in Layer 0 format.
      * @throws Exception
      */
-    public function fromLayer1ToLayer0( string $segment ): string {
-        return parent::fromLayer1ToLayer0( $segment );
+    public function fromLayer1ToLayer0(string $segment): string
+    {
+        return parent::fromLayer1ToLayer0($segment);
     }
 
     /**
@@ -164,18 +169,19 @@ class MateCatFilter extends AbstractFilter {
      * @return string
      * @throws Exception
      */
-    public function fromRawXliffToLayer0( string $segment ): string {
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( RemoveDangerousChars::class );
-        $channel->addLast( PlaceHoldXliffTags::class );
-        $channel->addLast( EncodeControlCharsInXliff::class );
-        $channel->addLast( RestoreXliffTagsContent::class );
-        $channel->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
+    public function fromRawXliffToLayer0(string $segment): string
+    {
+        $channel = new Pipeline($this->source, $this->target, $this->dataRefMap);
+        $channel->addLast(RemoveDangerousChars::class);
+        $channel->addLast(PlaceHoldXliffTags::class);
+        $channel->addLast(EncodeControlCharsInXliff::class);
+        $channel->addLast(RestoreXliffTagsContent::class);
+        $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
 
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromRawXliffToLayer0', $channel );
+        /** @type $channel Pipeline */
+        $channel = $this->featureSet->filter('fromRawXliffToLayer0', $channel);
 
-        return $channel->transform( $segment );
+        return $channel->transform($segment);
     }
 
     /**
@@ -186,18 +192,19 @@ class MateCatFilter extends AbstractFilter {
      * @return string
      * @throws Exception
      */
-    public function fromLayer0ToRawXliff( string $segment ): string {
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-        $channel->addLast( PlaceHoldXliffTags::class );
-        $channel->addLast( RemoveDangerousChars::class );
-        $channel->addLast( RestoreXliffTagsContent::class );
-        $channel->addLast( RestorePlaceHoldersToXLIFFLtGt::class );
-        $channel->addLast( LtGtEncode::class );
+    public function fromLayer0ToRawXliff(string $segment): string
+    {
+        $channel = new Pipeline($this->source, $this->target, $this->dataRefMap);
+        $channel->addLast(PlaceHoldXliffTags::class);
+        $channel->addLast(RemoveDangerousChars::class);
+        $channel->addLast(RestoreXliffTagsContent::class);
+        $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
+        $channel->addLast(LtGtEncode::class);
 
-        /** @var $channel Pipeline */
-        $channel = $this->featureSet->filter( 'fromLayer0ToRawXliff', $channel );
+        /** @type $channel Pipeline */
+        $channel = $this->featureSet->filter('fromLayer0ToRawXliff', $channel);
 
-        return $channel->transform( $segment );
+        return $channel->transform($segment);
     }
 
     /**
@@ -215,37 +222,44 @@ class MateCatFilter extends AbstractFilter {
      * @see getSegmentsController in matecat
      *
      */
-    public function realignIDInLayer1( string $source, string $target ): string {
+    public function realignIDInLayer1(string $source, string $target): string
+    {
         $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
-        preg_match_all( $pattern, $source, $src_tags, PREG_PATTERN_ORDER );
-        preg_match_all( $pattern, $target, $trg_tags, PREG_PATTERN_ORDER );
+        preg_match_all($pattern, $source, $src_tags, PREG_PATTERN_ORDER);
+        preg_match_all($pattern, $target, $trg_tags, PREG_PATTERN_ORDER);
 
-        if ( count( $src_tags[ 0 ] ) != count( $trg_tags[ 0 ] ) ) {
+        if (count($src_tags[0]) != count($trg_tags[0])) {
             return $target; //WRONG NUMBER OF TAGS, in the translation there is a tag mismatch, let the user fix it
         }
 
         $notFoundTargetTags = [];
 
         $start_offset = 0;
-        foreach ( $trg_tags[ 2 ] as $trg_tag_position => $b64 ) {
+        foreach ($trg_tags[2] as $trg_tag_position => $b64) {
+            $src_tag_position = array_search($b64, $src_tags[2], true);
 
-            $src_tag_position = array_search( $b64, $src_tags[ 2 ], true );
-
-            if ( $src_tag_position === false ) {
+            if ($src_tag_position === false) {
                 //this means that the content of a tag is changed in the translation
-                $notFoundTargetTags[ $trg_tag_position ] = $b64;
+                $notFoundTargetTags[$trg_tag_position] = $b64;
                 continue;
             } else {
-                unset( $src_tags[ 2 ][ $src_tag_position ] ); // remove the index to allow array_search to find the equal next one if it is present
+                unset($src_tags[2][$src_tag_position]); // remove the index to allow array_search to find the equal next one if it is present
             }
 
             //replace ONLY ONE element AND the EXACT ONE
-            $tag_position_in_string = strpos( $target, $trg_tags[ 0 ][ $trg_tag_position ], $start_offset );
-            $target                 = (string)substr_replace( $target, $src_tags[ 0 ][ $src_tag_position ], $tag_position_in_string, strlen( $trg_tags[ 0 ][ $trg_tag_position ] ) );
-            $start_offset           = $tag_position_in_string + strlen( $src_tags[ 0 ][ $src_tag_position ] ); // set the next starting point
+            $tag_position_in_string = (int)strpos($target, $trg_tags[0][$trg_tag_position], $start_offset); //force integer, false or 0 is the same for us in this case
+            $target = (string)substr_replace(
+                $target,
+                $src_tags[0][$src_tag_position],
+                $tag_position_in_string,
+                strlen($trg_tags[0][$trg_tag_position])
+            );
+            $start_offset = $tag_position_in_string + strlen(
+                    $src_tags[0][$src_tag_position]
+                ); // set the next starting point
         }
 
-        if ( !empty( $notFoundTargetTags ) ) {
+        if (!empty($notFoundTargetTags)) {
             //do something ?!? how to re-align if they are changed in value and changed in position?
         }
 

@@ -20,7 +20,8 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
  * angle bracket characters, making it suitable for rendering or final storage where
  * these characters are expected.
  */
-class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler {
+class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler
+{
 
     /**
      * Replaces temporary placeholders for less-than and greater-than characters with
@@ -30,11 +31,12 @@ class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler {
      *
      * @return string The transformed string with '<' and '>' characters restored.
      */
-    public function transform( string $segment ): string {
+    public function transform(string $segment): string
+    {
         // Replace the less-than placeholder (e.g., '##LESSTHAN##') with the actual '<' character.
-        $segment = str_replace( ConstantEnum::LTPLACEHOLDER, "<", $segment );
+        $segment = str_replace(ConstantEnum::LTPLACEHOLDER, "<", $segment);
 
         // Replace the greater-than placeholder (e.g., '##GREATERTHAN##') with the actual '>' character.
-        return str_replace( ConstantEnum::GTPLACEHOLDER, ">", $segment );
+        return str_replace(ConstantEnum::GTPLACEHOLDER, ">", $segment);
     }
 }

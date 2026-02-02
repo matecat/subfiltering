@@ -24,7 +24,8 @@ use Matecat\SubFiltering\Commons\Pipeline;
  *
  * @package Matecat\SubFiltering\Filters\Html
  */
-trait CallbacksHandler {
+trait CallbacksHandler
+{
 
     /**
      * @var Pipeline
@@ -38,7 +39,7 @@ trait CallbacksHandler {
      * @param string $buffer The complete HTML tag string (e.g., "<p>", "</div>").
      * @return string The processed result that should replace the tag in the output.
      */
-    abstract protected function _finalizeMarkupTag( string $buffer ): string;
+    abstract protected function _finalizeMarkupTag(string $buffer): string;
 
     /**
      * Handles buffers that are determined to be invalid or malformed markup.
@@ -48,7 +49,7 @@ trait CallbacksHandler {
      * @param string $buffer The invalid or incomplete tag-like string.
      * @return string The processed, safe representation of the buffer.
      */
-    abstract protected function _fixWrongBuffer( string $buffer ): string;
+    abstract protected function _fixWrongBuffer(string $buffer): string;
 
     /**
      * Validates if a given buffer constitutes a well-formed HTML tag.
@@ -58,7 +59,7 @@ trait CallbacksHandler {
      * @return bool A truthy value if the tag is valid, falsy otherwise.
      *                (Note: The return type is string for legacy reasons but is treated as a boolean).
      */
-    abstract protected function _isTagValid( string $buffer ): bool;
+    abstract protected function _isTagValid(string $buffer): bool;
 
     /**
      * Processes a buffer containing plain text found between or outside of HTML tags.
@@ -66,7 +67,7 @@ trait CallbacksHandler {
      * @param string $buffer The segment of plain text.
      * @return string The processed representation of the text.
      */
-    abstract protected function _finalizePlainText( string $buffer ): string;
+    abstract protected function _finalizePlainText(string $buffer): string;
 
     /**
      * Processes the entire content of special blocks, such as HTML comments (`<!-- ... -->`),
@@ -75,15 +76,16 @@ trait CallbacksHandler {
      * @param string $buffer The full content of the script, style, or comment block.
      * @return string The processed representation of the block.
      */
-    abstract protected function _finalizeScriptTag( string $buffer ): string;
+    abstract protected function _finalizeScriptTag(string $buffer): string;
 
     /**
      * Signals to the processing pipeline that the current segment contains HTML markup.
      * This method assumes the class using this trait has a `pipeline` property
      * which is an instance of `Matecat\SubFiltering\Commons\Pipeline`.
      */
-    protected function _setSegmentContainsMarkup() {
-        $this->pipeline->_setSegmentContainsMarkup();
+    protected function _setSegmentContainsMarkup(): void
+    {
+        $this->pipeline->setSegmentContainsMarkup();
     }
 
 }

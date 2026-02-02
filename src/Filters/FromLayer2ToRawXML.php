@@ -19,24 +19,30 @@ use Matecat\SubFiltering\Utils\Utils;
  *
  * @package SubFiltering\Filters
  */
-class FromLayer2ToRawXML extends AbstractHandler {
+class FromLayer2ToRawXML extends AbstractHandler
+{
 
-    public function transform( string $segment ): string {
-
+    /**
+     * @param string $segment
+     * @return string
+     */
+    public function transform(string $segment): string
+    {
         //normal control characters must be converted to entities
         $segment = str_replace(
-                [ "\r\n", "\r", "\n", "\t", "", ],
-                [
-                        '&#13;&#10;',
-                        '&#13;',
-                        '&#10;',
-                        '&#09;',
-                        '&#157;',
-                ], $segment );
+            ["\r\n", "\r", "\n", "\t", "",],
+            [
+                '&#13;&#10;',
+                '&#13;',
+                '&#10;',
+                '&#09;',
+                '&#157;',
+            ],
+            $segment
+        );
 
         // now convert the real &nbsp;
-        return str_replace( ConstantEnum::nbspPlaceholder, Utils::unicode2chr( 0Xa0 ), $segment );
-
+        return str_replace(ConstantEnum::nbspPlaceholder, Utils::unicode2chr(0Xa0), $segment);
     }
 
 }

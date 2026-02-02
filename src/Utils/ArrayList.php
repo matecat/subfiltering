@@ -15,56 +15,68 @@ use DomainException;
 /**
  * A Java like Interface helper for key/value php arrays, with safe access to the elements (no warning for undefined index)
  *
+ * @extends ArrayObject<int, mixed>
+ *
  */
-class ArrayList extends ArrayObject {
+class ArrayList extends ArrayObject implements ListInterface
+{
 
     /**
-     * @param array $list
+     * @param array<int,mixed> $list
      */
-    public function __construct( array $list = [] ) {
-        if ( !empty( $list ) && !Utils::array_is_list( $list ) ) {
-            throw new DomainException( "Invalid list provided" );
+    public function __construct(array $list = [])
+    {
+        if (!empty($list) && !array_is_list($list)) {
+            throw new DomainException("Invalid list provided");
         }
-        parent::__construct( $list );
-    }
-
-    public static function instance( array $list = [] ): ArrayList {
-        return new static( $list );
+        parent::__construct($list);
     }
 
     /**
      * @param $key
      *
-     * @return false|mixed|null
+     * @return mixed|null
      */
-    public function offsetGet( $key ) {
-        if ( $this->offsetExists( $key ) ) {
-            return parent::offsetGet( $key );
+    public function offsetGet($key): mixed
+    {
+        if ($this->offsetExists($key)) {
+            return parent::offsetGet($key);
         }
 
         return null;
     }
 
     /**
+     * @param array<int,mixed> $list
+     * @return ArrayList
+     */
+    public static function instance(array $list = []): ArrayList
+    {
+        return new static($list);
+    }
+
+    /**
      * Returns the element at the specified position in this list.
      *
-     * @param $key
+     * @param int $key
      *
      * @return false|mixed|null the element at the specified position in this list
      */
-    public function get( $key ) {
-        return $this->offsetGet( $key );
+    public function get(int $key): mixed
+    {
+        return $this->offsetGet($key);
     }
 
     /**
      * Appends the specified element to the end of this list.
      *
-     * @param $value
+     * @param mixed $value
      *
      * @return true
      */
-    public function add( $value ): bool {
-        parent::append( $value );
+    public function add(mixed $value): bool
+    {
+        parent::append($value);
         return true;
     }
 

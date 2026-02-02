@@ -14,12 +14,14 @@ use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 /**
  * Used from sources which want not to implement a custom object from this package
  */
-class EmptyFeatureSet implements FeatureSetInterface {
+class EmptyFeatureSet implements FeatureSetInterface
+{
 
     /**
      * @inheritDoc
      */
-    public function filter( $method, $filterable ) {
+    public function filter($method, $filterable): mixed
+    {
         return $filterable;
     }
 }

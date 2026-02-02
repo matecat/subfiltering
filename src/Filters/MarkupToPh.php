@@ -25,7 +25,8 @@ use Matecat\SubFiltering\Filters\Html\HtmlParser;
  * @package SubFiltering
  *
  */
-class MarkupToPh extends AbstractHandler {
+class MarkupToPh extends AbstractHandler
+{
 
     use CallbacksHandler;
 
@@ -38,7 +39,8 @@ class MarkupToPh extends AbstractHandler {
      *
      * @return string The original buffer.
      */
-    protected function _finalizePlainText( string $buffer ): string {
+    protected function _finalizePlainText(string $buffer): string
+    {
         return $buffer;
     }
 
@@ -53,19 +55,19 @@ class MarkupToPh extends AbstractHandler {
      *
      * @return string The generated <ph> placeholder tag.
      */
-    protected function _finalizeMarkupTag( string $buffer ): string {
+    protected function _finalizeMarkupTag(string $buffer): string
+    {
         // Decode attributes by locking < and > first
-        // Because a HTML tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
+        // Because an HTML tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
         // Ex:
         // incoming string: <a href="/users/settings?test=123&amp;amp;foobar=1" target="_blank">
         // this should be: <a href="/users/settings?test=123&amp;foobar=1" target="_blank"> with only one ampersand encoding
         //
-        $buffer = str_replace( [ '<', '>' ], [ '#_lt_#', '#_gt_#' ], $buffer );
-        $buffer = html_entity_decode( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8' );
-        $buffer = str_replace( [ '#_lt_#', '#_gt_#' ], [ '<', '>' ], $buffer );
+        $buffer = str_replace(['<', '>'], ['#_lt_#', '#_gt_#'], $buffer);
+        $buffer = html_entity_decode($buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
+        $buffer = str_replace(['#_lt_#', '#_gt_#'], ['<', '>'], $buffer);
 
-        return $this->_finalizeTag( $buffer );
-
+        return $this->_finalizeTag($buffer);
     }
 
     /**
@@ -90,10 +92,11 @@ class MarkupToPh extends AbstractHandler {
      *
      * @return string The fixed string with escaped angle brackets.
      */
-    protected function _fixWrongBuffer( string $buffer ): string {
-        $buffer = str_replace( "<", "&lt;", $buffer );
+    protected function _fixWrongBuffer(string $buffer): string
+    {
+        $buffer = str_replace("<", "&lt;", $buffer);
 
-        return str_replace( ">", "&gt;", $buffer );
+        return str_replace(">", "&gt;", $buffer);
     }
 
     /**
@@ -103,8 +106,9 @@ class MarkupToPh extends AbstractHandler {
      *
      * @return string The generated <ph> placeholder tag.
      */
-    protected function _finalizeScriptTag( string $buffer ): string {
-        return $this->_finalizeTag( $buffer );
+    protected function _finalizeScriptTag(string $buffer): string
+    {
+        return $this->_finalizeTag($buffer);
     }
 
     /**
@@ -119,15 +123,15 @@ class MarkupToPh extends AbstractHandler {
      *
      * @return bool Returns true if the tag is considered valid; false otherwise.
      */
-    protected function _isTagValid( string $buffer ): bool {
-
+    protected function _isTagValid(string $buffer): bool
+    {
         // This is a safeguard against misinterpreting partially processed strings.
         // During filtering, inner tags might be replaced by placeholders (e.g., ##LESSTHAN##).
         // If such placeholders exist within what looks like a tag, it means the tag's
         // content is not yet restored, so we must not treat it as a valid, final tag.
         // For example, an original string like '&lt;a href="<x/>"&gt;' could become
         // '<a href="##LESSTHAN##x/##GREATERTHAN##">', which should not be converted to a <ph> tag.
-        if ( strpos( $buffer, ConstantEnum::LTPLACEHOLDER ) !== false || strpos( $buffer, ConstantEnum::GTPLACEHOLDER ) !== false ) {
+        if (str_contains($buffer, ConstantEnum::LTPLACEHOLDER) || str_contains($buffer, ConstantEnum::GTPLACEHOLDER)) {
             return false;
         }
 
@@ -188,7 +192,6 @@ class MarkupToPh extends AbstractHandler {
         }
 
         return false;
-
     }
 
     /**
@@ -201,16 +204,16 @@ class MarkupToPh extends AbstractHandler {
      *
      * @return string The transformed segment.
      */
-    public function transform( string $segment ): string {
-
+    public function transform(string $segment): string
+    {
         // restore < e >
-        $segment = str_replace( "&lt;", "<", $segment );
-        $segment = str_replace( "&gt;", ">", $segment );
+        $segment = str_replace("&lt;", "<", $segment);
+        $segment = str_replace("&gt;", ">", $segment);
 
         $parser = new HtmlParser();
-        $parser->registerCallbacksHandler( $this );
+        $parser->registerCallbacksHandler($this);
 
-        return $parser->transform( $segment );
+        return $parser->transform($segment);
     }
 
 }

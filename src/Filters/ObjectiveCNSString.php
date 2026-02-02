@@ -17,7 +17,6 @@ namespace Matecat\SubFiltering\Filters;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
-use Matecat\SubFiltering\Filters\Sprintf\SprintfLocker;
 
 /**
  * Handles Objective-C NSString placeholders within segments for processing.
@@ -29,35 +28,27 @@ use Matecat\SubFiltering\Filters\Sprintf\SprintfLocker;
  *
  * Extends the AbstractHandler to use its pipeline and processing capabilities.
  */
-class ObjectiveCNSString extends AbstractHandler {
+class ObjectiveCNSString extends AbstractHandler
+{
     /**
      * @see https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html#//apple_ref/doc/uid/TP40004265-SW2
      *
      * @inheritDoc
      */
-    public function transform( string $segment ): string {
-
-//        $sprintfLocker = new SprintfLocker( $this->pipeline->getSource(), $this->pipeline->getTarget() );
-
-//         placeholding
-//        $segment = $sprintfLocker->lock( $segment );
-
-
-        preg_match_all( '/%\d+\$@|%@/', $segment, $html, PREG_SET_ORDER );
-        foreach ( $html as $percentNumberSnailVariable ) {
-
+    public function transform(string $segment): string
+    {
+        preg_match_all('/%\d+\$@|%@/', $segment, $html, PREG_SET_ORDER);
+        foreach ($html as $percentNumberSnailVariable) {
             $segment = preg_replace(
-                    '/' . preg_quote( $percentNumberSnailVariable[ 0 ], '/' ) . '/',
-                    '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:' . base64_encode( $percentNumberSnailVariable[ 0 ] ) . '"/>',
-                    $segment,
-                    1
+                '/' . preg_quote($percentNumberSnailVariable[0], '/') . '/',
+                '<ph id="' . $this->getPipeline()->getNextId(
+                ) . '" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:' . base64_encode(
+                    $percentNumberSnailVariable[0]
+                ) . '"/>',
+                $segment,
+                1
             );
         }
-
-        //revert placeholding
-//        return $sprintfLocker->unlock( $segment );
-
         return $segment;
-
     }
 }

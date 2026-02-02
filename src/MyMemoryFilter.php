@@ -4,10 +4,10 @@ namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
+use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 
 /**
  * A specific filter implementation tailored for MyMemory services.
@@ -22,7 +22,8 @@ use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
  *
  * @package Matecat\SubFiltering
  */
-class MyMemoryFilter extends AbstractFilter {
+class MyMemoryFilter extends AbstractFilter
+{
 
     /**
      * Converts a segment from Layer 0 format to Layer 1 format, applying an optional client-specific pipeline configuration.
@@ -30,21 +31,20 @@ class MyMemoryFilter extends AbstractFilter {
      * This method processes the given segment through a transformation pipeline, which may be customized
      * based on the provided Client ID (`cid`) to handle specific placeholder or syntax rules.
      *
-     * @param string      $segment The segment in Layer 0 format to be transformed.
-     * @param string|null $cid     An optional Client ID for customizing the transformation pipeline. If provided.
+     * @param string $segment The segment in Layer 0 format to be transformed.
+     * @param string|null $cid An optional Client ID for customizing the transformation pipeline. If provided.
      *                             this adjusts the pipeline to account for client-specific rules.
      *
      * @return string The transformed segment in Layer 1 format.
      */
-    public function fromLayer0ToLayer1( string $segment, ?string $cid = null ): string {
+    public function fromLayer0ToLayer1(string $segment, ?string $cid = null): string
+    {
+        $channel = new Pipeline($this->source, $this->target, $this->dataRefMap);
 
-        $channel = new Pipeline( $this->source, $this->target, $this->dataRefMap );
-
-        $this->configureFromLayer0ToLayer1Pipeline( $channel, $cid );
+        $this->configureFromLayer0ToLayer1Pipeline($channel, $cid);
 
         // Process the segment and return the result.
-        return $channel->transform( $segment );
-
+        return $channel->transform($segment);
     }
 
     /**
@@ -54,45 +54,43 @@ class MyMemoryFilter extends AbstractFilter {
      * `fromLayer0ToLayer1Pipeline` based on the provided Client ID (`cid`). This allows for
      * tailored placeholder handling for different clients before the main transformation occurs.
      *
-     * @param Pipeline    $channel
-     * @param string|null $cid     An optional Client ID to trigger specific filtering rules:
+     * @param Pipeline $channel
+     * @param string|null $cid An optional Client ID to trigger specific filtering rules:
      *                             - 'airbnb': Adds `SmartCounts` handler for advanced variable processing.
      *                             - 'roblox': Adds `SingleCurlyBracketsToPh` handler for `{placeholder}` style variables.
      *                             - 'familysearch': Removes `TwigToPh` and adds `SingleCurlyBracketsToPh`.
      *
      */
-    protected function configureFromLayer0ToLayer1Pipeline( Pipeline $channel, ?string $cid = null ): void {
+    protected function configureFromLayer0ToLayer1Pipeline(Pipeline $channel, ?string $cid = null): void
+    {
+        parent::configureFromLayer0ToLayer1Pipeline($channel);
 
-        parent::configureFromLayer0ToLayer1Pipeline( $channel );
-
-        switch ( $cid ) {
+        switch ($cid) {
             case 'airbnb':
                 // For Airbnb, add the SmartCounts handler to process specific variable syntax
                 // that looks like `%{smart_count}`.
-                if ( !$channel->contains( SmartCounts::class ) ) {
-                    $channel->addAfter( PercentDoubleCurlyBrackets::class, SmartCounts::class );
+                if (!$channel->contains(SmartCounts::class)) {
+                    $channel->addAfter(PercentDoubleCurlyBrackets::class, SmartCounts::class);
                 }
                 break;
 
             case 'roblox':
                 // For Roblox, add a handler to convert single curly bracket placeholders
                 // (e.g., `{placeholder}`) into standard <ph> tags.
-                if ( !$channel->contains( SingleCurlyBracketsToPh::class ) ) {
-                    $channel->addAfter( DollarCurlyBrackets::class, SingleCurlyBracketsToPh::class );
+                if (!$channel->contains(SingleCurlyBracketsToPh::class)) {
+                    $channel->addAfter(DollarCurlyBrackets::class, SingleCurlyBracketsToPh::class);
                 }
                 break;
 
             case 'familysearch':
                 // For FamilySearch, customize the pipeline by removing Twig support and adding
                 // support for single curly bracket placeholders.
-                if ( !$channel->contains( SingleCurlyBracketsToPh::class ) ) {
-                    $channel->remove( TwigToPh::class );
-                    $channel->addAfter( DollarCurlyBrackets::class, SingleCurlyBracketsToPh::class );
+                if (!$channel->contains(SingleCurlyBracketsToPh::class)) {
+                    $channel->remove(TwigToPh::class);
+                    $channel->addAfter(DollarCurlyBrackets::class, SingleCurlyBracketsToPh::class);
                 }
                 break;
         }
-
-
     }
 
 }

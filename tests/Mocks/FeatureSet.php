@@ -15,11 +15,11 @@ class FeatureSet implements FeatureSetInterface
     /**
      * FeatureSet constructor.
      *
-     * @param array $features
+     * @param BaseFeature[] $features
      */
-    public function __construct( array $features = null )
+    public function __construct(array $features = null)
     {
-        if(!empty($features)){
+        if (!empty($features)) {
             $this->features = $features;
         }
     }
@@ -27,17 +27,17 @@ class FeatureSet implements FeatureSetInterface
     /**
      * @inheritDoc
      */
-    public function filter( $method, $filterable )
+    public function filter(string $method, mixed $filterable): mixed
     {
-        $args = array_slice( func_get_args(), 1 );
+        $args = array_slice(func_get_args(), 1);
 
-        foreach ( $this->features as $feature ) {
+        foreach ($this->features as $feature) {
             /* @var $feature BaseFeature */
 
-            if ( !is_null( $feature ) ) {
-                if ( method_exists( $feature, $method ) ) {
-                    array_shift( $args );
-                    array_unshift( $args, $filterable );
+            if (!is_null($feature)) {
+                if (method_exists($feature, $method)) {
+                    array_shift($args);
+                    array_unshift($args, $filterable);
 
                     /**
                      * There may be the need to avoid a filter to be executed before or after other ones.
@@ -51,7 +51,7 @@ class FeatureSet implements FeatureSetInterface
                      *
                      */
 
-                    $filterable = call_user_func_array( [ $feature, $method ], $args );
+                    $filterable = call_user_func_array([$feature, $method], $args);
                 }
             }
         }

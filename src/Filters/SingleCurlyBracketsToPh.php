@@ -13,7 +13,8 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
-class SingleCurlyBracketsToPh extends AbstractHandler {
+class SingleCurlyBracketsToPh extends AbstractHandler
+{
 
     /**
      * TestSet:
@@ -32,17 +33,21 @@ class SingleCurlyBracketsToPh extends AbstractHandler {
      *
      * @return string
      */
-    public function transform( string $segment ): string {
-        preg_match_all( '/{[^<>{} ]+?}/', $segment, $html, PREG_SET_ORDER );
-        foreach ( $html as $pos => $twig_variable ) {
-            //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
-            if ( !strstr( $twig_variable[ 0 ], ConstantEnum::GTPLACEHOLDER ) ) {
+    public function transform(string $segment): string
+    {
+        preg_match_all('/{[^<>{} ]+?}/', $segment, $html, PREG_SET_ORDER);
+        foreach ($html as $twig_variable) {
+            //check if inside the variable there is a tag because in this case shouldn't replace the content with a PH tag
+            if (!strstr($twig_variable[0], ConstantEnum::GTPLACEHOLDER)) {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
-                        '/' . preg_quote( $twig_variable[ 0 ], '/' ) . '/',
-                        '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::CURLY_BRACKETS . '" equiv-text="base64:' . base64_encode( $twig_variable[ 0 ] ) . '"/>',
-                        $segment,
-                        1
+                    '/' . preg_quote($twig_variable[0], '/') . '/',
+                    '<ph id="' . $this->getPipeline()->getNextId(
+                    ) . '" ctype="' . CTypeEnum::CURLY_BRACKETS . '" equiv-text="base64:' . base64_encode(
+                        $twig_variable[0]
+                    ) . '"/>',
+                    $segment,
+                    1
                 );
             }
         }

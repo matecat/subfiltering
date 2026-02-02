@@ -5,25 +5,30 @@ namespace Matecat\SubFiltering\Filters;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
-class SmartCounts extends AbstractHandler {
+class SmartCounts extends AbstractHandler
+{
     /**
-     * @param $segment
+     * @param string $segment
      *
      * @return string
      */
-    public function transform( string $segment ): string {
-        /*
+    public function transform(string $segment): string
+    {
+        /**
          * Examples:
          * - [AIRBNB] Reminder: Reply to %{guest}’s inquiry. |||| [AIRBNB] Reminder: Reply to %{guest}’s inquiry.
          */
-        preg_match_all( '/(\|\|\|\|)/', $segment, $html, PREG_SET_ORDER );
-        foreach ( $html as $pos => $variable ) {
+        preg_match_all('/(\|\|\|\|)/', $segment, $html, PREG_SET_ORDER);
+        foreach ($html as $variable) {
             //replace subsequent elements excluding already encoded
             $segment = preg_replace(
-                    '/' . preg_quote( $variable[ 0 ], '/' ) . '/',
-                    '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . CTypeEnum::SMART_COUNT . '" equiv-text="base64:' . base64_encode( $variable[ 0 ] ) . "\"/>",
-                    $segment,
-                    1
+                '/' . preg_quote($variable[0], '/') . '/',
+                '<ph id="' . $this->getPipeline()->getNextId(
+                ) . '" ctype="' . CTypeEnum::SMART_COUNT . '" equiv-text="base64:' . base64_encode(
+                    $variable[0]
+                ) . "\"/>",
+                $segment,
+                1
             );
         }
 

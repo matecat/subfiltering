@@ -9,6 +9,7 @@
 
 namespace Matecat\SubFiltering\Utils;
 
+use ArrayObject;
 use DOMException;
 use Exception;
 use Matecat\SubFiltering\Enum\CTypeEnum;
@@ -16,7 +17,19 @@ use Matecat\XmlParser\Exception\InvalidXmlException;
 use Matecat\XmlParser\Exception\XmlParsingException;
 use Matecat\XmlParser\XmlParser;
 
-class DataRefReplacer {
+/**
+ * @phpstan-type NodeShape object{
+ *   attributes: array<string,string>,
+ *   has_children: bool|null,
+ *   inner_html: ArrayObject <int,object>|object[],
+ *   node: string,
+ *   self_closed: bool|null,
+ *   tagName: string,
+ *   text: ?string
+ * }
+ */
+class DataRefReplacer
+{
     /**
      * @var Map
      */
@@ -25,10 +38,11 @@ class DataRefReplacer {
     /**
      * DataRefReplacer constructor.
      *
-     * @param array $map
+     * @param array<string,string> $map
      */
-    public function __construct( array $map = [] ) {
-        $this->map = Map::instance( $this->sanitizeMap( $map ) );
+    public function __construct(array $map = [])
+    {
+        $this->map = Map::instance($this->sanitizeMap($map));
     }
 
     /**
@@ -42,48 +56,44 @@ class DataRefReplacer {
      *
      * @return string
      */
-    public function replace( string $string ): string {
-
+    public function replace(string $string): string
+    {
         // if the map is empty
         // or the string has not a dataRef attribute
         // return string as is
-        if ( $this->map->isEmpty() || !$this->hasAnyDataRefAttribute( $string ) ) {
+        if ($this->map->isEmpty() || !$this->hasAnyDataRefAttribute($string)) {
             return $string;
         }
 
         // try not to throw exception for wrong segments with opening tags and no closing
         try {
 
-            $html = XmlParser::parse( $string, true );
+            /** @var NodeShape[] $html */
+            $html = XmlParser::parse($string, true);
 
             $dataRefEndMap = new ArrayList();
 
-            foreach ( $html as $node ) {
-
+            foreach ($html as $node) {
                 // 1. Replace <ph>|<sc>|<ec> tags
-                $string = $this->recursiveTransformDataRefToPhTag( $node, $string );
+                $string = $this->recursiveTransformDataRefToPhTag($node, $string);
 
                 // 2. Replace self-closed <pc dataRefStart="xyz" /> tags
-                $string = $this->recursiveReplaceSelfClosedPcTags( $node, $string );
+                $string = $this->recursiveReplaceSelfClosedPcTags($node, $string);
 
                 // 3. Build the DataRefEndMap needed by replaceClosingPcTags function
                 // (needed for correct handling of </pc> closing tags)
                 // make this inline with one foreach cycle
-                $this->extractDataRefMapRecursively( $node, $string, $dataRefEndMap );
-
+                $this->extractDataRefMapRecursively($node, $string, $dataRefEndMap);
             }
 
             // 4. replace pc tags
-            $string = $this->replaceOpeningPcTags( $string );
-            $string = $this->replaceClosingPcTags( $string, $dataRefEndMap );
-
-        } catch ( Exception $ignore ) {
+            $string = $this->replaceOpeningPcTags($string);
+            $string = $this->replaceClosingPcTags($string, $dataRefEndMap);
+        } catch (Exception) {
             // if something fails here, do not throw an exception and return the original string instead
-//            var_dump( $ignore );
         } finally {
             return $string;
         }
-
     }
 
     /**
@@ -91,8 +101,9 @@ class DataRefReplacer {
      *
      * @return bool
      */
-    private function hasAnyDataRefAttribute( string $string ): bool {
-        return (bool)preg_match( '/(dataRef|dataRefStart|dataRefEnd)=[\'"].*?[\'"]/', $string );
+    private function hasAnyDataRefAttribute(string $string): bool
+    {
+        return (bool)preg_match('/(dataRef|dataRefStart|dataRefEnd)=[\'"].*?[\'"]/', $string);
     }
 
     /**
@@ -103,23 +114,21 @@ class DataRefReplacer {
      *
      * If there is no id tag, it will be copied from the dataRef attribute
      *
-     * @param object $node
+     * @param NodeShape $node
      * @param string $string
      *
      * @return string
      */
-    private function recursiveTransformDataRefToPhTag( object $node, string $string ): string {
-
-        if ( $node->has_children ) {
-
-            foreach ( $node->inner_html as $childNode ) {
-                $string = $this->recursiveTransformDataRefToPhTag( $childNode, $string );
+    private function recursiveTransformDataRefToPhTag(object $node, string $string): string
+    {
+        if ($node->has_children) {
+            foreach ($node->inner_html as $childNode) {
+                /** @var NodeShape $childNode */
+                $string = $this->recursiveTransformDataRefToPhTag($childNode, $string);
             }
-
         } else {
-
             // accept only those tags
-            switch ( $node->tagName ) {
+            switch ($node->tagName) {
                 case 'ph':
                     $ctype = CTypeEnum::PH_DATA_REF;
                     break;
@@ -134,22 +143,21 @@ class DataRefReplacer {
             }
 
             // if isset a value in the map, proceed with conversion, otherwise skip
-            $attributesMap = Map::instance( $node->attributes );
-            if ( !$this->map->get( $attributesMap->get( 'dataRef' ) ) ) {
+            $attributesMap = Map::instance($node->attributes);
+            if (!$this->map->get($attributesMap->get('dataRef'))) {
                 return $string;
             }
 
-            $dataRefName = $node->attributes[ 'dataRef' ];   // map identifier. Eg: source1
+            $dataRefName = $node->attributes['dataRef'];   // map identifier. Eg: source1
 
             return $this->replaceNewTagString(
-                    $node->node,
-                    $attributesMap->getOrDefault( 'id', $dataRefName ),
-                    $this->map->getOrDefault( $node->attributes[ 'dataRef' ], 'NULL' ),
-                    $ctype,
-                    $string,
-                    null
+                $node->node,
+                $attributesMap->getOrDefault('id', $dataRefName),
+                $this->map->getOrDefault($node->attributes['dataRef'], 'NULL'),
+                $ctype,
+                $string,
+                null
             );
-
         }
 
         return $string;
@@ -158,15 +166,15 @@ class DataRefReplacer {
     /**
      * Check if values in the map are null or an empty string, in that case, convert them to NULL string
      *
-     * @param array $map
+     * @param array<string,?string> $map
      *
-     * @return array
+     * @return array<string,?string>
      */
-    private function sanitizeMap( array $map ): array {
-
-        foreach ( $map as $name => $value ) {
-            if ( is_null( $value ) || $value === '' ) {
-                $map[ $name ] = 'NULL';
+    private function sanitizeMap(array $map): array
+    {
+        foreach ($map as $name => $value) {
+            if (is_null($value) || $value === '') {
+                $map[$name] = 'NULL';
             }
         }
 
@@ -174,7 +182,7 @@ class DataRefReplacer {
     }
 
     /**
-     * @param object $node
+     * @param NodeShape $node
      * @param string $string
      *
      * @return string
@@ -182,49 +190,44 @@ class DataRefReplacer {
      * @throws InvalidXmlException
      * @throws XmlParsingException
      */
-    private function recursiveReplaceSelfClosedPcTags( object $node, string $string ): string {
-
-        if ( $node->has_children ) {
-
-            foreach ( $node->inner_html as $childNode ) {
-                $string = $this->recursiveReplaceSelfClosedPcTags( $childNode, $string );
+    private function recursiveReplaceSelfClosedPcTags(object $node, string $string): string
+    {
+        if ($node->has_children) {
+            foreach ($node->inner_html as $childNode) {
+                /** @var NodeShape $childNode */
+                $string = $this->recursiveReplaceSelfClosedPcTags($childNode, $string);
             }
+        } elseif ($node->tagName == 'pc' && $node->self_closed === true) {
+            $attributesMap = Map::instance($node->attributes);
 
-        } elseif ( $node->tagName == 'pc' && $node->self_closed === true ) {
-
-            $attributesMap = Map::instance( $node->attributes );
-
-            if ( $dataRefStartValue = $this->map->get( $node->attributes[ 'dataRefStart' ] ) ) {
-
+            if ($dataRefStartValue = $this->map->get($node->attributes['dataRefStart'])) {
                 $string = $this->replaceNewTagString(
-                        $node->node,
-                        $attributesMap->get( 'id' ),
-                        $dataRefStartValue,
-                        CTypeEnum::PC_SELF_CLOSE_DATA_REF,
-                        $string
+                    $node->node,
+                    $attributesMap->get('id'),
+                    $dataRefStartValue,
+                    CTypeEnum::PC_SELF_CLOSE_DATA_REF,
+                    $string
                 );
-
             }
-
         }
 
         return $string;
-
     }
 
     /**
-     * Extract (recursively) the dataRefEnd map from a single node
+     * (Recursively) extract the dataRefEnd map from a single node
      *
-     * @param object    $node
-     * @param string    $completeString
+     * @param object $node
+     * @param string $completeString
      * @param ArrayList $dataRefEndMap
      */
-    private function extractDataRefMapRecursively( object $node, string $completeString, ArrayList $dataRefEndMap ) {
-
+    private function extractDataRefMapRecursively(object $node, string $completeString, ArrayList $dataRefEndMap): void
+    {
         // we have to build the map for the closing pc tag, so get the children first
-        if ( $node->has_children ) {
-            foreach ( $node->inner_html as $nestedNode ) {
-                $this->extractDataRefMapRecursively( $nestedNode, $completeString, $dataRefEndMap );
+        /** @var NodeShape $node */
+        if ($node->has_children) {
+            foreach ($node->inner_html as $nestedNode) {
+                $this->extractDataRefMapRecursively($nestedNode, $completeString, $dataRefEndMap);
             }
         }
 
@@ -237,20 +240,17 @@ class DataRefReplacer {
         //   becomes
         // <pc id="source5" dataRefStart="source5"></pc>
         //
-        $isATagPairWithEmptyTextNode = strpos( $completeString, substr( $node->node, 0, -2 ) . '></pc>' ) !== false;
+        $isATagPairWithEmptyTextNode = str_contains($completeString, substr($node->node, 0, -2) . '></pc>');
 
-        if ( $node->tagName === 'pc' && ( $node->self_closed === false || $isATagPairWithEmptyTextNode ) ) {
-
-            $attributesMap = Map::instance( $node->attributes );
-            $dataRefEnd    = $attributesMap->getOrDefault( 'dataRefEnd', $attributesMap->get( 'dataRefStart' ) );
+        if ($node->tagName === 'pc' && ($node->self_closed === false || $isATagPairWithEmptyTextNode)) {
+            $attributesMap = Map::instance($node->attributes);
+            $dataRefEnd = $attributesMap->getOrDefault('dataRefEnd', $attributesMap->get('dataRefStart'));
 
             $dataRefEndMap[] = [
-                    'id'         => $attributesMap->get( 'id' ),
-                    'dataRefEnd' => $dataRefEnd,
+                'id' => $attributesMap->get('id'),
+                'dataRefEnd' => $dataRefEnd,
             ];
-
         }
-
     }
 
     /**
@@ -263,35 +263,32 @@ class DataRefReplacer {
      * @throws InvalidXmlException
      * @throws XmlParsingException
      */
-    private function replaceOpeningPcTags( string $string ): string {
+    private function replaceOpeningPcTags(string $string): string
+    {
+        preg_match_all('|<pc ([^>/]+?)>|iu', $string, $openingPcMatches);
 
-        preg_match_all( '|<pc ([^>/]+?)>|iu', $string, $openingPcMatches );
-
-        foreach ( $openingPcMatches[ 0 ] as $match ) {
-
-            $node = XmlParser::parse( $match . '</pc>', true )[ 0 ]; // add a closing tag to not break XML integrity
+        foreach ($openingPcMatches[0] as $match) {
+            $node = XmlParser::parse($match . '</pc>', true)[0]; // add a closing tag to not break XML integrity
 
             // CASE 1 - Missing `dataRefStart`
-            if ( isset( $node->attributes[ 'dataRefEnd' ] ) && !isset( $node->attributes[ 'dataRefStart' ] ) ) {
-                $node->attributes[ 'dataRefStart' ] = $node->attributes[ 'dataRefEnd' ];
+            if (isset($node->attributes['dataRefEnd']) && !isset($node->attributes['dataRefStart'])) {
+                $node->attributes['dataRefStart'] = $node->attributes['dataRefEnd'];
             }
 
             // CASE 2 - Missing `dataRefEnd`
-            if ( isset( $node->attributes[ 'dataRefStart' ] ) && !isset( $node->attributes[ 'dataRefEnd' ] ) ) {
-                $node->attributes[ 'dataRefEnd' ] = $node->attributes[ 'dataRefStart' ];
+            if (isset($node->attributes['dataRefStart']) && !isset($node->attributes['dataRefEnd'])) {
+                $node->attributes['dataRefEnd'] = $node->attributes['dataRefStart'];
             }
 
-            if ( isset( $node->attributes[ 'dataRefStart' ] ) ) {
-
-                $attributesMap = Map::instance( $node->attributes );
-                $string        = $this->replaceNewTagString(
-                        $match,
-                        $attributesMap->get( 'id' ),
-                        $this->map->getOrDefault( $node->attributes[ 'dataRefStart' ], 'NULL' ),
-                        CTypeEnum::PC_OPEN_DATA_REF,
-                        $string
+            if (isset($node->attributes['dataRefStart'])) {
+                $attributesMap = Map::instance($node->attributes);
+                $string = $this->replaceNewTagString(
+                    $match,
+                    $attributesMap->get('id'),
+                    $this->map->getOrDefault($node->attributes['dataRefStart'], 'NULL'),
+                    CTypeEnum::PC_OPEN_DATA_REF,
+                    $string
                 );
-
             }
         }
 
@@ -302,43 +299,38 @@ class DataRefReplacer {
      * Replace closing </pc> tags with the correct reference in the $string
      * thanks to $dataRefEndMap
      *
-     * @param string    $string
+     * @param string $string
      * @param ArrayList $dataRefEndMap
      *
      * @return string
      */
-    private function replaceClosingPcTags( string $string, ArrayList $dataRefEndMap ): string {
-
-        preg_match_all( '|</pc>|iu', $string, $closingPcMatches, PREG_OFFSET_CAPTURE );
+    private function replaceClosingPcTags(string $string, ArrayList $dataRefEndMap): string
+    {
+        preg_match_all('|</pc>|iu', $string, $closingPcMatches, PREG_OFFSET_CAPTURE);
         $delta = 0;
 
-        foreach ( $closingPcMatches[ 0 ] as $index => $match ) {
-
-            $offset = $match[ 1 ];
+        foreach ($closingPcMatches[0] as $index => $match) {
+            $offset = $match[1];
             $length = 5; // strlen of '</pc>'
 
-            $attr = $dataRefEndMap->get( $index );
-            if ( !empty( $attr ) && isset( $attr[ 'dataRefEnd' ] ) ) {
-
+            $attr = $dataRefEndMap->get($index);
+            if (!empty($attr) && isset($attr['dataRefEnd'])) {
                 // conversion for opening <pc> tag
                 $completeTag = $this->getNewTagString(
-                        '</pc>',
-                        $attr[ 'id' ],
-                        $this->map->getOrDefault( $attr[ 'dataRefEnd' ], 'NULL' ),
-                        CTypeEnum::PC_CLOSE_DATA_REF,
-                        '_2'
+                    '</pc>',
+                    $attr['id'],
+                    $this->map->getOrDefault($attr['dataRefEnd'], 'NULL'),
+                    CTypeEnum::PC_CLOSE_DATA_REF,
+                    '_2'
                 );
 
-                $realOffset = ( $delta === 0 ) ? $offset : ( $offset + $delta );
-                $string     = (string)substr_replace( $string, $completeTag, $realOffset, $length );
-                $delta      = $delta + strlen( $completeTag ) - $length;
-
+                $realOffset = ($delta === 0) ? $offset : ($offset + $delta);
+                $string = (string)substr_replace($string, $completeTag, $realOffset, $length);
+                $delta = $delta + strlen($completeTag) - $length;
             }
-
         }
 
         return $string;
-
     }
 
     /**
@@ -349,83 +341,100 @@ class DataRefReplacer {
      * @throws InvalidXmlException
      * @throws XmlParsingException
      */
-    public function restore( string $string ): string {
-
+    public function restore(string $string): string
+    {
         // if the map is empty return string as is
-        if ( $this->map->isEmpty() ) {
+        if ($this->map->isEmpty()) {
             return $string;
         }
 
-        $html = XmlParser::parse( $string, true );
+        /** @var NodeShape[] $html */
+        $html = XmlParser::parse($string, true);
 
-        foreach ( $html as $node ) {
-            $string = $this->recursiveRestoreOriginalTags( $node, $string );
+        foreach ($html as $node) {
+            $string = $this->recursiveRestoreOriginalTags($node, $string);
         }
 
         return $string;
     }
 
     /**
-     * @param object $node
+     * @param NodeShape $node
      * @param string $string
      *
      * @return string
      */
-    private function recursiveRestoreOriginalTags( object $node, string $string ): string {
-
-        if ( $node->has_children ) {
-
-            foreach ( $node->inner_html as $childNode ) {
-                $string = $this->recursiveRestoreOriginalTags( $childNode, $string );
+    private function recursiveRestoreOriginalTags(object $node, string $string): string
+    {
+        if ($node->has_children) {
+            foreach ($node->inner_html as $childNode) {
+                /** @var NodeShape $childNode */
+                $string = $this->recursiveRestoreOriginalTags($childNode, $string);
             }
-
         } else {
+            $nodeAttributesMap = Map::instance($node->attributes);
 
-            $nodeAttributesMap = Map::instance( $node->attributes );
-
-            if ( !$nodeAttributesMap->get( 'x-orig' ) ) {
+            if (!$nodeAttributesMap->get('x-orig')) {
                 return $string;
             }
 
-            $cType = $nodeAttributesMap->get( 'ctype' );
+            $cType = $nodeAttributesMap->get('ctype');
 
-            if ( CTypeEnum::isLayer2Constant( $cType ?? '' ) ) {
-                return preg_replace( '/' . preg_quote( $node->node, '/' ) . '/', base64_decode( $nodeAttributesMap->get( 'x-orig' ) ), $string, 1 );
+            if (CTypeEnum::isLayer2Constant($cType ?? '')) {
+                return preg_replace(
+                    '/' . preg_quote($node->node, '/') . '/',
+                    base64_decode($nodeAttributesMap->get('x-orig')),
+                    $string,
+                    1
+                );
             }
-
         }
 
         return $string;
-
     }
 
     /**
-     * @param string      $actualNodeString
+     * @param string $actualNodeString
      * @param string|null $id
-     * @param string      $dataRefValue
-     * @param string      $ctype
+     * @param string $dataRefValue
+     * @param string $ctype
      * @param string|null $upCountIdValue
      *
      * @return string
      */
-    private function getNewTagString( string $actualNodeString, ?string $id, string $dataRefValue, string $ctype, ?string $upCountIdValue = null ): string {
+    private function getNewTagString(
+        string $actualNodeString,
+        ?string $id,
+        string $dataRefValue,
+        string $ctype,
+        ?string $upCountIdValue = null
+    ): string {
+        $newTag = ['<ph'];
 
-        $newTag = [ '<ph' ];
-
-        if ( isset( $id ) ) {
+        if (isset($id)) {
             $newTag[] = 'id="' . $id . $upCountIdValue . '"';
         }
 
         $newTag[] = 'ctype="' . $ctype . '"';
-        $newTag[] = 'equiv-text="base64:' . base64_encode( $dataRefValue ) . '"';
-        $newTag[] = 'x-orig="' . base64_encode( $actualNodeString ) . '"';
+        $newTag[] = 'equiv-text="base64:' . base64_encode($dataRefValue) . '"';
+        $newTag[] = 'x-orig="' . base64_encode($actualNodeString) . '"';
 
-        return implode( " ", $newTag ) . '/>';
-
+        return implode(" ", $newTag) . '/>';
     }
 
-    private function replaceNewTagString( $actualNodeString, $id, $dataRefValue, $ctype, $originalString, $upCountIdValue = '_1' ) {
-        return str_replace( $actualNodeString, $this->getNewTagString( $actualNodeString, $id, $dataRefValue, $ctype, $upCountIdValue ), $originalString );
+    private function replaceNewTagString(
+        string $actualNodeString,
+        string $id,
+        string $dataRefValue,
+        string $ctype,
+        string $originalString,
+        ?string $upCountIdValue = '_1'
+    ): string {
+        return (string)str_replace(
+            $actualNodeString,
+            $this->getNewTagString($actualNodeString, $id, $dataRefValue, $ctype, $upCountIdValue),
+            $originalString
+        );
     }
 
 }

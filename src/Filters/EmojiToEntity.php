@@ -12,10 +12,16 @@ namespace Matecat\SubFiltering\Filters;
 use Matecat\EmojiParser\Emoji;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 
-class EmojiToEntity extends AbstractHandler {
+class EmojiToEntity extends AbstractHandler
+{
 
-    public function transform( string $segment ): string {
-        return Emoji::toEntity( $segment );
+    /**
+     * @param string $segment
+     * @return string
+     */
+    public function transform(string $segment): string
+    {
+        return Emoji::toEntity($segment);
     }
 
 }

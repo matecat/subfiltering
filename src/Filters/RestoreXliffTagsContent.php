@@ -13,21 +13,24 @@ namespace Matecat\SubFiltering\Filters;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 
-class RestoreXliffTagsContent extends AbstractHandler {
+class RestoreXliffTagsContent extends AbstractHandler
+{
+    /**
+     * @param string $segment
+     * @return string
+     */
+    public function transform(string $segment): string
+    {
+        //base64 decode of the tag content to avoid unwanted manipulation
+        return preg_replace_callback(
+            '/' . ConstantEnum::LTPLACEHOLDER . '(.*?)' . ConstantEnum::GTPLACEHOLDER . '/u',
+            function ($matches) {
+                $_match = base64_decode($matches[1]);
 
-    public function transform( string $segment ): string {
-
-        $segment = preg_replace_callback( '/' . ConstantEnum::LTPLACEHOLDER . '(.*?)' . ConstantEnum::GTPLACEHOLDER . '/u',
-                function ( $matches ) {
-                    $_match = base64_decode( $matches[ 1 ] );
-
-                    return ConstantEnum::LTPLACEHOLDER . $_match . ConstantEnum::GTPLACEHOLDER;
-                },
-                $segment
-        ); //base64 decode of the tag content to avoid unwanted manipulation
-
-        return $segment;
-
+                return ConstantEnum::LTPLACEHOLDER . $_match . ConstantEnum::GTPLACEHOLDER;
+            },
+            $segment
+        );
     }
 
 }

@@ -3,8 +3,8 @@
 namespace Matecat\SubFiltering\Tests\Mocks\Features;
 
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
+use Matecat\SubFiltering\Filters\SmartCounts;
 
 class AirbnbFeature extends BaseFeature
 {
@@ -17,7 +17,7 @@ class AirbnbFeature extends BaseFeature
      */
     public function fromLayer0ToLayer1(Pipeline $channel)
     {
-        $channel->addAfter( PercentDoubleCurlyBrackets::class, SmartCounts::class);
+        $channel->addAfter(PercentDoubleCurlyBrackets::class, SmartCounts::class);
 
         return $channel;
     }

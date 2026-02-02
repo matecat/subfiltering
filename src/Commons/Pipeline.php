@@ -19,7 +19,8 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
  *
  * @package Matecat\SubFiltering\Commons
  */
-class Pipeline {
+class Pipeline
+{
 
     /**
      * Registered handler instances that make up the processing pipeline.
@@ -52,7 +53,7 @@ class Pipeline {
     /**
      * A key/value map used for reference during segment processing.
      *
-     * @var array
+     * @var array<string,string>
      */
     protected array $dataRefMap;
 
@@ -66,13 +67,14 @@ class Pipeline {
     /**
      * Constructor.
      *
-     * @param string|null $source     The source segment, if available.
-     * @param string|null $target     The target segment, if available.
-     * @param array       $dataRefMap Optional reference map relevant to the segment.
+     * @param string|null $source The source segment, if available.
+     * @param string|null $target The target segment, if available.
+     * @param array<string,string> $dataRefMap Optional reference map relevant to the segment.
      */
-    public function __construct( ?string $source = null, ?string $target = null, array $dataRefMap = [] ) {
-        $this->source     = $source;
-        $this->target     = $target;
+    public function __construct(?string $source = null, ?string $target = null, array $dataRefMap = [])
+    {
+        $this->source = $source;
+        $this->target = $target;
         $this->dataRefMap = $dataRefMap;
     }
 
@@ -81,7 +83,8 @@ class Pipeline {
      *
      * @return string The generated identifier.
      */
-    public function getNextId(): string {
+    public function getNextId(): string
+    {
         $this->id_number++;
 
         return ConstantEnum::INTERNAL_ATTR_ID_PREFIX . $this->id_number;
@@ -92,7 +95,8 @@ class Pipeline {
      *
      * @return void
      */
-    public function _setSegmentContainsMarkup() {
+    public function setSegmentContainsMarkup(): void
+    {
         $this->segmentContainsMarkup = true;
     }
 
@@ -101,7 +105,8 @@ class Pipeline {
      *
      * @return string|null Source segment or null if not set.
      */
-    public function getSource(): ?string {
+    public function getSource(): ?string
+    {
         return $this->source;
     }
 
@@ -110,16 +115,18 @@ class Pipeline {
      *
      * @return string|null Target segment or null if not set.
      */
-    public function getTarget(): ?string {
+    public function getTarget(): ?string
+    {
         return $this->target;
     }
 
     /**
      * Returns the mapping array provided to the pipeline for external reference.
      *
-     * @return array The data reference map.
+     * @return array<string,string> The data reference map.
      */
-    public function getDataRefMap(): array {
+    public function getDataRefMap(): array
+    {
         return $this->dataRefMap;
     }
 
@@ -128,10 +135,13 @@ class Pipeline {
      *
      * @param class-string<AbstractHandler> $handlerClass The handler
      */
-    public function contains( string $handlerClass ): bool {
-        return !empty( array_filter( $this->handlers, function ( $handler ) use ( $handlerClass ) {
+    public function contains(string $handlerClass): bool
+    {
+        return !empty(
+        array_filter($this->handlers, function ($handler) use ($handlerClass) {
             return $handlerClass == $handler->getName();
-        } ) );
+        })
+        );
     }
 
     /**
@@ -141,9 +151,10 @@ class Pipeline {
      *
      * @return $this This pipeline instance (for method chaining).
      */
-    public function addFirst( string $handler ): Pipeline {
-        $handlerInstance = $this->_register( $handler );
-        array_unshift( $this->handlers, $handlerInstance );
+    public function addFirst(string $handler): Pipeline
+    {
+        $handlerInstance = $this->_register($handler);
+        array_unshift($this->handlers, $handlerInstance);
 
         return $this;
     }
@@ -151,43 +162,43 @@ class Pipeline {
     /**
      * Inserts a handler into the pipeline before another specified handler.
      *
-     * @param class-string<AbstractHandler> $before      Class name (FQN) of the handler before which the new handler will be inserted.
+     * @param class-string<AbstractHandler> $before Class name (FQN) of the handler before which the new handler will be inserted.
      * @param class-string<AbstractHandler> $newPipeline Class name (FQN) of the new handler to insert.
      *
      * @return $this This pipeline instance (for method chaining).
      */
-    public function addBefore( string $before, string $newPipeline ): Pipeline {
-        $newPipelineHandler = $this->_register( $newPipeline );
-        foreach ( $this->handlers as $pos => $handler ) {
-            if ( $handler->getName() == $before ) {
-                array_splice( $this->handlers, $pos, 0, [ $newPipelineHandler ] );
+    public function addBefore(string $before, string $newPipeline): Pipeline
+    {
+        $newPipelineHandler = $this->_register($newPipeline);
+        foreach ($this->handlers as $pos => $handler) {
+            if ($handler->getName() == $before) {
+                array_splice($this->handlers, $pos, 0, [$newPipelineHandler]);
                 break;
             }
         }
 
         return $this;
-
     }
 
     /**
      * Inserts a handler into the pipeline after another specified handler.
      *
-     * @param class-string<AbstractHandler> $after       Class name (FQN) of the handler after which the new handler will be inserted.
+     * @param class-string<AbstractHandler> $after Class name (FQN) of the handler after which the new handler will be inserted.
      * @param class-string<AbstractHandler> $newPipeline Class name (FQN) of the new handler to insert.
      *
      * @return $this This pipeline instance (for method chaining).
      */
-    public function addAfter( string $after, string $newPipeline ): Pipeline {
-        $newPipelineHandler = $this->_register( $newPipeline );
-        foreach ( $this->handlers as $pos => $handler ) {
-            if ( $handler->getName() == $after ) {
-                array_splice( $this->handlers, $pos + 1, 0, [ $newPipelineHandler ] );
+    public function addAfter(string $after, string $newPipeline): Pipeline
+    {
+        $newPipelineHandler = $this->_register($newPipeline);
+        foreach ($this->handlers as $pos => $handler) {
+            if ($handler->getName() == $after) {
+                array_splice($this->handlers, $pos + 1, 0, [$newPipelineHandler]);
                 break;
             }
         }
 
         return $this;
-
     }
 
     /**
@@ -197,11 +208,12 @@ class Pipeline {
      *
      * @return $this This pipeline instance (for method chaining).
      */
-    public function remove( string $handlerToDelete ): Pipeline {
-        foreach ( $this->handlers as $pos => $handler ) {
-            if ( $handler->getName() == $handlerToDelete ) {
-                unset( $this->handlers[ $pos ] );
-                $this->handlers = array_values( $this->handlers );
+    public function remove(string $handlerToDelete): Pipeline
+    {
+        foreach ($this->handlers as $pos => $handler) {
+            if ($handler->getName() == $handlerToDelete) {
+                unset($this->handlers[$pos]);
+                $this->handlers = array_values($this->handlers);
                 break;
             }
         }
@@ -216,8 +228,9 @@ class Pipeline {
      *
      * @return $this This pipeline instance (for method chaining).
      */
-    public function addLast( string $handler ): Pipeline {
-        $newHandler       = $this->_register( $handler );
+    public function addLast(string $handler): Pipeline
+    {
+        $newHandler = $this->_register($handler);
         $this->handlers[] = $newHandler;
 
         return $this;
@@ -231,13 +244,14 @@ class Pipeline {
      *
      * @return string The processed segment after all transformations.
      */
-    public function transform( string $segment ): string {
+    public function transform(string $segment): string
+    {
         $this->id_number = -1;
-        foreach ( $this->handlers as $handler ) {
-            $segment = $handler->transform( $segment );
+        foreach ($this->handlers as $handler) {
+            $segment = $handler->transform($segment);
         }
 
-        return $this->realignIDs( $segment );
+        return $this->realignIDs($segment);
     }
 
     /**
@@ -248,12 +262,13 @@ class Pipeline {
      *
      * @return string The string with realigned and updated ID tags.
      */
-    protected function realignIDs( string $segment ): string {
-        if ( $this->id_number > -1 ) {
-            preg_match_all( '/"__mtc_[0-9]+"/', $segment, $html, PREG_SET_ORDER );
-            foreach ( $html as $pos => $tag_id ) {
+    protected function realignIDs(string $segment): string
+    {
+        if ($this->id_number > -1) {
+            preg_match_all('/"__mtc_[0-9]+"/', $segment, $html, PREG_SET_ORDER);
+            foreach ($html as $pos => $tag_id) {
                 //replace subsequent elements excluding already encoded
-                $segment = preg_replace( '/' . $tag_id[ 0 ] . '/', '"mtc_' . ( $pos + 1 ) . '"', $segment, 1 );
+                $segment = preg_replace('/' . $tag_id[0] . '/', '"mtc_' . ($pos + 1) . '"', $segment, 1);
             }
         }
 
@@ -268,11 +283,20 @@ class Pipeline {
      *
      * @return T An instantiated handler object with the pipeline set.
      */
-    protected function _register( string $handler ): AbstractHandler {
+    protected function _register(string $handler): AbstractHandler
+    {
         $handler = new $handler();
-        $handler->setPipeline( $this );
+        $handler->setPipeline($this);
 
         return $handler;
+    }
+
+    /**
+     * @return bool True if the current segment contains markup, false otherwise.
+     */
+    public function segmentContainsMarkup(): bool
+    {
+        return $this->segmentContainsMarkup;
     }
 
 }
