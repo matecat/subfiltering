@@ -15,4 +15,4 @@ before_script:
 script: ./vendor/bin/phpunit -d memory_limit=-1 -dxdebug.mode=coverage --coverage-clover=build/logs/clover.xml
 
 after_success:
-  - travis_retry php -d memory_limit=-1 vendor/bin/php-coveralls --clover build/logs/clover.xml
+  - travis_retry php -d memory_limit=-1 vendor/bin/php-coveralls --coverage_clover=build/logs/clover.xml
