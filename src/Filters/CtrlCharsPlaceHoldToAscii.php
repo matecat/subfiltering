@@ -7,7 +7,6 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
 
 class CtrlCharsPlaceHoldToAscii extends AbstractHandler
 {
-
     /**
      * @param string $segment
      * @return string

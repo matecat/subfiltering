@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author ostico domenico@translated.net / ostico@gmail.com
@@ -20,7 +21,6 @@ use PHPUnit\Framework\TestCase;
 
 class HtmlParserTest extends TestCase
 {
-
     public function testRegisterInvalidCallbacksHandlerThrowsException()
     {
         // Expect the specific exception to be thrown
@@ -34,7 +34,7 @@ class HtmlParserTest extends TestCase
 
         // Create an anonymous class instance that extends AbstractHandler
         // but does NOT use the CallbacksHandler trait.
-        $invalidHandler = new class extends AbstractHandler {
+        $invalidHandler = new class () extends AbstractHandler {
             public function transform(string $segment): string
             {
                 return $segment; // Fake implementation

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author ostico domenico@translated.net / ostico@gmail.com
@@ -25,7 +26,6 @@ use ReflectionClass;
 
 class PipelineOrderTest extends TestCase
 {
-
     /**
      * @var Pipeline
      */

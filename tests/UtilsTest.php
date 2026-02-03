@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 class UtilsTest extends TestCase
 {
-
     /**
      * Provides various arrays to test the array_is_list function.
      *

@@ -10,7 +10,6 @@ use Matecat\XmlParser\XmlParser;
 
 class DataRefReplace extends AbstractHandler
 {
-
     /**
      * @var array<string,string>
      */

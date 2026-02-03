@@ -9,7 +9,6 @@ use Matecat\SubFiltering\Utils\DataRefReplacer;
 
 class DataRefRestore extends AbstractHandler
 {
-
     /**
      * @var array<string,string>
      */

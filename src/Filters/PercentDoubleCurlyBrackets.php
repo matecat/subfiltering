@@ -7,7 +7,6 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class PercentDoubleCurlyBrackets extends AbstractHandler
 {
-
     /**
      * @param string $segment
      *

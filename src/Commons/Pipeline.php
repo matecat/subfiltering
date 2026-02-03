@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -21,7 +22,6 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
  */
 class Pipeline
 {
-
     /**
      * Registered handler instances that make up the processing pipeline.
      *
@@ -138,9 +138,9 @@ class Pipeline
     public function contains(string $handlerClass): bool
     {
         return !empty(
-        array_filter($this->handlers, function ($handler) use ($handlerClass) {
-            return $handlerClass == $handler->getName();
-        })
+            array_filter($this->handlers, function ($handler) use ($handlerClass) {
+                return $handlerClass == $handler->getName();
+            })
         );
     }
 

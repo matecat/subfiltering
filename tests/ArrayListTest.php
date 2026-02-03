@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 class ArrayListTest extends TestCase
 {
-
     /**
      * Tests that the constructor correctly initializes with a valid list
      * and the instance factory method works.

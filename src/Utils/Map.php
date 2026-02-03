@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author hashashiyyin domenico@translated.net / ostico@gmail.com
@@ -24,7 +25,6 @@ use IteratorAggregate;
  */
 class Map implements ArrayAccess, IteratorAggregate, Countable, MapInterface
 {
-
     /**
      * @var array<string,mixed>
      */

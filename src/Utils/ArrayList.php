@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author hashashiyyin domenico@translated.net / ostico@gmail.com
@@ -20,7 +21,6 @@ use DomainException;
  */
 class ArrayList extends ArrayObject implements ListInterface
 {
-
     /**
      * @param array<int,mixed> $list
      */

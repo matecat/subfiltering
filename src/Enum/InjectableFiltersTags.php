@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
@@ -25,7 +26,6 @@ use Matecat\SubFiltering\Filters\TwigToPh;
 
 class InjectableFiltersTags
 {
-
     public const  string markup = 'markup';
     public const  string percent_double_curly = 'percent_double_curly';
     public const  string twig = 'twig';

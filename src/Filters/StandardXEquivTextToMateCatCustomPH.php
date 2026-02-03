@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -14,7 +15,6 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class StandardXEquivTextToMateCatCustomPH extends AbstractHandler
 {
-
     /**
      * @param string $segment
      * @return string
@@ -39,5 +39,3 @@ class StandardXEquivTextToMateCatCustomPH extends AbstractHandler
 
 
 }
-
-

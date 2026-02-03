@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -21,7 +22,6 @@ use Matecat\SubFiltering\Utils\Utils;
  */
 class FromLayer2ToRawXML extends AbstractHandler
 {
-
     /**
      * @param string $segment
      * @return string

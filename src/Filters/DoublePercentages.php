@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -15,7 +16,6 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class DoublePercentages extends AbstractHandler
 {
-
     /**
      * All inside percentages will be locked if there are no spaces
      *

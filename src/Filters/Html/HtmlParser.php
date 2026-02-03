@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -48,12 +49,11 @@ use RuntimeException;
  */
 class HtmlParser
 {
-
     /** Parser states for input processing (plaintext, HTML tag, comment, or script/style). */
-    const int STATE_PLAINTEXT = 0;
-    const int STATE_HTML = 1;
-    const int STATE_COMMENT = 2;
-    const int STATE_JS_CSS = 3;
+    public const int STATE_PLAINTEXT = 0;
+    public const int STATE_HTML = 1;
+    public const int STATE_COMMENT = 2;
+    public const int STATE_JS_CSS = 3;
 
     /**
      * Processing pipeline; used for HTML presence flagging.
@@ -99,7 +99,7 @@ class HtmlParser
             $current = get_parent_class($current);
         }
 
-        if (!in_array(CallbacksHandler::class,$traits, true)) {
+        if (!in_array(CallbacksHandler::class, $traits, true)) {
             throw new RuntimeException(
                 "Class passed to " . __METHOD__ . " must use " . CallbacksHandler::class . " trait."
             );

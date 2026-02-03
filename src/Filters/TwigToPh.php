@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -15,7 +16,6 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class TwigToPh extends AbstractHandler
 {
-
     /**
      * TestSet:
      * <code>

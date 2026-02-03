@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -14,7 +15,6 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class StandardPHToMateCatCustomPH extends AbstractHandler
 {
-
     public function transform(string $segment): string
     {
         $segment = $this->filterPhTagContent($segment);
@@ -83,5 +83,3 @@ class StandardPHToMateCatCustomPH extends AbstractHandler
     }
 
 }
-
-

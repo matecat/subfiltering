@@ -24,7 +24,6 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  */
 class MyMemoryFilter extends AbstractFilter
 {
-
     /**
      * Converts a segment from Layer 0 format to Layer 1 format, applying an optional client-specific pipeline configuration.
      *

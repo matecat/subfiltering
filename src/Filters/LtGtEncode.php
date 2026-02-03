@@ -6,7 +6,6 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class LtGtEncode extends AbstractHandler
 {
-
     /**
      * @param string $segment
      * @return string

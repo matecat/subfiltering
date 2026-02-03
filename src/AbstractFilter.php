@@ -39,7 +39,6 @@ use Matecat\SubFiltering\Filters\StandardXEquivTextToMateCatCustomPH;
  */
 abstract class AbstractFilter
 {
-
     /**
      * @var FeatureSetInterface
      * The set of features to be applied during the filtering process.
@@ -122,8 +121,8 @@ abstract class AbstractFilter
 
         // Determine which handlers to use for the Layer 0 to Layer 1 transition.
         if (is_array(
-                $handlerClassNamesForLayer0ToLayer1Transition
-            ) && empty($handlerClassNamesForLayer0ToLayer1Transition)) {
+            $handlerClassNamesForLayer0ToLayer1Transition
+        ) && empty($handlerClassNamesForLayer0ToLayer1Transition)) {
             // If an empty array is passed, load the default set of handlers from the sorter.
             $handlerClassNamesForLayer0ToLayer1Transition = array_keys(HandlersSorter::getDefaultInjectedHandlers());
         } elseif (is_null($handlerClassNamesForLayer0ToLayer1Transition)) {
@@ -187,7 +186,7 @@ abstract class AbstractFilter
      *
      * @return string The transformed segment after processing from Layer 0 to Layer 1.
      */
-    public abstract function fromLayer0ToLayer1(string $segment, ?string $cid = null): string;
+    abstract public function fromLayer0ToLayer1(string $segment, ?string $cid = null): string;
 
     /**
      * Configures the pipeline for transforming content from Layer 0 to Layer 1.

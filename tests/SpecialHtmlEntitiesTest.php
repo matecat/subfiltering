@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author hashashiyyin domenico@translated.net / ostico@gmail.com
@@ -17,7 +18,6 @@ use PHPUnit\Framework\TestCase;
 
 class SpecialHtmlEntitiesTest extends TestCase
 {
-
     private function getFilterInstance()
     {
         return MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT');
@@ -181,8 +181,8 @@ class SpecialHtmlEntitiesTest extends TestCase
          */
         $filter = $this->getFilterInstance();
         $segment = "These dangerous characters in a xliff: '" . chr(0X07) . "'(Bell) '" . chr(
-                0X7F
-            ) . "'(Delete) '" . chr(0X18) . "'(Cancel)";
+            0X7F
+        ) . "'(Delete) '" . chr(0X18) . "'(Cancel)";
         $expected_db_segment = "These dangerous characters in a xliff: ''(Bell) ''(Delete) ''(Cancel)";
 
         $database_segment = $filter->fromRawXliffToLayer0($segment);

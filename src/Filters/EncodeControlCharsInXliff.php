@@ -6,7 +6,6 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class EncodeControlCharsInXliff extends AbstractHandler
 {
-
     /**
      * @inheritDoc
      */

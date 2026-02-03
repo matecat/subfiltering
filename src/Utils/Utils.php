@@ -4,7 +4,6 @@ namespace Matecat\SubFiltering\Utils;
 
 class Utils
 {
-
     /**
      * @param string $needle
      * @param string $haystack

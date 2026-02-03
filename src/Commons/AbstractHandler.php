@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -9,10 +10,8 @@
 
 namespace Matecat\SubFiltering\Commons;
 
-
 abstract class AbstractHandler
 {
-
     protected string $name;
 
     /**
@@ -26,7 +25,7 @@ abstract class AbstractHandler
      * @return string
      *
      */
-    public abstract function transform(string $segment): string;
+    abstract public function transform(string $segment): string;
 
     /**
      * AbstractHandler constructor.

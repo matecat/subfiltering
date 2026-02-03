@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
  */
 class FiltersTagsEnumTest extends TestCase
 {
-
     /**
      * Ensures that forName() returns the correct class name for a valid tag.
      * @test
@@ -109,7 +108,7 @@ class FiltersTagsEnumTest extends TestCase
         $this->assertSame('markup', InjectableFiltersTags::tagForClassName(MarkupToPh::class));
         $this->assertSame(
             'percent_double_curly',
-            InjectableFiltersTags::    tagForClassName(PercentDoubleCurlyBrackets::class)
+            InjectableFiltersTags::tagForClassName(PercentDoubleCurlyBrackets::class)
         );
     }
 

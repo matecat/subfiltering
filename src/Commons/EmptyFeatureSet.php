@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author ostico domenico@translated.net / ostico@gmail.com
@@ -16,7 +17,6 @@ use Matecat\SubFiltering\Contracts\FeatureSetInterface;
  */
 class EmptyFeatureSet implements FeatureSetInterface
 {
-
     /**
      * @inheritDoc
      */

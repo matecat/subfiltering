@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author hashashiyyin domenico@translated.net / ostico@gmail.com
@@ -14,7 +15,6 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class EmojiToEntity extends AbstractHandler
 {
-
     /**
      * @param string $segment
      * @return string

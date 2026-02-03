@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -9,12 +10,10 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-
 use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class RemoveDangerousChars extends AbstractHandler
 {
-
     /**
      * @param string $segment
      * @return string

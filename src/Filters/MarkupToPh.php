@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -27,7 +28,6 @@ use Matecat\SubFiltering\Filters\Html\HtmlParser;
  */
 class MarkupToPh extends AbstractHandler
 {
-
     use CallbacksHandler;
 
     protected bool $isHTML = false;
@@ -78,11 +78,12 @@ class MarkupToPh extends AbstractHandler
      *
      * @return string The resulting <ph> tag.
      */
-    protected function _finalizeTag( string $buffer ): string {
+    protected function _finalizeTag(string $buffer): string
+    {
         $isHTML       = $this->isHTML;
         $this->isHTML = false;
 
-        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . ( $isHTML ? CTypeEnum::HTML : CTypeEnum::XML ) . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . ($isHTML ? CTypeEnum::HTML : CTypeEnum::XML) . '" equiv-text="base64:' . base64_encode(htmlentities($buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */)) . '"/>';
     }
 
     /**
@@ -159,7 +160,7 @@ class MarkupToPh extends AbstractHandler
          *
          * @return bool Returns true if the buffer contains a valid HTML5 tag; false otherwise.
          */
-        if ( preg_match( '#</?(?:a|abbr|address|area|article|aside|audio|b|base|bdi|bdo|blockquote|body|br|button|canvas|caption|cite|code|col|colgroup|data|datalist|dd|del|details|dfn|dialog|div|dl|dt|em|embed|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|head|header|hr|html|i|iframe|img|input|ins|kbd|label|legend|li|link|main|map|mark|menu|meta|meter|nav|noscript|object|ol|optgroup|option|output|p|param|picture|pre|progress|q|rb|rp|rt|rtc|ruby|s|samp|script|section|select|slot|small|source|span|strong|style|sub|summary|sup|table|tbody|td|template|textarea|tfoot|th|thead|time|title|tr|track|u|ul|var|video|wbr)(?:\s+[:a-z0-9\-._]+(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?)*\s*/?>#ui', $buffer ) ) {
+        if (preg_match('#</?(?:a|abbr|address|area|article|aside|audio|b|base|bdi|bdo|blockquote|body|br|button|canvas|caption|cite|code|col|colgroup|data|datalist|dd|del|details|dfn|dialog|div|dl|dt|em|embed|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|head|header|hr|html|i|iframe|img|input|ins|kbd|label|legend|li|link|main|map|mark|menu|meta|meter|nav|noscript|object|ol|optgroup|option|output|p|param|picture|pre|progress|q|rb|rp|rt|rtc|ruby|s|samp|script|section|select|slot|small|source|span|strong|style|sub|summary|sup|table|tbody|td|template|textarea|tfoot|th|thead|time|title|tr|track|u|ul|var|video|wbr)(?:\s+[:a-z0-9\-._]+(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?)*\s*/?>#ui', $buffer)) {
             $this->isHTML = true;
 
             return true;
@@ -187,7 +188,7 @@ class MarkupToPh extends AbstractHandler
          *
          * @return bool Returns true if the tag matches the stricter XML structure; false otherwise.
          */
-        if ( preg_match( '#</?(?![0-9\-]+)[a-z0-9\-._:]+?(?:\s+[:a-z0-9\-._]+=(?:"[^"]*"|\'[^\']*\'))*\s*/?>#ui', $buffer ) ) {
+        if (preg_match('#</?(?![0-9\-]+)[a-z0-9\-._:]+?(?:\s+[:a-z0-9\-._]+=(?:"[^"]*"|\'[^\']*\'))*\s*/?>#ui', $buffer)) {
             return true;
         }
 

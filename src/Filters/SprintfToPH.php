@@ -1,15 +1,12 @@
 <?php
 
-
 namespace Matecat\SubFiltering\Filters;
-
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
 class SprintfToPH extends AbstractHandler
 {
-
     /**
      * TestSet:
      * <code>

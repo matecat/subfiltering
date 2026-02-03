@@ -15,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 
 class HandlersSorterTest extends TestCase
 {
-
     /**
      * This test ensures that the sorter correctly handles and reorder instances of the
      * `Matecat\SubFiltering\Filters\AbstractFilter` class.

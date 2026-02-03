@@ -44,7 +44,6 @@ use Matecat\SubFiltering\Filters\SpecialEntitiesToPlaceholdersForView;
  */
 class MateCatFilter extends AbstractFilter
 {
-
     /**
      * Transforms database raw XML content (Layer 0) to intermediate structures (Layer 1).
      *
@@ -255,8 +254,8 @@ class MateCatFilter extends AbstractFilter
                 strlen($trg_tags[0][$trg_tag_position])
             );
             $start_offset = $tag_position_in_string + strlen(
-                    $src_tags[0][$src_tag_position]
-                ); // set the next starting point
+                $src_tags[0][$src_tag_position]
+            ); // set the next starting point
         }
 
         if (!empty($notFoundTargetTags)) {

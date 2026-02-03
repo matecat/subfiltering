@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file contains the RestorePlaceHoldersToXLIFFLtGt class, which is responsible
  * for restoring escaped greater-than and less-than characters in a string.
@@ -22,7 +23,6 @@ use Matecat\SubFiltering\Enum\ConstantEnum;
  */
 class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler
 {
-
     /**
      * Replaces temporary placeholders for less-than and greater-than characters with
      * their original '<' and '>' equivalents.

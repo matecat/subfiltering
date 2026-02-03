@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file contains the HandlersSorter class, which is responsible for ordering
  * a set of "injectable" filter handlers based on a predefined priority.
@@ -33,7 +34,6 @@ use Matecat\SubFiltering\Filters\TwigToPh;
  */
 class HandlersSorter
 {
-
     /**
      * Defines the execution order for injectable handlers. Lower numbers have higher priority and run first.
      *

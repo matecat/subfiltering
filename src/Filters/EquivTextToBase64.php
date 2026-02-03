@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -13,7 +14,6 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 
 class EquivTextToBase64 extends AbstractHandler
 {
-
     /**
      * @param string $segment
      * @return string

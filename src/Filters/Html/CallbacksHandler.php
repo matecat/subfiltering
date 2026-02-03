@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author ostico domenico@translated.net / ostico@gmail.com
@@ -26,7 +27,6 @@ use Matecat\SubFiltering\Commons\Pipeline;
  */
 trait CallbacksHandler
 {
-
     /**
      * @var Pipeline
      */
