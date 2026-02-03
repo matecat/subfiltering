@@ -4,6 +4,11 @@ language: php
 php:
   - 8.3
 
-before_script: composer install
+before_script:
+  - composer install
+  - composer require php-coveralls/php-coveralls "^2.9"
 
-script: ./vendor/bin/phpunit
+script: ./vendor/bin/phpunit -d memory_limit=-1 -dxdebug.mode=coverage --coverage-clover=build/logs/clover.xml
+
+after_success:
+  - travis_retry php -d memory_limit=-1 vendor/bin/coveralls --clover build/logs/clover.xml
