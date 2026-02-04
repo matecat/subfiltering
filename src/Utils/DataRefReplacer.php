@@ -67,7 +67,6 @@ class DataRefReplacer
 
         // try not to throw exception for wrong segments with opening tags and no closing
         try {
-
             /** @var NodeShape[] $html */
             $html = XmlParser::parse($string, true);
 
@@ -103,7 +102,7 @@ class DataRefReplacer
      */
     private function hasAnyDataRefAttribute(string $string): bool
     {
-        return (bool)preg_match('/(dataRef|dataRefStart|dataRefEnd)=[\'"].*?[\'"]/', $string);
+        return (bool)preg_match('/(dataRef|dataRefStart|dataRefEnd)=[\'"][^\'"]*[\'"]/', $string);
     }
 
     /**
@@ -126,38 +125,31 @@ class DataRefReplacer
                 /** @var NodeShape $childNode */
                 $string = $this->recursiveTransformDataRefToPhTag($childNode, $string);
             }
-        } else {
-            // accept only those tags
-            switch ($node->tagName) {
-                case 'ph':
-                    $ctype = CTypeEnum::PH_DATA_REF->value;
-                    break;
-                case 'sc':
-                    $ctype = CTypeEnum::SC_DATA_REF->value;
-                    break;
-                case 'ec':
-                    $ctype = CTypeEnum::EC_DATA_REF->value;
-                    break;
-                default:
-                    return $string;
-            }
 
-            // if isset a value in the map, proceed with conversion, otherwise skip
+            return $string;
+        }
+
+        $ctype = match ($node->tagName) {
+            'ph' => CTypeEnum::PH_DATA_REF->value,
+            'sc' => CTypeEnum::SC_DATA_REF->value,
+            'ec' => CTypeEnum::EC_DATA_REF->value,
+            default => null,
+        };
+
+        if ($ctype !== null) {
             $attributesMap = Map::instance($node->attributes);
-            if (!$this->map->get($attributesMap->get('dataRef'))) {
-                return $string;
+            $dataRefName = $attributesMap->get('dataRef');
+
+            if ($dataRefName && $this->map->get($dataRefName)) {
+                $string = $this->replaceNewTagString(
+                    $node->node,
+                    $attributesMap->getOrDefault('id', $dataRefName),
+                    $this->map->getOrDefault($dataRefName, 'NULL'),
+                    $ctype,
+                    $string,
+                    null
+                );
             }
-
-            $dataRefName = $node->attributes['dataRef'];   // map identifier. Eg: source1
-
-            return $this->replaceNewTagString(
-                $node->node,
-                $attributesMap->getOrDefault('id', $dataRefName),
-                $this->map->getOrDefault($node->attributes['dataRef'], 'NULL'),
-                $ctype,
-                $string,
-                null
-            );
         }
 
         return $string;

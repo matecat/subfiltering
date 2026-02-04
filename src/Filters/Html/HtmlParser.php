@@ -87,7 +87,6 @@ class HtmlParser
      */
     public function registerCallbacksHandler(AbstractHandler $class): void
     {
-
         //check: $class must use CallbacksHandler trait
         // Safe retrieval of trait uses: avoid calling class_uses() with false
         // Collect traits from the class and its parents by walking the inheritance chain.
@@ -99,7 +98,7 @@ class HtmlParser
             $current = get_parent_class($current);
         }
 
-        if (!in_array(CallbacksHandler::class,$traits, true)) {
+        if (!in_array(CallbacksHandler::class, $traits, true)) {
             throw new RuntimeException(
                 "Class passed to " . __METHOD__ . " must use " . CallbacksHandler::class . " trait."
             );
@@ -157,9 +156,6 @@ class HtmlParser
 
         foreach ($originalSplit as $idx => $char) {
             switch ($state) {
-                case static::STATE_PLAINTEXT:
-                    $this->handlePlainTextState($char, $state, $html_buffer, $plain_text_buffer, $output);
-                    break;
                 case static::STATE_HTML:
                     $this->handleHtmlState(
                         $char,
@@ -177,6 +173,10 @@ class HtmlParser
                     break;
                 case static::STATE_JS_CSS:
                     $this->handleJsCssState($char, $state, $html_buffer, $output);
+                    break;
+                case static::STATE_PLAINTEXT:
+                default:
+                    $this->handlePlainTextState($char, $state, $html_buffer, $plain_text_buffer, $output);
                     break;
             }
         }
@@ -399,15 +399,13 @@ class HtmlParser
     {
         $html_buffer .= $char;
         // Detect close: e.g., '</script>' or '</style>'
-        if ($char === '>') {
-            if (in_array(substr($html_buffer, -6), ['cript>', 'style>'], true)) {
-                $state = static::STATE_PLAINTEXT;
-                $this->_isTagValid($html_buffer);
-                $output .= $this->_finalizeScriptTag($html_buffer);
-                $html_buffer = '';
-                if (null !== $this->pipeline) {
-                    $this->_setSegmentContainsMarkup();
-                }
+        if ($char === '>' && in_array(substr($html_buffer, -6), ['cript>', 'style>'], true)) {
+            $state = static::STATE_PLAINTEXT;
+            $this->_isTagValid($html_buffer);
+            $output .= $this->_finalizeScriptTag($html_buffer);
+            $html_buffer = '';
+            if (null !== $this->pipeline) {
+                $this->_setSegmentContainsMarkup();
             }
         }
     }

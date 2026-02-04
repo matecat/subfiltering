@@ -26,7 +26,7 @@ abstract class AbstractHandler
      * @return string
      *
      */
-    public abstract function transform(string $segment): string;
+    abstract public function transform(string $segment): string;
 
     /**
      * AbstractHandler constructor.

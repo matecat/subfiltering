@@ -7,6 +7,7 @@ use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XmlParser\XmlParser;
+use OutOfBoundsException;
 
 class DataRefReplace extends AbstractHandler
 {
@@ -15,14 +16,6 @@ class DataRefReplace extends AbstractHandler
      * @var array<string,string>
      */
     private array $dataRefMap = [];
-
-    /**
-     * DataRefReplace constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     /**
      * @inheritDoc
@@ -35,16 +28,16 @@ class DataRefReplace extends AbstractHandler
 
         // dataRefMap is present only in xliff 2.0 files
         if (empty($this->dataRefMap)) {
-            $segment = $this->replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
+            $segment = $this->replacePhTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
 
-            return $this->replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
+            return $this->replacePcTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
         }
 
         $dataRefReplacer = new DataRefReplacer($this->dataRefMap);
         $segment = $dataRefReplacer->replace($segment);
-        $segment = $this->replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
+        $segment = $this->replacePhTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
 
-        return $this->replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
+        return $this->replacePcTagsWithoutDataRefCorrespondenceToMatecatPhTags($segment);
     }
 
     /**
@@ -63,7 +56,7 @@ class DataRefReplace extends AbstractHandler
      *
      * @return string
      */
-    private function replace_Ph_TagsWithoutDataRefCorrespondenceToMatecatPhTags(string $segment): string
+    private function replacePhTagsWithoutDataRefCorrespondenceToMatecatPhTags(string $segment): string
     {
         preg_match_all('/<(ph .*?)>/iu', $segment, $phTags);
 
@@ -100,29 +93,24 @@ class DataRefReplace extends AbstractHandler
      */
     private function isAValidPhTag(string $phTag): bool
     {
-        // try not to throw exception for wrong segments with opening tags and no closing
         try {
             $parsed = XmlParser::parse($phTag, true);
+
+            $attrs = $parsed[0]->attributes ?? [];
+            $cType = $attrs['ctype'] ?? 'not-found';
+
+            if (CTypeEnum::isMatecatCType($cType) || isset($attrs['equiv-text'])) {
+                throw new OutOfBoundsException('Not a valid ph tag without dataRef correspondence');
+            }
+
+            if (isset($attrs['dataRef'])) {
+                return !array_key_exists($attrs['dataRef'], $this->dataRefMap);
+            }
+
+            return true;
         } catch (Exception) {
             return false;
         }
-
-        // check for matecat ctype
-        $cType = isset($parsed[0]->attributes['ctype']) ? $parsed[0]->attributes['ctype'] : 'not-found';
-        if (CTypeEnum::isMatecatCType($cType)) {
-            return false;
-        }
-
-        // if has equiv-text don't touch
-        if (isset($parsed[0]->attributes['equiv-text'])) {
-            return false;
-        }
-
-        if (isset($parsed[0]->attributes['dataRef'])) {
-            return !array_key_exists($parsed[0]->attributes['dataRef'], $this->dataRefMap);
-        }
-
-        return true;
     }
 
     /**
@@ -141,7 +129,7 @@ class DataRefReplace extends AbstractHandler
      *
      * @return string
      */
-    private function replace_Pc_TagsWithoutDataRefCorrespondenceToMatecatPhTags(string $segment): string
+    private function replacePcTagsWithoutDataRefCorrespondenceToMatecatPhTags(string $segment): string
     {
         preg_match_all('/<(pc .*?)>/iu', $segment, $openingPcTags);
         preg_match_all('|<(/pc)>|iu', $segment, $closingPcTags);

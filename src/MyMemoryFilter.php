@@ -90,6 +90,8 @@ class MyMemoryFilter extends AbstractFilter
                     $channel->addAfter(DollarCurlyBrackets::class, SingleCurlyBracketsToPh::class);
                 }
                 break;
+            default:
+                break;
         }
     }
 

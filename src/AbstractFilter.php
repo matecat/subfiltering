@@ -187,7 +187,7 @@ abstract class AbstractFilter
      *
      * @return string The transformed segment after processing from Layer 0 to Layer 1.
      */
-    public abstract function fromLayer0ToLayer1(string $segment, ?string $cid = null): string;
+    abstract public function fromLayer0ToLayer1(string $segment, ?string $cid = null): string;
 
     /**
      * Configures the pipeline for transforming content from Layer 0 to Layer 1.

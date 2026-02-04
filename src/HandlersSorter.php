@@ -45,7 +45,7 @@ class HandlersSorter
      *
      * A map of handler class names to their integer priority and whether they are enabled by default.
      */
-    protected const array injectableHandlersOrder = [
+    protected const array INJECTABLE_HANDLERS_ORDER = [
         MarkupToPh::class => ['position' => 0, 'default_enabled' => true, 'icu_compliant' => true],
         PercentDoubleCurlyBrackets::class => ['position' => 1, 'default_enabled' => true, 'icu_compliant' => false],
         TwigToPh::class => ['position' => 2, 'default_enabled' => true, 'icu_compliant' => false],
@@ -68,7 +68,7 @@ class HandlersSorter
      */
     public static function getDefaultInjectedHandlers(): array
     {
-        return array_filter(self::injectableHandlersOrder, function ($settings) {
+        return array_filter(self::INJECTABLE_HANDLERS_ORDER, function ($settings) {
             return $settings['default_enabled'];
         });
     }
@@ -95,7 +95,7 @@ class HandlersSorter
     public function __construct(array $injectedHandlers = [], bool $icu_enabled = false)
     {
         // Start with the default order of handlers.
-        $this->defaultInjectedHandlers = self::injectableHandlersOrder;
+        $this->defaultInjectedHandlers = self::INJECTABLE_HANDLERS_ORDER;
 
         // Sort the final list of handlers according to their predefined execution order.
         $this->injectedHandlers = $this->quickSort($injectedHandlers, $icu_enabled);

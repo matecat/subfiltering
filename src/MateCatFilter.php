@@ -149,19 +149,6 @@ class MateCatFilter extends AbstractFilter
     }
 
     /**
-     * Transforms content from UI structures (Layer 1) back to database raw XML content (Layer 0).
-     *
-     * @param string $segment The segment of content to be transformed from Layer 1 to Layer 0.
-     *
-     * @return string The resulting transformed content in Layer 0 format.
-     * @throws Exception
-     */
-    public function fromLayer1ToLayer0(string $segment): string
-    {
-        return parent::fromLayer1ToLayer0($segment);
-    }
-
-    /**
      * Used to convert the raw XLIFF content from the file to an XML for the database (Layer 0)
      *
      * @param string $segment
@@ -224,7 +211,7 @@ class MateCatFilter extends AbstractFilter
      */
     public function realignIDInLayer1(string $source, string $target): string
     {
-        $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
+        $pattern = '|<ph id ?= ?["\'](mtc_\d+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
         preg_match_all($pattern, $source, $src_tags, PREG_PATTERN_ORDER);
         preg_match_all($pattern, $target, $trg_tags, PREG_PATTERN_ORDER);
 

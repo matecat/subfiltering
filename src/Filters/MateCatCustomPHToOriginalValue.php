@@ -35,7 +35,7 @@ class MateCatCustomPHToOriginalValue extends AbstractHandler
     private function restoreOriginalTags(string $segment): string
     {
         preg_match_all(
-            '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']([^"\']+)["\'] x-orig\s*=\s*["\']([^"\']+)["\'] equiv-text\s*=\s*["\']base64:[^"\']+["\']\s*/>|iU',
+            '|<ph id\s*=\s*["\']mtc_\d+["\'] ctype\s*=\s*["\']([^"\']+)["\'] x-orig\s*=\s*["\']([^"\']+)["\'] equiv-text\s*=\s*["\']base64:[^"\']+["\']\s*/>|iU',
             $segment,
             $html,
             PREG_SET_ORDER
@@ -59,7 +59,7 @@ class MateCatCustomPHToOriginalValue extends AbstractHandler
     {
         // pipeline for restore PH tag of subfiltering to original encoded HTML
         preg_match_all(
-            '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']([0-9a-zA-Z\-_]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/>|iU',
+            '|<ph id\s*=\s*["\']mtc_\d+["\'] ctype\s*=\s*["\']([\w\-]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/>|iU',
             $segment,
             $html,
             PREG_SET_ORDER

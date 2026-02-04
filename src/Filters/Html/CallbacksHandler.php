@@ -80,7 +80,7 @@ trait CallbacksHandler
 
     /**
      * Signals to the processing pipeline that the current segment contains HTML markup.
-     * This method assumes the class using this trait has a `pipeline` property
+     * This method assumes the class using this trait has a `pipeline` property,
      * which is an instance of `Matecat\SubFiltering\Commons\Pipeline`.
      */
     protected function _setSegmentContainsMarkup(): void

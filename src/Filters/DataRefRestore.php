@@ -18,14 +18,6 @@ class DataRefRestore extends AbstractHandler
     private const string REGEXP = '|<ph[^>]+? ctype="%s" equiv-text="base64:(.*?)"/>|iu';
 
     /**
-     * DataRefReplace constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * @inheritDoc
      * @throws Exception
      */

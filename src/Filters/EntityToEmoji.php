@@ -24,5 +24,4 @@ class EntityToEmoji extends AbstractHandler
         return Emoji::toEmoji($segment);
     }
 
-
 }

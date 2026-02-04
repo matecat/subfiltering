@@ -34,7 +34,7 @@ class Pipeline
      *
      * @var int
      */
-    protected int $id_number = -1;
+    protected int $idNumber = -1;
 
     /**
      * The optional source string the Pipeline operates on.
@@ -85,9 +85,9 @@ class Pipeline
      */
     public function getNextId(): string
     {
-        $this->id_number++;
+        $this->idNumber++;
 
-        return ConstantEnum::INTERNAL_ATTR_ID_PREFIX->value . $this->id_number;
+        return ConstantEnum::INTERNAL_ATTR_ID_PREFIX->value . $this->idNumber;
     }
 
     /**
@@ -153,7 +153,7 @@ class Pipeline
      */
     public function addFirst(string $handler): Pipeline
     {
-        $handlerInstance = $this->_register($handler);
+        $handlerInstance = $this->register($handler);
         array_unshift($this->handlers, $handlerInstance);
 
         return $this;
@@ -169,7 +169,7 @@ class Pipeline
      */
     public function addBefore(string $before, string $newPipeline): Pipeline
     {
-        $newPipelineHandler = $this->_register($newPipeline);
+        $newPipelineHandler = $this->register($newPipeline);
         foreach ($this->handlers as $pos => $handler) {
             if ($handler->getName() == $before) {
                 array_splice($this->handlers, $pos, 0, [$newPipelineHandler]);
@@ -190,7 +190,7 @@ class Pipeline
      */
     public function addAfter(string $after, string $newPipeline): Pipeline
     {
-        $newPipelineHandler = $this->_register($newPipeline);
+        $newPipelineHandler = $this->register($newPipeline);
         foreach ($this->handlers as $pos => $handler) {
             if ($handler->getName() == $after) {
                 array_splice($this->handlers, $pos + 1, 0, [$newPipelineHandler]);
@@ -230,7 +230,7 @@ class Pipeline
      */
     public function addLast(string $handler): Pipeline
     {
-        $newHandler = $this->_register($handler);
+        $newHandler = $this->register($handler);
         $this->handlers[] = $newHandler;
 
         return $this;
@@ -246,7 +246,7 @@ class Pipeline
      */
     public function transform(string $segment): string
     {
-        $this->id_number = -1;
+        $this->idNumber = -1;
         foreach ($this->handlers as $handler) {
             $segment = $handler->transform($segment);
         }
@@ -264,8 +264,8 @@ class Pipeline
      */
     protected function realignIDs(string $segment): string
     {
-        if ($this->id_number > -1) {
-            preg_match_all('/"__mtc_[0-9]+"/', $segment, $html, PREG_SET_ORDER);
+        if ($this->idNumber > -1) {
+            preg_match_all('/"__mtc_\d+"/', $segment, $html, PREG_SET_ORDER);
             foreach ($html as $pos => $tag_id) {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace('/' . $tag_id[0] . '/', '"mtc_' . ($pos + 1) . '"', $segment, 1);
@@ -283,7 +283,7 @@ class Pipeline
      *
      * @return T An instantiated handler object with the pipeline set.
      */
-    protected function _register(string $handler): AbstractHandler
+    protected function register(string $handler): AbstractHandler
     {
         $handler = new $handler();
         $handler->setPipeline($this);
