@@ -1006,8 +1006,10 @@ class MateCatFilterTest extends TestCase
         $this->assertEquals($l2_segment, $expected_l2_segment);
 
         $back_to_db_segment_from_l1 = $Filter->fromLayer1ToLayer0($l1_segment);
+        $back_to_l1_from_l2 = $Filter->fromLayer2ToLayer1($l2_segment);
 
         $this->assertEquals($back_to_db_segment_from_l1, $db_segment);
+        $this->assertEquals($back_to_l1_from_l2, $l1_segment);
     }
 
 

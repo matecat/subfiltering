@@ -378,7 +378,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable, MapInterface
      * If the function returns null, no mapping is recorded. If the function itself throws an (unchecked) exception,
      * the exception is rethrown, and no mapping is recorded.
      *
-     * The most common usage is to construct a new object serving as an initial mapped value or memoized result, as in:
+     * The most common usage is to construct a new object serving as an initially mapped value or memoized result, as in:
      *
      * @param string $offset
      * @param callable $callable
@@ -392,7 +392,7 @@ class Map implements ArrayAccess, IteratorAggregate, Countable, MapInterface
         $res = null;
         if (!$exists || $previousValue === null) {
             $res = $callable($offset, $this->get($offset));
-            if ($res != null) {
+            if ($res !== null) {
                 $this->map[$offset] = $res;
             }
         }

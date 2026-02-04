@@ -466,12 +466,50 @@ class MapTest extends TestCase
 
         // if no mapping is present, the callable function will not be invoked
         $res = $m->computeIfPresent('5', function ($k, $v) {
-            $this->assertFalse(true); // this will not be called
-
-            return null;
+            $this->fail(); // this will not be called
         });
         $this->assertNull($res);
         $this->assertCount(4, $m);
+    }
+
+    /**
+     * @test
+     */
+    public function test_compute_if_absent_when_value_is_null()
+    {
+        $m = Map::instance([
+            "null_key" => null,
+        ]);
+
+        $res = $m->computeIfAbsent('null_key', function ($k, $v) {
+            $this->assertEquals('null_key', $k);
+            $this->assertNull($v);
+
+            return 0;
+        });
+
+        $this->assertNull($res);
+        $this->assertSame(0, $m->get('null_key'));
+    }
+
+    /**
+     * @test
+     */
+    public function test_compute_if_present_skips_null_value()
+    {
+        $m = Map::instance([
+            "null_key" => null,
+        ]);
+
+        $res = $m->computeIfPresent('null_key', function () {
+            $this->assertFalse(true);
+
+            return 'should_not_run';
+        });
+
+        $this->assertNull($res);
+        $this->assertTrue($m->containsKey('null_key'));
+        $this->assertNull($m->get('null_key'));
     }
 
     /**
@@ -521,4 +559,54 @@ class MapTest extends TestCase
         Map::instance([1, 2, 3]);
     }
 
+    /**
+     * @test
+     */
+    public function test_constructor_rejects_list_input()
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Invalid map provided');
+
+        new Map([1, 2, 3]);
+    }
+
+    /**
+     * @test
+     */
+    public function test_compute_if_present_updates_value_when_non_null()
+    {
+        $m = Map::instance([
+            "k" => 10,
+        ]);
+
+        $res = $m->computeIfPresent('k', function ($k, $v) {
+            $this->assertEquals('k', $k);
+            $this->assertEquals(10, $v);
+
+            return 20;
+        });
+
+        $this->assertSame(20, $res);
+        $this->assertSame(20, $m->get('k'));
+    }
+
+    /**
+     * @test
+     */
+    public function test_compute_if_present_removes_mapping_on_null_result()
+    {
+        $m = Map::instance([
+            "k" => "v",
+        ]);
+
+        $res = $m->computeIfPresent('k', function ($k, $v) {
+            $this->assertEquals('k', $k);
+            $this->assertEquals('v', $v);
+
+            return null;
+        });
+
+        $this->assertNull($res);
+        $this->assertFalse($m->containsKey('k'));
+    }
 }

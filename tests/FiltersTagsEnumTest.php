@@ -6,6 +6,13 @@ use Matecat\SubFiltering\Filters\MarkupToPh;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\TwigToPh;
+use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
+use Matecat\SubFiltering\Filters\DoublePercentages;
+use Matecat\SubFiltering\Filters\ObjectiveCNSString;
+use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
+use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
+use Matecat\SubFiltering\Filters\Snails;
+use Matecat\SubFiltering\Filters\SquareSprintf;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -121,6 +128,32 @@ class FiltersTagsEnumTest extends TestCase
     {
         // Not present in the reverse map
         $this->assertNull(InjectableFiltersTags::tagForClassName(stdClass::class));
+    }
+
+    /**
+     * Ensures that tagForClassName() covers all mapped handler classes.
+     * @test
+     */
+    public function test_tagForClassNameCoversAllMappedClasses()
+    {
+        $expectedMap = [
+            MarkupToPh::class => 'markup',
+            PercentDoubleCurlyBrackets::class => 'percent_double_curly',
+            TwigToPh::class => 'twig',
+            RubyOnRailsI18n::class => 'ruby_on_rails',
+            Snails::class => 'double_snail',
+            DoubleSquareBrackets::class => 'double_square',
+            DollarCurlyBrackets::class => 'dollar_curly',
+            SingleCurlyBracketsToPh::class => 'single_curly',
+            ObjectiveCNSString::class => 'objective_c_ns',
+            DoublePercentages::class => 'double_percent',
+            SquareSprintf::class => 'square_sprintf',
+            SprintfToPH::class => 'sprintf',
+        ];
+
+        foreach ($expectedMap as $className => $tagName) {
+            $this->assertSame($tagName, InjectableFiltersTags::tagForClassName($className));
+        }
     }
 
     /**

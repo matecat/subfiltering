@@ -88,7 +88,7 @@ class DataRefReplacer
             // 4. replace pc tags
             $string = $this->replaceOpeningPcTags($string);
             $string = $this->replaceClosingPcTags($string, $dataRefEndMap);
-        } catch (Exception) {
+        } catch (Exception) { // @codeCoverageIgnore
             // if something fails here, do not throw an exception and return the original string instead
         } finally {
             return $string;

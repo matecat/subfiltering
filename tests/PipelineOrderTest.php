@@ -43,6 +43,13 @@ class PipelineOrderTest extends TestCase
         $this->channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
     }
 
+    public function testGetters()
+    {
+        $this->assertEquals('it-IT', $this->channel->getSource());
+        $this->assertEquals('en-US', $this->channel->getTarget());
+        $this->assertEquals([], $this->channel->getDataRefMap());
+    }
+
     /**
      * @test
      */

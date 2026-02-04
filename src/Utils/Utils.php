@@ -6,17 +6,6 @@ class Utils
 {
 
     /**
-     * @param string $needle
-     * @param string $haystack
-     *
-     * @return bool
-     */
-    public static function contains(string $needle, string $haystack): bool
-    {
-        return str_contains($haystack, $needle);
-    }
-
-    /**
      * Get the char code from a multibyte char
      *
      * 2/3 times faster than the old implementation

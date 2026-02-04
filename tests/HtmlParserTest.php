@@ -62,6 +62,8 @@ class HtmlParserTest extends TestCase
         $str = $pipeline->transform($segment);
 
         $this->assertEquals($expected, $str);
+
+        $this->assertTrue($pipeline->segmentContainsMarkup());
     }
 
     /**
