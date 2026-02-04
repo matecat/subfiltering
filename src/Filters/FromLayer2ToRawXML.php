@@ -42,7 +42,7 @@ class FromLayer2ToRawXML extends AbstractHandler
         );
 
         // now convert the real &nbsp;
-        return str_replace(ConstantEnum::nbspPlaceholder, Utils::unicode2chr(0Xa0), $segment);
+        return str_replace(ConstantEnum::nbspPlaceholder->value, Utils::unicode2chr(0Xa0), $segment);
     }
 
 }

@@ -95,11 +95,11 @@ class MyMemoryFilterTest extends TestCase
 
         // A handler set that is missing the PercentDoubleCurlyBrackets handler, to test the Airbnb 'if' branch
         $handlersWithoutVariables = array_filter($defaultHandlers, function ($handler) {
-            return $handler !== InjectableFiltersTags::percent_double_curly;
+            return $handler !== InjectableFiltersTags::percent_double_curly->value;
         });
 
         // A handler set that already includes SingleCurlyBracketsToPh
-        $handlersWithSingleCurly = array_merge($defaultHandlers, [InjectableFiltersTags::single_curly]);
+        $handlersWithSingleCurly = array_merge($defaultHandlers, [InjectableFiltersTags::single_curly->value]);
 
         return [
             [
@@ -201,7 +201,7 @@ class MyMemoryFilterTest extends TestCase
         $segment = "This is a {placeholder}";
         $segmentL1 = $filter->fromLayer0ToLayer1($segment, 'roblox');
 
-        $string_from_UI = 'This is a <ph id="mtc_1" ctype="' . CTypeEnum::CURLY_BRACKETS . '" equiv-text="base64:e3BsYWNlaG9sZGVyfQ=="/>';
+        $string_from_UI = 'This is a <ph id="mtc_1" ctype="' . CTypeEnum::CURLY_BRACKETS->value . '" equiv-text="base64:e3BsYWNlaG9sZGVyfQ=="/>';
 
         $this->assertEquals($segmentL1, $string_from_UI);
         $this->assertEquals($segment, $filter->fromLayer1ToLayer0($segmentL1));
@@ -217,7 +217,7 @@ class MyMemoryFilterTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment = 'Airbnb account.%{\n}%{&lt;br&gt;}%{\n}1) From ';
-        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>1) From ';
+        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="' . CTypeEnum::HTML->value . '" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtcbn0="/>1) From ';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment, 'airbnb'));
@@ -251,7 +251,7 @@ class MyMemoryFilterTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment = 'This syntax %%customer.first_name%% is still valid';
-        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="' . CTypeEnum::PERCENTAGES . '" equiv-text="base64:JSVjdXN0b21lci5maXJzdF9uYW1lJSU="/> is still valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="' . CTypeEnum::PERCENTAGES->value . '" equiv-text="base64:JSVjdXN0b21lci5maXJzdF9uYW1lJSU="/> is still valid';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
@@ -302,7 +302,7 @@ class MyMemoryFilterTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment = 'This syntax @@this_is_a_variable@@ is valid';
-        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="' . CTypeEnum::SNAILS . '" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
+        $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="' . CTypeEnum::SNAILS->value . '" equiv-text="base64:QEB0aGlzX2lzX2FfdmFyaWFibGVAQA=="/> is valid';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
@@ -313,7 +313,7 @@ class MyMemoryFilterTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment = 'Save up to {{|discount|}} with these hotels';
-        $segment_from_UI = 'Save up to <ph id="mtc_1" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
+        $segment_from_UI = 'Save up to <ph id="mtc_1" ctype="' . CTypeEnum::TWIG->value . '" equiv-text="base64:e3t8ZGlzY291bnR8fX0="/> with these hotels';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
@@ -324,7 +324,7 @@ class MyMemoryFilterTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment = 'This string: %@ is a IOS placeholder %@.';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/>.';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JUA="/>.';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
@@ -335,7 +335,7 @@ class MyMemoryFilterTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
-        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTE0MzQzJEA="/>';
+        $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTE0MzQzJEA="/>';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
@@ -345,7 +345,7 @@ class MyMemoryFilterTest extends TestCase
     {
         $filter = $this->getFilterInstance();
         $db_segment = '&lt;x id="1"/&gt;&lt;g id="2"&gt;As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
-        $segment_received = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/><ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2cgaWQ9IjIiJmd0Ow=="/>As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
+        $segment_received = '<ph id="mtc_1" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:Jmx0O3ggaWQ9IjEiLyZndDs="/><ph id="mtc_2" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:Jmx0O2cgaWQ9IjIiJmd0Ow=="/>As soon as the tickets are available to the sellers, they will be able to execute the transfer to you. ';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_received));
         $this->assertEquals($segment_received, $filter->fromLayer0ToLayer1($db_segment));
@@ -363,7 +363,7 @@ class MyMemoryFilterTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment = 'This string contains [[placeholder]]';
-        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOUBLE_SQUARE_BRACKETS . '" equiv-text="base64:W1twbGFjZWhvbGRlcl1d"/>';
+        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOUBLE_SQUARE_BRACKETS->value . '" equiv-text="base64:W1twbGFjZWhvbGRlcl1d"/>';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
@@ -374,7 +374,7 @@ class MyMemoryFilterTest extends TestCase
 //        $filter = $this->getFilterInstance();
 //
 //        $db_segment      = 'This string contains __placeholder_one__';
-//        $segment_from_UI      = 'This string contains <ph id="mtc_1" ctype="'.CTypeEnum::DOUBLE_UNDERSCORE.'" equiv-text="base64:X19wbGFjZWhvbGRlcl9vbmVfXw=="/>';
+//        $segment_from_UI      = 'This string contains <ph id="mtc_1" ctype="'.CTypeEnum::DOUBLE_UNDERSCORE.'"->value equiv-text="base64:X19wbGFjZWhvbGRlcl9vbmVfXw=="/>';
 //
 //        $this->assertEquals( $db_segment, $filter->fromLayer1ToLayer0( $segment_from_UI ) );
 //        $this->assertEquals( $segment_from_UI, $filter->fromLayer0ToLayer1( $db_segment ) );
@@ -385,7 +385,7 @@ class MyMemoryFilterTest extends TestCase
         $filter = $this->getFilterInstance();
 
         $db_segment = 'This string contains ${placeholder_one}';
-        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOLLAR_CURLY_BRACKETS . '" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
+        $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOLLAR_CURLY_BRACKETS->value . '" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
@@ -427,7 +427,7 @@ class MyMemoryFilterTest extends TestCase
 
         foreach ($tags as $tag) {
             $db_segment = 'Ciao ' . $tag;
-            $segment_from_UI = 'Ciao <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:' . base64_encode(
+            $segment_from_UI = 'Ciao <ph id="mtc_1" ctype="' . CTypeEnum::SQUARE_SPRINTF->value . '" equiv-text="base64:' . base64_encode(
                     $tag
                 ) . '"/>';
 

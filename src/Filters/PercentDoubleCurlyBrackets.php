@@ -25,7 +25,7 @@ class PercentDoubleCurlyBrackets extends AbstractHandler
             $segment = preg_replace(
                 '/' . preg_quote($variable[0], '/') . '/',
                 '<ph id="' . $this->getPipeline()->getNextId(
-                ) . '" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:' . base64_encode(
+                ) . '" ctype="' . CTypeEnum::PERCENT_VARIABLE->value . '" equiv-text="base64:' . base64_encode(
                     $variable[0]
                 ) . "\"/>",
                 $segment,

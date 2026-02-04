@@ -38,12 +38,12 @@ class TwigToPh extends AbstractHandler
         preg_match_all('/{{[^<>!{}]+?}}|{%[^<>!%]+?%}|{#[^<>!#]+?#}/', $segment, $html, PREG_SET_ORDER);
         foreach ($html as $pos => $twig_variable) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
-            if (!strstr($twig_variable[0], ConstantEnum::GTPLACEHOLDER)) {
+            if (!strstr($twig_variable[0], ConstantEnum::GTPLACEHOLDER->value)) {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
                     '/' . preg_quote($twig_variable[0], '/') . '/',
                     '<ph id="' . $this->getPipeline()->getNextId(
-                    ) . '" ctype="' . CTypeEnum::TWIG . '" equiv-text="base64:' . base64_encode(
+                    ) . '" ctype="' . CTypeEnum::TWIG->value . '" equiv-text="base64:' . base64_encode(
                         $twig_variable[0]
                     ) . '"/>',
                     $segment,

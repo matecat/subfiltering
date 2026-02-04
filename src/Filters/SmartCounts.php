@@ -24,7 +24,7 @@ class SmartCounts extends AbstractHandler
             $segment = preg_replace(
                 '/' . preg_quote($variable[0], '/') . '/',
                 '<ph id="' . $this->getPipeline()->getNextId(
-                ) . '" ctype="' . CTypeEnum::SMART_COUNT . '" equiv-text="base64:' . base64_encode(
+                ) . '" ctype="' . CTypeEnum::SMART_COUNT->value . '" equiv-text="base64:' . base64_encode(
                     $variable[0]
                 ) . "\"/>",
                 $segment,

@@ -19,6 +19,6 @@ class SplitPlaceholder extends AbstractHandler
      */
     public function transform(string $segment): string
     {
-        return str_replace(ConstantEnum::splitPlaceHolder, "", $segment);
+        return str_replace(ConstantEnum::splitPlaceHolder->value, "", $segment);
     }
 }

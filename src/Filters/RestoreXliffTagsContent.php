@@ -23,11 +23,11 @@ class RestoreXliffTagsContent extends AbstractHandler
     {
         //base64 decode of the tag content to avoid unwanted manipulation
         return preg_replace_callback(
-            '/' . ConstantEnum::LTPLACEHOLDER . '(.*?)' . ConstantEnum::GTPLACEHOLDER . '/u',
+            '/' . ConstantEnum::LTPLACEHOLDER->value . '(.*?)' . ConstantEnum::GTPLACEHOLDER->value . '/u',
             function ($matches) {
                 $_match = base64_decode($matches[1]);
 
-                return ConstantEnum::LTPLACEHOLDER . $_match . ConstantEnum::GTPLACEHOLDER;
+                return ConstantEnum::LTPLACEHOLDER->value . $_match . ConstantEnum::GTPLACEHOLDER->value;
             },
             $segment
         );

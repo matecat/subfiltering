@@ -130,13 +130,13 @@ class DataRefReplacer
             // accept only those tags
             switch ($node->tagName) {
                 case 'ph':
-                    $ctype = CTypeEnum::PH_DATA_REF;
+                    $ctype = CTypeEnum::PH_DATA_REF->value;
                     break;
                 case 'sc':
-                    $ctype = CTypeEnum::SC_DATA_REF;
+                    $ctype = CTypeEnum::SC_DATA_REF->value;
                     break;
                 case 'ec':
-                    $ctype = CTypeEnum::EC_DATA_REF;
+                    $ctype = CTypeEnum::EC_DATA_REF->value;
                     break;
                 default:
                     return $string;
@@ -205,7 +205,7 @@ class DataRefReplacer
                     $node->node,
                     $attributesMap->get('id'),
                     $dataRefStartValue,
-                    CTypeEnum::PC_SELF_CLOSE_DATA_REF,
+                    CTypeEnum::PC_SELF_CLOSE_DATA_REF->value,
                     $string
                 );
             }
@@ -286,7 +286,7 @@ class DataRefReplacer
                     $match,
                     $attributesMap->get('id'),
                     $this->map->getOrDefault($node->attributes['dataRefStart'], 'NULL'),
-                    CTypeEnum::PC_OPEN_DATA_REF,
+                    CTypeEnum::PC_OPEN_DATA_REF->value,
                     $string
                 );
             }
@@ -320,7 +320,7 @@ class DataRefReplacer
                     '</pc>',
                     $attr['id'],
                     $this->map->getOrDefault($attr['dataRefEnd'], 'NULL'),
-                    CTypeEnum::PC_CLOSE_DATA_REF,
+                    CTypeEnum::PC_CLOSE_DATA_REF->value,
                     '_2'
                 );
 

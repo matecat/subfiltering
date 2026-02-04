@@ -42,7 +42,7 @@ class ObjectiveCNSString extends AbstractHandler
             $segment = preg_replace(
                 '/' . preg_quote($percentNumberSnailVariable[0], '/') . '/',
                 '<ph id="' . $this->getPipeline()->getNextId(
-                ) . '" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:' . base64_encode(
+                ) . '" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:' . base64_encode(
                     $percentNumberSnailVariable[0]
                 ) . '"/>',
                 $segment,

@@ -15,6 +15,8 @@ class DataRefRestore extends AbstractHandler
      */
     private array $dataRefMap = [];
 
+    private const string REGEXP = '|<ph[^>]+? ctype="%s" equiv-text="base64:(.*?)"/>|iu';
+
     /**
      * DataRefReplace constructor.
      */
@@ -65,7 +67,7 @@ class DataRefRestore extends AbstractHandler
     private function restoreXliffPhTagsFromMatecatPhTags(string $segment): string
     {
         preg_match_all(
-            '|<ph[^>]+? ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:(.*?)"/>|iu',
+            sprintf(self::REGEXP, CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value),
             $segment,
             $matches
         );
@@ -101,12 +103,12 @@ class DataRefRestore extends AbstractHandler
     {
         $matches = [];
         preg_match_all(
-            '|<ph[^>]+? ctype="' . CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF . '" equiv-text="base64:(.*?)"/>|iu',
+            sprintf(self::REGEXP, CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF->value),
             $segment,
             $open_matches
         );
         preg_match_all(
-            '|<ph[^>]+? ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF . '" equiv-text="base64:(.*?)"/>|iu',
+            sprintf(self::REGEXP, CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF->value),
             $segment,
             $close_matches
         );

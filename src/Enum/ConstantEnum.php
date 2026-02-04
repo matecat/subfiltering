@@ -3,23 +3,21 @@
 namespace Matecat\SubFiltering\Enum;
 
 
-class ConstantEnum
+enum ConstantEnum: string
 {
+    case INTERNAL_ATTR_ID_PREFIX = '__mtc_';
+    case LTPLACEHOLDER = '##LESSTHAN##';
+    case GTPLACEHOLDER = '##GREATERTHAN##';
+    case AMPPLACEHOLDER = '##AMPPLACEHOLDER##';
 
-    const INTERNAL_ATTR_ID_PREFIX = '__mtc_';
-    const LTPLACEHOLDER = "##LESSTHAN##";
-    const GTPLACEHOLDER = "##GREATERTHAN##";
-    const AMPPLACEHOLDER = "##AMPPLACEHOLDER##";
+    case lfPlaceholder = '##$_0A$##';
+    case crPlaceholder = '##$_0D$##';
+    case crlfPlaceholder = '##$_0D0A$##';
+    case tabPlaceholder = '##$_09$##';
+    case nbspPlaceholder = '##$_A0$##';
 
-    const lfPlaceholder = '##$_0A$##';
-    const crPlaceholder = '##$_0D$##';
-    const crlfPlaceholder = '##$_0D0A$##';
-    const tabPlaceholder = '##$_09$##';
-    const nbspPlaceholder = '##$_A0$##';
+    case splitPlaceHolder = '##$_SPLIT$##';
 
-    const splitPlaceHolder = '##$_SPLIT$##';
-
-    const xliffInXliffStartPlaceHolder = '##XLIFFTAGPLACEHOLDER_START##';
-    const xliffInXliffEndPlaceHolder = '##XLIFFTAGPLACEHOLDER_END##';
-
+    case xliffInXliffStartPlaceHolder = '##XLIFFTAGPLACEHOLDER_START##';
+    case xliffInXliffEndPlaceHolder = '##XLIFFTAGPLACEHOLDER_END##';
 }

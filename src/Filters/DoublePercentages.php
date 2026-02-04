@@ -38,12 +38,12 @@ class DoublePercentages extends AbstractHandler
         ); // removed single percentage support '/(?<!{)%[^<>\s%]+?%/'
         foreach ($html as $percentage_variable) {
             //check if inside the variable there is a tag because in this case shouldn't replace the content with a PH tag
-            if (!strstr($percentage_variable[0], ConstantEnum::GTPLACEHOLDER)) {
+            if (!strstr($percentage_variable[0], ConstantEnum::GTPLACEHOLDER->value)) {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
                     '/' . preg_quote($percentage_variable[0], '/') . '/',
                     '<ph id="' . $this->getPipeline()->getNextId(
-                    ) . '" ctype="' . CTypeEnum::PERCENTAGES . '" equiv-text="base64:' . base64_encode(
+                    ) . '" ctype="' . CTypeEnum::PERCENTAGES->value . '" equiv-text="base64:' . base64_encode(
                         $percentage_variable[0]
                     ) . '"/>',
                     $segment,

@@ -131,12 +131,12 @@ class HandlersSorterTest extends TestCase
     {
         // Prepare a mixed set of known tags and an unknown one
         $tags = [
-            InjectableFiltersTags::double_percent,
+            InjectableFiltersTags::double_percent->value,
             'non_existing_tag', // unknown
-            InjectableFiltersTags::ruby_on_rails,
-            InjectableFiltersTags::double_square,
-            InjectableFiltersTags::sprintf,
-            InjectableFiltersTags::dollar_curly,
+            InjectableFiltersTags::ruby_on_rails->value,
+            InjectableFiltersTags::double_square->value,
+            InjectableFiltersTags::sprintf->value,
+            InjectableFiltersTags::dollar_curly->value,
         ];
 
         // Map tags to handler class names using the enum

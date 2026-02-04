@@ -77,7 +77,7 @@ class DataRefReplace extends AbstractHandler
                 $segment = preg_replace(
                     '/' . preg_quote($phTag, '/') . '/',
                     '<ph id="' . $this->getPipeline()->getNextId() .
-                    '" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF .
+                    '" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value .
                     '" equiv-text="base64:' . base64_encode($phTag) .
                     '"/>',
                     $segment,
@@ -154,7 +154,7 @@ class DataRefReplace extends AbstractHandler
             $segment = preg_replace(
                 '/' . preg_quote($openingPcTag, '/') . '/',
                 '<ph id="' . $this->getPipeline()->getNextId() .
-                '" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF .
+                '" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF->value .
                 '" equiv-text="base64:' . base64_encode($openingPcTag) .
                 '"/>',
                 $segment,
@@ -166,7 +166,7 @@ class DataRefReplace extends AbstractHandler
             $segment = preg_replace(
                 '/' . preg_quote($closingPcTag, '/') . '/',
                 '<ph id="' . $this->getPipeline()->getNextId() .
-                '" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF .
+                '" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF->value .
                 '" equiv-text="base64:' . base64_encode($closingPcTag) .
                 '"/>',
                 $segment,

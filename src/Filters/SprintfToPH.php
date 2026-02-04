@@ -47,7 +47,7 @@ class SprintfToPH extends AbstractHandler
             $segment = preg_replace(
                 '/' . preg_quote($variable[0], '/') . '/',
                 '<ph id="' . $this->getPipeline()->getNextId(
-                ) . '" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:' . base64_encode($variable[0]) . '"/>',
+                ) . '" ctype="' . CTypeEnum::SPRINTF->value . '" equiv-text="base64:' . base64_encode($variable[0]) . '"/>',
                 $segment,
                 1
             );

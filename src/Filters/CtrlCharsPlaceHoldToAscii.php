@@ -15,11 +15,11 @@ class CtrlCharsPlaceHoldToAscii extends AbstractHandler
     public function transform(string $segment): string
     {
         //Replace br placeholders
-        $segment = str_replace(ConstantEnum::crlfPlaceholder, "\r\n", $segment);
-        $segment = str_replace(ConstantEnum::lfPlaceholder, "\n", $segment);
-        $segment = str_replace(ConstantEnum::crPlaceholder, "\r", $segment);
+        $segment = str_replace(ConstantEnum::crlfPlaceholder->value, "\r\n", $segment);
+        $segment = str_replace(ConstantEnum::lfPlaceholder->value, "\n", $segment);
+        $segment = str_replace(ConstantEnum::crPlaceholder->value, "\r", $segment);
 
-        return str_replace(ConstantEnum::tabPlaceholder, "\t", $segment);
+        return str_replace(ConstantEnum::tabPlaceholder->value, "\t", $segment);
     }
 
 }

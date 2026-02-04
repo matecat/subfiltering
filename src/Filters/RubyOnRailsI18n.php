@@ -40,12 +40,12 @@ class RubyOnRailsI18n extends AbstractHandler
         preg_match_all('/%{(?!<ph )[^{}]*?}/', $segment, $html, PREG_SET_ORDER);
         foreach ($html as $ruby_variable) {
             //check if inside the variable there is a tag because in this case shouldn't replace the content with a PH tag
-            if (!strstr($ruby_variable[0], ConstantEnum::GTPLACEHOLDER)) {
+            if (!strstr($ruby_variable[0], ConstantEnum::GTPLACEHOLDER->value)) {
                 //replace subsequent elements excluding already encoded
                 $segment = preg_replace(
                     '/' . preg_quote($ruby_variable[0], '/') . '/',
                     '<ph id="' . $this->getPipeline()->getNextId(
-                    ) . '" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:' . base64_encode(
+                    ) . '" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:' . base64_encode(
                         $ruby_variable[0]
                     ) . '"/>',
                     $segment,

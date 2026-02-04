@@ -35,7 +35,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler
                 $segment = preg_replace(
                     '/' . preg_quote($group[0], '/') . '/',
                     '<ph id="' . $this->getPipeline()->getNextId(
-                    ) . '" ctype="' . CTypeEnum::ORIGINAL_PH_CONTENT . '" x-orig="' . base64_encode(
+                    ) . '" ctype="' . CTypeEnum::ORIGINAL_PH_CONTENT->value . '" x-orig="' . base64_encode(
                         $group[0]
                     ) . '" equiv-text="base64:' .
                     base64_encode(htmlentities($group[2], ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8')) .
@@ -69,7 +69,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler
             $segment = preg_replace(
                 '/' . preg_quote($tag_attribute[0], '/') . '/',
                 '<ph id="' . $this->getPipeline()->getNextId(
-                ) . '" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT . '" x-orig="' . base64_encode(
+                ) . '" ctype="' . CTypeEnum::ORIGINAL_SELF_CLOSE_PH_WITH_EQUIV_TEXT->value . '" x-orig="' . base64_encode(
                     $tag_attribute[0]
                 ) . '" equiv-text="base64:' .
                 base64_encode(($tag_attribute[2] ?? '') != '' ? $tag_attribute[2] : 'NULL') .

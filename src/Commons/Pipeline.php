@@ -87,7 +87,7 @@ class Pipeline
     {
         $this->id_number++;
 
-        return ConstantEnum::INTERNAL_ATTR_ID_PREFIX . $this->id_number;
+        return ConstantEnum::INTERNAL_ATTR_ID_PREFIX->value . $this->id_number;
     }
 
     /**

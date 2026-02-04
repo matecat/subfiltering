@@ -34,16 +34,16 @@ class SpecialEntitiesToPlaceholdersForView extends AbstractHandler
                 '&#x09;'
             ],
             [
-                ConstantEnum::lfPlaceholder,
-                ConstantEnum::crPlaceholder,
-                ConstantEnum::nbspPlaceholder,
-                ConstantEnum::lfPlaceholder,
-                ConstantEnum::crPlaceholder,
-                ConstantEnum::nbspPlaceholder,
-                ConstantEnum::nbspPlaceholder,
-                ConstantEnum::tabPlaceholder,
-                ConstantEnum::tabPlaceholder,
-                ConstantEnum::tabPlaceholder,
+                ConstantEnum::lfPlaceholder->value,
+                ConstantEnum::crPlaceholder->value,
+                ConstantEnum::nbspPlaceholder->value,
+                ConstantEnum::lfPlaceholder->value,
+                ConstantEnum::crPlaceholder->value,
+                ConstantEnum::nbspPlaceholder->value,
+                ConstantEnum::nbspPlaceholder->value,
+                ConstantEnum::tabPlaceholder->value,
+                ConstantEnum::tabPlaceholder->value,
+                ConstantEnum::tabPlaceholder->value,
             ],
             $segment
         );

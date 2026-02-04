@@ -82,7 +82,7 @@ class MarkupToPh extends AbstractHandler
         $isHTML       = $this->isHTML;
         $this->isHTML = false;
 
-        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . ( $isHTML ? CTypeEnum::HTML : CTypeEnum::XML ) . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+        return '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . ( $isHTML ? CTypeEnum::HTML->value : CTypeEnum::XML->value ) . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
     }
 
     /**
@@ -131,7 +131,7 @@ class MarkupToPh extends AbstractHandler
         // content is not yet restored, so we must not treat it as a valid, final tag.
         // For example, an original string like '&lt;a href="<x/>"&gt;' could become
         // '<a href="##LESSTHAN##x/##GREATERTHAN##">', which should not be converted to a <ph> tag.
-        if (str_contains($buffer, ConstantEnum::LTPLACEHOLDER) || str_contains($buffer, ConstantEnum::GTPLACEHOLDER)) {
+        if (str_contains($buffer, ConstantEnum::LTPLACEHOLDER->value) || str_contains($buffer, ConstantEnum::GTPLACEHOLDER->value)) {
             return false;
         }
 

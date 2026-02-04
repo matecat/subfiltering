@@ -55,7 +55,7 @@ class HtmlParserTest extends TestCase
         // WARNING the href attribute MUST NOT BE encoded because we want to only extract HTML
         // WARNING the text node inside HTML must remain untouched
         $segment = "<p> Airbnb &amp;amp; Co. &amp;lt; <strong>Use professional tools</strong> in your <a href=\"/users/settings?test=123&amp;amp;ciccio=1\" target=\"_blank\">";
-        $expected = "<ph id=\"mtc_1\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> Airbnb &amp;amp; Co. &amp;lt; <ph id=\"mtc_2\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/>Use professional tools<ph id=\"mtc_3\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/> in your <ph id=\"mtc_4\" ctype=\"" . CTypeEnum::HTML . "\" equiv-text=\"base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs=\"/>";
+        $expected = "<ph id=\"mtc_1\" ctype=\"" . CTypeEnum::HTML->value . "\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> Airbnb &amp;amp; Co. &amp;lt; <ph id=\"mtc_2\" ctype=\"" . CTypeEnum::HTML->value . "\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/>Use professional tools<ph id=\"mtc_3\" ctype=\"" . CTypeEnum::HTML->value . "\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/> in your <ph id=\"mtc_4\" ctype=\"" . CTypeEnum::HTML->value . "\" equiv-text=\"base64:Jmx0O2EgaHJlZj0iL3VzZXJzL3NldHRpbmdzP3Rlc3Q9MTIzJmFtcDthbXA7Y2ljY2lvPTEiIHRhcmdldD0iX2JsYW5rIiZndDs=\"/>";
 
         $pipeline = new Pipeline();
         $pipeline->addLast(MarkupToPh::class);
@@ -78,7 +78,7 @@ class HtmlParserTest extends TestCase
 h1 {color:blue;}p{color:red;}
 </style>";
 
-        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3N0eWxlJmd0O2JvZHl7YmFja2dyb3VuZC1jb2xvcjpwb3dkZXJibHVlO30gCmgxIHtjb2xvcjpibHVlO31we2NvbG9yOnJlZDt9CiZsdDsvc3R5bGUmZ3Q7"/>';
+        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML->value . '" equiv-text="base64:Jmx0O3N0eWxlJmd0O2JvZHl7YmFja2dyb3VuZC1jb2xvcjpwb3dkZXJibHVlO30gCmgxIHtjb2xvcjpibHVlO31we2NvbG9yOnJlZDt9CiZsdDsvc3R5bGUmZ3Q7"/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast(MarkupToPh::class);
@@ -112,7 +112,7 @@ h1 {color:blue;}p{color:red;}
     {
         $segment = "<style0>this is a test text inside a custom XML tag similar to a style HTML tag</style0>";
 
-        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3N0eWxlMCZndDs="/>this is a test text inside a custom XML tag similar to a style HTML tag<ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9zdHlsZTAmZ3Q7"/>';
+        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:Jmx0O3N0eWxlMCZndDs="/>this is a test text inside a custom XML tag similar to a style HTML tag<ph id="mtc_2" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:Jmx0Oy9zdHlsZTAmZ3Q7"/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast(MarkupToPh::class);
@@ -136,7 +136,7 @@ h1 {color:blue;}p{color:red;}
 let elements = document.getElementsByClassName('note');
 </script>";
 
-        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O3NjcmlwdCZndDsKbGV0IGVsZW1lbnRzID0gZG9jdW1lbnQuZ2V0RWxlbWVudHNCeUNsYXNzTmFtZSgnbm90ZScpOwombHQ7L3NjcmlwdCZndDs="/>';
+        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::HTML->value . '" equiv-text="base64:Jmx0O3NjcmlwdCZndDsKbGV0IGVsZW1lbnRzID0gZG9jdW1lbnQuZ2V0RWxlbWVudHNCeUNsYXNzTmFtZSgnbm90ZScpOwombHQ7L3NjcmlwdCZndDs="/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast(MarkupToPh::class);
@@ -153,7 +153,7 @@ let elements = document.getElementsByClassName('note');
     {
         $segment = "<scripting>let elements = document.getElementsByClassName('note');</scripting>";
 
-        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O3NjcmlwdGluZyZndDs="/>let elements = document.getElementsByClassName(\'note\');<ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9zY3JpcHRpbmcmZ3Q7"/>';
+        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:Jmx0O3NjcmlwdGluZyZndDs="/>let elements = document.getElementsByClassName(\'note\');<ph id="mtc_2" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:Jmx0Oy9zY3JpcHRpbmcmZ3Q7"/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast(MarkupToPh::class);
@@ -166,7 +166,7 @@ let elements = document.getElementsByClassName('note');
     public function testWithDoublePoints()
     {
         $segment = "<l:style1>test</l:style1>";
-        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0O2w6c3R5bGUxJmd0Ow=="/>test<ph id="mtc_2" ctype="' . CTypeEnum::XML . '" equiv-text="base64:Jmx0Oy9sOnN0eWxlMSZndDs="/>';
+        $expected = '<ph id="mtc_1" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:Jmx0O2w6c3R5bGUxJmd0Ow=="/>test<ph id="mtc_2" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:Jmx0Oy9sOnN0eWxlMSZndDs="/>';
 
         $pipeline = new Pipeline();
         $pipeline->addLast(MarkupToPh::class);
@@ -198,7 +198,7 @@ let elements = document.getElementsByClassName('note');
             'A&gt;B plain text. ' .
 
             // 2. A valid opening <p> tag, which becomes a placeholder.
-            '<ph id="mtc_1" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode(
+            '<ph id="mtc_1" ctype="' . CTypeEnum::HTML->value . '" equiv-text="base64:' . base64_encode(
                 htmlentities("<p class='c1\"c2'>", ENT_NOQUOTES | 16)
             ) . '"/>' .
 
@@ -206,7 +206,7 @@ let elements = document.getElementsByClassName('note');
             'valid tag' .
 
             // 4. A valid closing </p> tag.
-            '<ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode(
+            '<ph id="mtc_2" ctype="' . CTypeEnum::HTML->value . '" equiv-text="base64:' . base64_encode(
                 htmlentities("</p>", ENT_NOQUOTES | 16)
             ) . '"/>' .
 
@@ -214,17 +214,17 @@ let elements = document.getElementsByClassName('note');
             ' ' .
 
             // 6. A comment block, which becomes a placeholder.
-            '<ph id="mtc_3" ctype="' . CTypeEnum::XML . '" equiv-text="base64:' . base64_encode(
+            '<ph id="mtc_3" ctype="' . CTypeEnum::XML->value . '" equiv-text="base64:' . base64_encode(
                 htmlentities("<!-- comment -->", ENT_NOQUOTES | 16)
             ) . '"/>' .
 
             // 7. A script block.
-            '<ph id="mtc_4" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode(
+            '<ph id="mtc_4" ctype="' . CTypeEnum::HTML->value . '" equiv-text="base64:' . base64_encode(
                 htmlentities("<script>js</script>", ENT_NOQUOTES | 16)
             ) . '"/>' .
 
             // 8. A style block.
-            '<ph id="mtc_5" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:' . base64_encode(
+            '<ph id="mtc_5" ctype="' . CTypeEnum::HTML->value . '" equiv-text="base64:' . base64_encode(
                 htmlentities("<style>css</style>", ENT_NOQUOTES | 16)
             ) . '"/>' .
 

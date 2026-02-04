@@ -38,7 +38,7 @@ class SquareSprintf extends AbstractHandler
             $segment = preg_replace(
                 '/' . preg_quote($squaredSprintf[0], '/') . '/',
                 '<ph id="' . $this->getPipeline()->getNextId(
-                ) . '" ctype="' . CTypeEnum::SQUARE_SPRINTF . '" equiv-text="base64:' . base64_encode(
+                ) . '" ctype="' . CTypeEnum::SQUARE_SPRINTF->value . '" equiv-text="base64:' . base64_encode(
                     $squaredSprintf[0]
                 ) . '"/>',
                 $segment,

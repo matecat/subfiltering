@@ -172,18 +172,18 @@ class FiltersTagsEnumTest extends TestCase
     public function test_getTagsReturnsAllTagKeysInOrder()
     {
         $expected = [
-            InjectableFiltersTags::markup,
-            InjectableFiltersTags::percent_double_curly,
-            InjectableFiltersTags::twig,
-            InjectableFiltersTags::ruby_on_rails,
-            InjectableFiltersTags::double_snail,
-            InjectableFiltersTags::double_square,
-            InjectableFiltersTags::dollar_curly,
-            InjectableFiltersTags::single_curly,
-            InjectableFiltersTags::objective_c_ns,
-            InjectableFiltersTags::double_percent,
-            InjectableFiltersTags::square_sprintf,
-            InjectableFiltersTags::sprintf,
+            InjectableFiltersTags::markup->value,
+            InjectableFiltersTags::percent_double_curly->value,
+            InjectableFiltersTags::twig->value,
+            InjectableFiltersTags::ruby_on_rails->value,
+            InjectableFiltersTags::double_snail->value,
+            InjectableFiltersTags::double_square->value,
+            InjectableFiltersTags::dollar_curly->value,
+            InjectableFiltersTags::single_curly->value,
+            InjectableFiltersTags::objective_c_ns->value,
+            InjectableFiltersTags::double_percent->value,
+            InjectableFiltersTags::square_sprintf->value,
+            InjectableFiltersTags::sprintf->value,
         ];
 
         $this->assertSame($expected, InjectableFiltersTags::getTags());
