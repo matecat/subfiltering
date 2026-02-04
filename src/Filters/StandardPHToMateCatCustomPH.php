@@ -59,7 +59,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler
     private function filterOriginalSelfClosePhTagsWithEquivText(string $segment): string
     {
         preg_match_all(
-            '|<ph[^>]+?equiv-text\s*?=\s*?(["\'])(?!base64:)(.*?)?\1[^>]*?/>|',
+            '|<ph[^>]+?equiv-text\s*?=\s*?(["\'])(?!base64:)(.+?)?\1[^>]*?/>|',
             $segment,
             $html,
             PREG_SET_ORDER
