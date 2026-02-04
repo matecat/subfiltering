@@ -2,7 +2,9 @@
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=matecat_subfiltering&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=matecat_subfiltering)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=matecat_subfiltering&metric=coverage)](https://sonarcloud.io/summary/new_code?id=matecat_subfiltering)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=matecat_subfiltering&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=matecat_subfiltering)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=matecat_subfiltering&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=matecat_subfiltering)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=matecat_subfiltering&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=matecat_subfiltering)
+
 
 Subfiltering is a component used by Matecat and MyMemory for converting strings between the database, external services, and the UI layers. 
 It provides a pipeline of filters to safely transform content across these layers while preserving XLIFF tags, HTML placeholders, and special entities.
