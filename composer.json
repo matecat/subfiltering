@@ -31,7 +31,7 @@
   "require": {
     "php": ">=8.3",
     "matecat/emoji-to-entity-converter": "^1",
-    "matecat/xml-dom-parser": "^1",
+    "matecat/xml-dom-parser": "^2",
     "phpstan/phpstan": "^2",
     "ext-dom": "*",
     "ext-xml": "*",
