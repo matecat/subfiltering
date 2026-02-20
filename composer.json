@@ -32,7 +32,7 @@
     "php": ">=8.3",
     "matecat/emoji-to-entity-converter": "^2",
     "matecat/xml-dom-parser": "^2",
-    "phpstan/phpstan": "^2",
+    "phpstan/phpstan": "@stable",
     "ext-dom": "*",
     "ext-xml": "*",
     "ext-libxml": "*"
