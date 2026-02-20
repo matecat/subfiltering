@@ -1,6 +1,6 @@
 # Matecat Subfiltering
 
-[![Build Status](https://app.travis-ci.com/matecat/subfiltering.svg?token=qBazxkHwP18h3EWnHjjF&branch=main)](https://app.travis-ci.com/matecat/emoji-to-entity-converter)
+[![Build Status](https://app.travis-ci.com/matecat/subfiltering.svg?token=qBazxkHwP18h3EWnHjjF&branch=main)](https://app.travis-ci.com/matecat/esubfiltering)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=matecat_subfiltering&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=matecat_subfiltering)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=matecat_subfiltering&metric=coverage)](https://sonarcloud.io/summary/new_code?id=matecat_subfiltering)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=matecat_subfiltering&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=matecat_subfiltering)
