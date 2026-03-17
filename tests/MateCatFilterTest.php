@@ -33,13 +33,14 @@ class MateCatFilterTest extends TestCase
 {
     /**
      * @param array<string,string> $data_ref_map
+     * @param array<string> $injectable_handlers
      *
      * @return MateCatFilter
      */
-    private function getFilterInstance(array $data_ref_map = []): MateCatFilter
+    private function getFilterInstance(array $data_ref_map = [], array $injectable_handlers = []): MateCatFilter
     {
         /** @type $filter MateCatFilter */
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', $data_ref_map);
+        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', $data_ref_map, $injectable_handlers);
 
         return $filter;
     }
@@ -840,7 +841,7 @@ class MateCatFilterTest extends TestCase
     public function testPhWithoutDataRef()
     {
         $db_segment = 'We can control who sees %s content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET');
+        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', [], ["sprintf"]);
 
         $expected_l1_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF->value . '" equiv-text="base64:JXM="/> content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
         $expected_l2_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF->value . '" equiv-text="base64:JXM="/> content when with <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value . '" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>Visibility Constraints.';
@@ -1202,7 +1203,7 @@ class MateCatFilterTest extends TestCase
      */
     public function testSinglePercentageSyntax()
     {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([], ["sprintf"]);
 
         $db_segment = 'This syntax %this_is_a_variable% is no more valid and blocked as sprintf Syntax instead';
         $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="x-sprintf" equiv-text="base64:JXRoaQ=="/>s_is_a_variable% is no more valid and blocked as sprintf Syntax instead';
@@ -1386,7 +1387,7 @@ class MateCatFilterTest extends TestCase
      */
     public function testWithSquareSprintf()
     {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([], ["square_sprintf", "sprintf"]);
 
         $tags = [
             '[%s]',

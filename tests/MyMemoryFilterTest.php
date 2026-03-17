@@ -23,12 +23,14 @@ use ReflectionMethod;
 class MyMemoryFilterTest extends TestCase
 {
     /**
+     * @param array<string> $injectable_handlers
+     *
      * @return AbstractFilter
      * @throws Exception
      */
-    private function getFilterInstance()
+    private function getFilterInstance(array $injectable_handlers = [])
     {
-        return MyMemoryFilter::getInstance(new EmptyFeatureSet(), 'en-US', 'it-IT');
+        return MyMemoryFilter::getInstance(new EmptyFeatureSet(), 'en-US', 'it-IT', [], $injectable_handlers);
     }
 
     /**
@@ -231,7 +233,7 @@ class MyMemoryFilterTest extends TestCase
      */
     public function testSinglePercentageSyntax()
     {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance(['sprintf']);
 
         $db_segment = 'This syntax %this_is_a_variable% is no more valid';
         $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="x-sprintf" equiv-text="base64:JXRoaQ=="/>s_is_a_variable% is no more valid';
@@ -321,7 +323,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testPercentSnailSyntax()
     {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance(["objective_c_ns"]);
 
         $db_segment = 'This string: %@ is a IOS placeholder %@.';
         $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JUA="/>.';
@@ -332,7 +334,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testPercentNumberSnailSyntax()
     {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance(["objective_c_ns"]);
 
         $db_segment = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
         $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTE0MzQzJEA="/>';
@@ -382,7 +384,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testWithDollarCurlyBrackets()
     {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance(["dollar_curly"]);
 
         $db_segment = 'This string contains ${placeholder_one}';
         $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOLLAR_CURLY_BRACKETS->value . '" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
@@ -393,7 +395,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testWithSquareSprintf()
     {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance(["square_sprintf", "sprintf"]);
 
         $tags = [
             '[%s]',

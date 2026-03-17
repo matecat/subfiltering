@@ -47,18 +47,18 @@ class HandlersSorter
      */
     protected const array INJECTABLE_HANDLERS_ORDER = [
         MarkupToPh::class => ['position' => 0, 'default_enabled' => true, 'icu_compliant' => true],
-        PercentDoubleCurlyBrackets::class => ['position' => 1, 'default_enabled' => true, 'icu_compliant' => false],
+        PercentDoubleCurlyBrackets::class => ['position' => 1, 'default_enabled' => false, 'icu_compliant' => false],
         TwigToPh::class => ['position' => 2, 'default_enabled' => true, 'icu_compliant' => false],
-        RubyOnRailsI18n::class => ['position' => 3, 'default_enabled' => true, 'icu_compliant' => false],
+        RubyOnRailsI18n::class => ['position' => 3, 'default_enabled' => false, 'icu_compliant' => false],
         Snails::class => ['position' => 4, 'default_enabled' => true, 'icu_compliant' => false],
         DoubleSquareBrackets::class => ['position' => 5, 'default_enabled' => true, 'icu_compliant' => false],
-        DollarCurlyBrackets::class => ['position' => 6, 'default_enabled' => true, 'icu_compliant' => false],
+        DollarCurlyBrackets::class => ['position' => 6, 'default_enabled' => false, 'icu_compliant' => false],
         SingleCurlyBracketsToPh::class => ['position' => 7, 'default_enabled' => false, 'icu_compliant' => false],
         // Disabled by default because it may conflict with other curly braces handlers
-        ObjectiveCNSString::class => ['position' => 8, 'default_enabled' => true, 'icu_compliant' => false],
+        ObjectiveCNSString::class => ['position' => 8, 'default_enabled' => false, 'icu_compliant' => false],
         DoublePercentages::class => ['position' => 9, 'default_enabled' => true, 'icu_compliant' => false],
-        SquareSprintf::class => ['position' => 10, 'default_enabled' => true, 'icu_compliant' => false],
-        SprintfToPH::class => ['position' => 11, 'default_enabled' => true, 'icu_compliant' => false],
+        SquareSprintf::class => ['position' => 10, 'default_enabled' => false, 'icu_compliant' => false],
+        SprintfToPH::class => ['position' => 11, 'default_enabled' => false, 'icu_compliant' => false],
     ];
 
     /**
