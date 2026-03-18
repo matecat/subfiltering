@@ -31,13 +31,14 @@ use ReflectionClass;
 class MateCatFilterTest extends TestCase {
     /**
      * @param array $data_ref_map
+     * @param array $initialHandlers
      *
      * @return MateCatFilter
      */
-    private function getFilterInstance( array $data_ref_map = [] ): MateCatFilter {
+    private function getFilterInstance( array $data_ref_map = [], array $initialHandlers = [] ): MateCatFilter {
 
         /** @var $filter MateCatFilter */
-        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', $data_ref_map );
+        $filter = MateCatFilter::getInstance( new FeatureSet(), 'en-US', 'it-IT', $data_ref_map, $initialHandlers );
 
         return $filter;
 
@@ -228,7 +229,6 @@ class MateCatFilterTest extends TestCase {
     }
 
     /**
-     * @test
      * @dataProvider fromLayer0ToRawXliffProvider
      *
      * @param string $layer0_segment
@@ -247,24 +247,24 @@ class MateCatFilterTest extends TestCase {
     public function fromLayer0ToRawXliffProvider(): array {
         return [
                 'no tags or special characters'     => [
-                        'segment'  => 'This is a simple sentence.',
-                        'expected' => 'This is a simple sentence.',
+                        'This is a simple sentence.',
+                        'This is a simple sentence.',
                 ],
                 'with stray < and > characters'     => [
-                        'segment'  => 'A > B and C < D.',
-                        'expected' => 'A &gt; B and C &lt; D.',
+                        'A > B and C < D.',
+                        'A &gt; B and C &lt; D.',
                 ],
                 'with a g-tag and stray characters' => [
-                        'segment'  => 'This is a <g id="1">g-tag</g>, and this is a stray < char.',
-                        'expected' => 'This is a &lt;g id="1"&gt;g-tag&lt;/g&gt;, and this is a stray &lt; char.',
+                        'This is a <g id="1">g-tag</g>, and this is a stray < char.',
+                        'This is a &lt;g id="1"&gt;g-tag&lt;/g&gt;, and this is a stray &lt; char.',
                 ],
                 'with already encoded HTML'         => [
-                        'segment'  => 'This is &lt;b&gt;bold&lt;/b&gt; text.',
-                        'expected' => 'This is &lt;b&gt;bold&lt;/b&gt; text.', // Should not be double-encoded
+                        'This is &lt;b&gt;bold&lt;/b&gt; text.',
+                        'This is &lt;b&gt;bold&lt;/b&gt; text.', // Should not be double-encoded
                 ],
                 'with dangerous control characters' => [
-                        'segment'  => "This is a dangerous char: \x07 and a valid <g id='1'>tag</g>.",
-                        'expected' => "This is a dangerous char:  and a valid &lt;g id='1'&gt;tag&lt;/g&gt;.", // The BEL char should be removed
+                        "This is a dangerous char: \x07 and a valid <g id='1'>tag</g>.",
+                        "This is a dangerous char:  and a valid &lt;g id='1'&gt;tag&lt;/g&gt;.", // The BEL char should be removed
                 ],
         ];
     }
@@ -840,7 +840,9 @@ class MateCatFilterTest extends TestCase {
 
     public function testPhWithoutDataRef() {
         $db_segment = 'We can control who sees %s content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
-        $Filter     = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET' );
+        $Filter     = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', [], [
+            InjectableFiltersTags::sprintf
+        ] );
 
         $expected_l1_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
         $expected_l2_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF . '" equiv-text="base64:JXM="/> content when with <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF . '" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>Visibility Constraints.';
@@ -871,7 +873,10 @@ class MateCatFilterTest extends TestCase {
                 'source2' => '&lt;a href=%s&gt;',
         ];
 
-        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map );
+        $Filter = MateCatFilter::getInstance( new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map, [
+            InjectableFiltersTags::square_sprintf,
+            InjectableFiltersTags::sprintf,
+        ] );
 
         $db_segment              = "Hi %s .";
         $db_translation          = "Tere %s .";
@@ -1166,7 +1171,20 @@ class MateCatFilterTest extends TestCase {
      */
     public function testSmartCount() {
 
-        $Filter = MateCatFilter::getInstance( new FeatureSet( [ new AirbnbFeature() ] ), 'en-EN', 'et-ET', [] );
+        $Filter = MateCatFilter::getInstance( new FeatureSet( [ new AirbnbFeature() ] ), 'en-EN', 'et-ET', [], [
+            InjectableFiltersTags::markup,
+            InjectableFiltersTags::percent_double_curly,
+            InjectableFiltersTags::twig,
+            InjectableFiltersTags::ruby_on_rails,
+            InjectableFiltersTags::double_snail,
+            InjectableFiltersTags::double_square,
+            InjectableFiltersTags::dollar_curly,
+            InjectableFiltersTags::single_curly,
+            InjectableFiltersTags::objective_c_ns,
+            InjectableFiltersTags::double_percent,
+            InjectableFiltersTags::square_sprintf,
+            InjectableFiltersTags::sprintf,
+        ] );
 
         $db_segment      = '%{smart_count} discount||||%{smart_count} discounts';
         $segment_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discount<ph id="mtc_2" ctype="x-smart-count" equiv-text="base64:fHx8fA=="/><ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discounts';
@@ -1191,7 +1209,9 @@ class MateCatFilterTest extends TestCase {
      * @throws Exception
      */
     public function testSinglePercentageSyntax() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::sprintf,
+        ]);
 
         $db_segment      = 'This syntax %this_is_a_variable% is no more valid and blocked as sprintf Syntax instead';
         $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="x-sprintf" equiv-text="base64:JXRoaQ=="/>s_is_a_variable% is no more valid and blocked as sprintf Syntax instead';
@@ -1270,7 +1290,10 @@ class MateCatFilterTest extends TestCase {
     }
 
     public function testVariablesSyntax() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::percent_double_curly,
+            InjectableFiltersTags::double_percent
+        ]);
 
         $db_segment      = 'Save up to %{{|discount|}} with these hotels';
         $segment_from_UI = 'Save up to <ph id="mtc_1" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:JXt7fGRpc2NvdW50fH19"/> with these hotels';
@@ -1280,7 +1303,9 @@ class MateCatFilterTest extends TestCase {
     }
 
     public function testPercentSnailSyntax() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::objective_c_ns,
+        ]);
 
         $db_segment      = 'This string: %@ is a IOS placeholder %@.';
         $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/>.';
@@ -1290,7 +1315,9 @@ class MateCatFilterTest extends TestCase {
     }
 
     public function testPercentNumberSnailSyntax() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::objective_c_ns,
+        ]);
 
         $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
         $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTE0MzQzJEA="/>';
@@ -1353,7 +1380,9 @@ class MateCatFilterTest extends TestCase {
      * @throws Exception
      */
     public function testWithDollarCurlyBrackets() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::dollar_curly
+        ]);
 
         $db_segment      = 'This string contains ${placeholder_one}';
         $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOLLAR_CURLY_BRACKETS . '" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
@@ -1367,7 +1396,21 @@ class MateCatFilterTest extends TestCase {
      * @throws Exception
      */
     public function testWithSquareSprintf() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::ruby_on_rails,
+            InjectableFiltersTags::markup.
+            InjectableFiltersTags::percent_double_curly,
+            InjectableFiltersTags::twig,
+            InjectableFiltersTags::ruby_on_rails,
+            InjectableFiltersTags::double_snail,
+            InjectableFiltersTags::double_square,
+            InjectableFiltersTags::dollar_curly,
+            InjectableFiltersTags::single_curly,
+            InjectableFiltersTags::objective_c_ns,
+            InjectableFiltersTags::double_percent,
+            InjectableFiltersTags::square_sprintf,
+            InjectableFiltersTags::sprintf,
+        ]);
 
         $tags = [
                 '[%s]',
@@ -1709,7 +1752,20 @@ class MateCatFilterTest extends TestCase {
         $segment = 'For the %{first_ruby_variable} site %{{second_bnb_variable}}, is ok.';
         $forUI   = 'For the <ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtmaXJzdF9ydWJ5X3ZhcmlhYmxlfQ=="/> site <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_VARIABLE . '" equiv-text="base64:JXt7c2Vjb25kX2JuYl92YXJpYWJsZX19"/>, is ok.';
 
-        $filter    = $this->getFilterInstance();
+        $filter    = $this->getFilterInstance([], [
+            InjectableFiltersTags::markup,
+            InjectableFiltersTags::percent_double_curly,
+            InjectableFiltersTags::twig,
+            InjectableFiltersTags::ruby_on_rails,
+            InjectableFiltersTags::double_snail,
+            InjectableFiltersTags::double_square,
+            InjectableFiltersTags::dollar_curly,
+            InjectableFiltersTags::single_curly,
+            InjectableFiltersTags::objective_c_ns,
+            InjectableFiltersTags::double_percent,
+            InjectableFiltersTags::square_sprintf,
+            InjectableFiltersTags::sprintf,
+        ]);
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment );
         $this->assertEquals( $segment, $filter->fromLayer1ToLayer0( $segmentL1 ) );
 

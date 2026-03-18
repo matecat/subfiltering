@@ -40,18 +40,19 @@ class HandlersSorter {
      * @var array[] A map of handler class names to their integer priority and whether they are enabled by default.
      */
     protected const injectableHandlersOrder = [
-            MarkupToPh::class                 => [ 'position' => 0, 'default_enabled' => true ],
-            PercentDoubleCurlyBrackets::class => [ 'position' => 1, 'default_enabled' => true ],
-            TwigToPh::class                   => [ 'position' => 2, 'default_enabled' => true ],
-            RubyOnRailsI18n::class            => [ 'position' => 3, 'default_enabled' => true ],
-            Snails::class                     => [ 'position' => 4, 'default_enabled' => true ],
-            DoubleSquareBrackets::class       => [ 'position' => 5, 'default_enabled' => true ],
-            DollarCurlyBrackets::class        => [ 'position' => 6, 'default_enabled' => true ],
-            SingleCurlyBracketsToPh::class    => [ 'position' => 7, 'default_enabled' => false ], // Disabled by default because it may conflict with other curly braces handlers
-            ObjectiveCNSString::class         => [ 'position' => 8, 'default_enabled' => true ],
-            DoublePercentages::class          => [ 'position' => 9, 'default_enabled' => true ],
-            SquareSprintf::class              => [ 'position' => 10, 'default_enabled' => true ],
-            SprintfToPH::class                => [ 'position' => 11, 'default_enabled' => true ],
+        MarkupToPh::class => ['position' => 0, 'default_enabled' => true, 'icu_compliant' => true],
+        PercentDoubleCurlyBrackets::class => ['position' => 1, 'default_enabled' => false, 'icu_compliant' => false],
+        TwigToPh::class => ['position' => 2, 'default_enabled' => true, 'icu_compliant' => false],
+        RubyOnRailsI18n::class => ['position' => 3, 'default_enabled' => false, 'icu_compliant' => false],
+        Snails::class => ['position' => 4, 'default_enabled' => true, 'icu_compliant' => false],
+        DoubleSquareBrackets::class => ['position' => 5, 'default_enabled' => true, 'icu_compliant' => false],
+        DollarCurlyBrackets::class => ['position' => 6, 'default_enabled' => false, 'icu_compliant' => false],
+        SingleCurlyBracketsToPh::class => ['position' => 7, 'default_enabled' => false, 'icu_compliant' => false],
+        // Disabled by default because it may conflict with other curly braces handlers
+        ObjectiveCNSString::class => ['position' => 8, 'default_enabled' => false, 'icu_compliant' => false],
+        DoublePercentages::class => ['position' => 9, 'default_enabled' => true, 'icu_compliant' => false],
+        SquareSprintf::class => ['position' => 10, 'default_enabled' => false, 'icu_compliant' => false],
+        SprintfToPH::class => ['position' => 11, 'default_enabled' => false, 'icu_compliant' => false],
     ];
 
     /**
@@ -84,13 +85,13 @@ class HandlersSorter {
      *
      * @param class-string[] $injectedHandlers An array of handler class names to be sorted.
      */
-    public function __construct( array $injectedHandlers = [] ) {
+    public function __construct( array $injectedHandlers = [], bool $icu_enabled = false ) {
 
         // Start with the default order of handlers.
         $this->defaultInjectedHandlers = self::injectableHandlersOrder;
 
         // Sort the final list of handlers according to their predefined execution order.
-        $this->injectedHandlers = $this->quickSort( $injectedHandlers );
+        $this->injectedHandlers = $this->quickSort( $injectedHandlers, $icu_enabled );
 
     }
 
@@ -101,21 +102,26 @@ class HandlersSorter {
      * priority in the `defaultInjectedHandlers` property. It then sorts the filtered list
      * using a custom comparison function based on the priority values.
      *
-     * @param string[] $handlersList An array of handler class names to be filtered and sorted.
+     * @param class-string<AbstractHandler>[] $handlersList An array of handler class names to be filtered and sorted.
      *
-     * @return string[] The sorted list of handler class names based on their priorities.
+     * @return class-string<AbstractHandler>[] The sorted list of handler class names based on their priorities.
      */
-    private function quickSort( array $handlersList ): array {
+    private function quickSort(array $handlersList, bool $icu_enabled): array
+    {
         // Filter the list to include only valid handlers.
-        $filteredHandlers = array_filter( $handlersList, function ( $handler ) {
-            return array_key_exists( $handler, $this->defaultInjectedHandlers );
-        } );
+        $filteredHandlers = array_filter($handlersList, function ($handler) use ($icu_enabled) {
+            $handlerExists = array_key_exists($handler, $this->defaultInjectedHandlers);
+            if ($handlerExists && $icu_enabled && !$this->defaultInjectedHandlers[$handler]['icu_compliant']) {
+                return false;
+            }
+            return $handlerExists;
+        });
 
         // Sort the handlers based on their priority using a custom comparison function.
-        usort( $filteredHandlers, function ( $a, $b ) {
+        usort($filteredHandlers, function ($a, $b) {
             // The spaceship operator (<=>) returns -1, 0, or 1, which is what usort expects.
-            return $this->defaultInjectedHandlers[ $a ] <=> $this->defaultInjectedHandlers[ $b ];
-        } );
+            return $this->defaultInjectedHandlers[$a] <=> $this->defaultInjectedHandlers[$b];
+        });
 
         return $filteredHandlers;
     }

@@ -90,7 +90,14 @@ abstract class AbstractFilter {
      *
      * @return T The configured instance of the filter.
      */
-    public static function getInstance( FeatureSetInterface $featureSet, ?string $source = null, ?string $target = null, ?array $dataRefMap = [], ?array $handlerTagNamesForLayer0ToLayer1Transition = [] ): ?AbstractFilter {
+    public static function getInstance(
+        FeatureSetInterface $featureSet,
+        ?string $source = null,
+        ?string $target = null,
+        ?array $dataRefMap = [],
+        ?array $handlerTagNamesForLayer0ToLayer1Transition = [],
+        bool $icu_enabled = false
+    ): ?AbstractFilter {
         // Create a new instance of the specific filter class (e.g., MateCatFilter).
         $newInstance = new static();
 
@@ -114,7 +121,7 @@ abstract class AbstractFilter {
         // Otherwise, use the custom list of handlers provided.
 
         // Sort the dynamic feature-based handlers.
-        $sorter                                                  = new HandlersSorter( $handlerClassNamesForLayer0ToLayer1Transition );
+        $sorter                                                  = new HandlersSorter( $handlerClassNamesForLayer0ToLayer1Transition, $icu_enabled );
         $newInstance->orderedHandlersForLayer0ToLayer1Transition = $sorter->getOrderedHandlersClassNames();
 
         // Return the fully configured filter instance.

@@ -8,9 +8,18 @@ use Matecat\SubFiltering\Commons\EmptyFeatureSet;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
+use Matecat\SubFiltering\Filters\DoublePercentages;
+use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
+use Matecat\SubFiltering\Filters\MarkupToPh;
+use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
+use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
+use Matecat\SubFiltering\Filters\Snails;
+use Matecat\SubFiltering\Filters\SprintfToPH;
+use Matecat\SubFiltering\Filters\SquareSprintf;
 use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\HandlersSorter;
 use Matecat\SubFiltering\MyMemoryFilter;
@@ -24,9 +33,9 @@ class MyMemoryFilterTest extends TestCase {
      * @return AbstractFilter
      * @throws Exception
      */
-    private function getFilterInstance() {
+    private function getFilterInstance(array $initialHandlers = []) {
 
-        return MyMemoryFilter::getInstance( new EmptyFeatureSet(), 'en-US', 'it-IT' );
+        return MyMemoryFilter::getInstance( new EmptyFeatureSet(), 'en-US', 'it-IT', [], $initialHandlers );
     }
 
     /**
@@ -70,7 +79,19 @@ class MyMemoryFilterTest extends TestCase {
      * @return array
      */
     public function pipelineConfigurationProvider(): array {
-        $defaultHandlers = $airbnbOverloadedHandlers = InjectableFiltersTags::tagNamesForArrayClasses( array_keys( HandlersSorter::getDefaultInjectedHandlers() ) );
+        $defaultHandlers = $airbnbOverloadedHandlers = InjectableFiltersTags::tagNamesForArrayClasses([
+            MarkupToPh::class,
+            PercentDoubleCurlyBrackets::class,
+            TwigToPh::class,
+            RubyOnRailsI18n::class,
+            Snails::class,
+            DoubleSquareBrackets::class,
+            DollarCurlyBrackets::class,
+            ObjectiveCNSString::class,
+            DoublePercentages::class,
+            SquareSprintf::class,
+            SprintfToPH::class,
+        ]);
 
         $airbnbOverloadedHandlers[] = SmartCounts::class;
 
@@ -174,7 +195,10 @@ class MyMemoryFilterTest extends TestCase {
      */
 
     public function testSingleCurlyBrackets() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([
+            InjectableFiltersTags::dollar_curly,
+            InjectableFiltersTags::single_curly,
+        ]);
 
         $segment   = "This is a {placeholder}";
         $segmentL1 = $filter->fromLayer0ToLayer1( $segment, 'roblox' );
@@ -191,7 +215,20 @@ class MyMemoryFilterTest extends TestCase {
      * @throws Exception
      */
     public function testVariablesWithHTML() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([
+            InjectableFiltersTags::markup,
+            InjectableFiltersTags::percent_double_curly,
+            InjectableFiltersTags::twig,
+            InjectableFiltersTags::ruby_on_rails,
+            InjectableFiltersTags::double_snail,
+            InjectableFiltersTags::double_square,
+            InjectableFiltersTags::dollar_curly,
+            InjectableFiltersTags::single_curly,
+            InjectableFiltersTags::objective_c_ns,
+            InjectableFiltersTags::double_percent,
+            InjectableFiltersTags::square_sprintf,
+            InjectableFiltersTags::sprintf,
+        ]);
 
         $db_segment      = 'Airbnb account.%{\n}%{&lt;br&gt;}%{\n}1) From ';
         $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="' . CTypeEnum::HTML . '" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS . '" equiv-text="base64:JXtcbn0="/>1) From ';
@@ -210,7 +247,9 @@ class MyMemoryFilterTest extends TestCase {
 
         $this->markTestSkipped('SprintfLocker is disabled for now, we want to check if this is really needed. We Must be revisited.'); // TODO review
 
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([
+            InjectableFiltersTags::twig,
+        ]);
 
         $db_segment      = 'This syntax %this_is_a_variable% is no more valid';
         $segment_from_UI = 'This syntax %this_is_a_variable% is no more valid';
@@ -295,7 +334,9 @@ class MyMemoryFilterTest extends TestCase {
     }
 
     public function testPercentSnailSyntax() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([
+            InjectableFiltersTags::objective_c_ns
+        ]);
 
         $db_segment      = 'This string: %@ is a IOS placeholder %@.';
         $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JUA="/>.';
@@ -305,7 +346,9 @@ class MyMemoryFilterTest extends TestCase {
     }
 
     public function testPercentNumberSnailSyntax() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([
+            InjectableFiltersTags::objective_c_ns,
+        ]);
 
         $db_segment      = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
         $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING . '" equiv-text="base64:JTE0MzQzJEA="/>';
@@ -353,7 +396,9 @@ class MyMemoryFilterTest extends TestCase {
 //    }
 
     public function testWithDollarCurlyBrackets() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([
+            InjectableFiltersTags::dollar_curly
+        ]);
 
         $db_segment      = 'This string contains ${placeholder_one}';
         $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOLLAR_CURLY_BRACKETS . '" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
@@ -363,7 +408,9 @@ class MyMemoryFilterTest extends TestCase {
     }
 
     public function testWithSquareSprintf() {
-        $filter = $this->getFilterInstance();
+        $filter = $this->getFilterInstance([
+            InjectableFiltersTags::square_sprintf,
+        ]);
 
         $tags = [
                 '[%s]',
