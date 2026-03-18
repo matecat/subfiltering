@@ -841,7 +841,7 @@ class MateCatFilterTest extends TestCase
     public function testPhWithoutDataRef()
     {
         $db_segment = 'We can control who sees %s content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', [], ["sprintf"]);
+        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', [], [InjectableFiltersTags::sprintf->value]);
 
         $expected_l1_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF->value . '" equiv-text="base64:JXM="/> content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
         $expected_l2_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF->value . '" equiv-text="base64:JXM="/> content when with <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value . '" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>Visibility Constraints.';
@@ -873,7 +873,7 @@ class MateCatFilterTest extends TestCase
             'source2' => '&lt;a href=%s&gt;',
         ];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map, ["sprintf"]);
+        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map, [InjectableFiltersTags::sprintf->value]);
 
         $db_segment = "Hi %s .";
         $db_translation = "Tere %s .";
@@ -1178,7 +1178,7 @@ class MateCatFilterTest extends TestCase
      */
     public function testSmartCount()
     {
-        $Filter = MateCatFilter::getInstance(new FeatureSet([new AirbnbFeature()]), 'en-EN', 'et-ET', [], ["percent_double_curly", "ruby_on_rails"]);
+        $Filter = MateCatFilter::getInstance(new FeatureSet([new AirbnbFeature()]), 'en-EN', 'et-ET', [], [InjectableFiltersTags::percent_double_curly->value, InjectableFiltersTags::ruby_on_rails->value]);
 
         $db_segment = '%{smart_count} discount||||%{smart_count} discounts';
         $segment_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discount<ph id="mtc_2" ctype="x-smart-count" equiv-text="base64:fHx8fA=="/><ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discounts';
@@ -1478,7 +1478,7 @@ class MateCatFilterTest extends TestCase
         );
 
         // revert
-        $filter = $this->getFilterInstance([], ["ruby_on_rails"]);
+        $filter = $this->getFilterInstance([], [InjectableFiltersTags::ruby_on_rails->value]);
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($transformed));
         $this->assertEquals($db_segment, $filter->fromLayer2ToLayer0($transformed));
@@ -1725,7 +1725,7 @@ class MateCatFilterTest extends TestCase
         $segment = 'For the %{first_ruby_variable} site %{{second_bnb_variable}}, is ok.';
         $forUI = 'For the <ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtmaXJzdF9ydWJ5X3ZhcmlhYmxlfQ=="/> site <ph id="mtc_2" ctype="' . CTypeEnum::PERCENT_VARIABLE->value . '" equiv-text="base64:JXt7c2Vjb25kX2JuYl92YXJpYWJsZX19"/>, is ok.';
 
-        $filter = $this->getFilterInstance([], ["ruby_on_rails", "percent_double_curly"]);
+        $filter = $this->getFilterInstance([], [InjectableFiltersTags::ruby_on_rails->value, InjectableFiltersTags::percent_double_curly->value]);
         $segmentL1 = $filter->fromLayer0ToLayer1($segment);
         $this->assertEquals($segment, $filter->fromLayer1ToLayer0($segmentL1));
 

@@ -217,7 +217,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testSingleCurlyBrackets()
     {
-        $filter = $this->getFilterInstance(["single_curly"]);
+        $filter = $this->getFilterInstance([InjectableFiltersTags::single_curly->value]);
 
         $segment = "This is a {placeholder}";
         $segmentL1 = $filter->fromLayer0ToLayer1($segment, 'roblox');
@@ -235,7 +235,7 @@ class MyMemoryFilterTest extends TestCase
      */
     public function testVariablesWithHTML()
     {
-        $filter = $this->getFilterInstance(["ruby_on_rails", "markup"]);
+        $filter = $this->getFilterInstance([InjectableFiltersTags::ruby_on_rails->value, InjectableFiltersTags::markup->value]);
 
         $db_segment = 'Airbnb account.%{\n}%{&lt;br&gt;}%{\n}1) From ';
         $segment_from_UI = 'Airbnb account.<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" ctype="' . CTypeEnum::HTML->value . '" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtcbn0="/>1) From ';
@@ -252,7 +252,7 @@ class MyMemoryFilterTest extends TestCase
      */
     public function testSinglePercentageSyntax()
     {
-        $filter = $this->getFilterInstance(['sprintf']);
+        $filter = $this->getFilterInstance([InjectableFiltersTags::sprintf->value]);
 
         $db_segment = 'This syntax %this_is_a_variable% is no more valid';
         $segment_from_UI = 'This syntax <ph id="mtc_1" ctype="x-sprintf" equiv-text="base64:JXRoaQ=="/>s_is_a_variable% is no more valid';
@@ -342,7 +342,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testPercentSnailSyntax()
     {
-        $filter = $this->getFilterInstance(["objective_c_ns"]);
+        $filter = $this->getFilterInstance([InjectableFiltersTags::objective_c_ns->value]);
 
         $db_segment = 'This string: %@ is a IOS placeholder %@.';
         $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JUA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JUA="/>.';
@@ -353,7 +353,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testPercentNumberSnailSyntax()
     {
-        $filter = $this->getFilterInstance(["objective_c_ns"]);
+        $filter = $this->getFilterInstance([InjectableFiltersTags::objective_c_ns->value]);
 
         $db_segment = 'This string: %12$@ is a IOS placeholder %1$@ %14343$@';
         $segment_from_UI = 'This string: <ph id="mtc_1" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTEyJEA="/> is a IOS placeholder <ph id="mtc_2" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTEkQA=="/> <ph id="mtc_3" ctype="' . CTypeEnum::OBJECTIVE_C_NSSTRING->value . '" equiv-text="base64:JTE0MzQzJEA="/>';
@@ -403,7 +403,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testWithDollarCurlyBrackets()
     {
-        $filter = $this->getFilterInstance(["dollar_curly"]);
+        $filter = $this->getFilterInstance([InjectableFiltersTags::dollar_curly->value]);
 
         $db_segment = 'This string contains ${placeholder_one}';
         $segment_from_UI = 'This string contains <ph id="mtc_1" ctype="' . CTypeEnum::DOLLAR_CURLY_BRACKETS->value . '" equiv-text="base64:JHtwbGFjZWhvbGRlcl9vbmV9"/>';
@@ -414,7 +414,7 @@ class MyMemoryFilterTest extends TestCase
 
     public function testWithSquareSprintf()
     {
-        $filter = $this->getFilterInstance(["square_sprintf", "sprintf"]);
+        $filter = $this->getFilterInstance([InjectableFiltersTags::square_sprintf->value, InjectableFiltersTags::sprintf->value]);
 
         $tags = [
             '[%s]',
