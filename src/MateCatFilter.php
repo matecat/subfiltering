@@ -61,8 +61,7 @@ class MateCatFilter extends AbstractFilter
         $this->configureFromLayer0ToLayer1Pipeline($channel);
 
         // Allow the feature set to modify the pipeline for this specific transformation.
-        /** @type $channel Pipeline */
-        $channel = $this->featureSet->filter('fromLayer0ToLayer1', $channel);
+        $channel = $this->featureSet->customizeFromLayer0ToLayer1($channel);
 
         // Process the segment and return the result.
         return $channel->transform($segment);
@@ -98,8 +97,7 @@ class MateCatFilter extends AbstractFilter
         $channel->addLast(EntityToEmoji::class);
         $channel->addLast(DataRefReplace::class);
 
-        /** @type $channel Pipeline */
-        $channel = $this->featureSet->filter('fromLayer1ToLayer2', $channel);
+        $channel = $this->featureSet->customizeFromLayer1ToLayer2($channel);
 
         return $channel->transform($segment);
     }
@@ -123,8 +121,7 @@ class MateCatFilter extends AbstractFilter
         $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
         $channel->addLast(DataRefRestore::class);
 
-        /** @type $channel Pipeline */
-        $channel = $this->featureSet->filter('fromLayer2ToLayer1', $channel);
+        $channel = $this->featureSet->customizeFromLayer2ToLayer1($channel);
 
         return $channel->transform($segment);
     }
@@ -165,8 +162,7 @@ class MateCatFilter extends AbstractFilter
         $channel->addLast(RestoreXliffTagsContent::class);
         $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
 
-        /** @type $channel Pipeline */
-        $channel = $this->featureSet->filter('fromRawXliffToLayer0', $channel);
+        $channel = $this->featureSet->customizeFromRawXliffToLayer0($channel);
 
         return $channel->transform($segment);
     }
@@ -188,8 +184,7 @@ class MateCatFilter extends AbstractFilter
         $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
         $channel->addLast(LtGtEncode::class);
 
-        /** @type $channel Pipeline */
-        $channel = $this->featureSet->filter('fromLayer0ToRawXliff', $channel);
+        $channel = $this->featureSet->customizeFromLayer0ToRawXliff($channel);
 
         return $channel->transform($segment);
     }

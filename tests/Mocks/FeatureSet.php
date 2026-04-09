@@ -2,6 +2,7 @@
 
 namespace Matecat\SubFiltering\Tests\Mocks;
 
+use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Matecat\SubFiltering\Tests\Mocks\Features\BaseFeature;
 
@@ -10,52 +11,60 @@ class FeatureSet implements FeatureSetInterface
     /**
      * @var BaseFeature[]
      */
-    private $features = [];
+    private array $features = [];
 
     /**
      * FeatureSet constructor.
      *
      * @param BaseFeature[] $features
      */
-    public function __construct(array $features = null)
+    public function __construct(?array $features = null)
     {
         if (!empty($features)) {
             $this->features = $features;
         }
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function filter(string $method, mixed $filterable): mixed
+    public function customizeFromLayer0ToLayer1(Pipeline $pipeline): Pipeline
     {
-        $args = array_slice(func_get_args(), 1);
+        return $this->customize('fromLayer0ToLayer1', $pipeline);
+    }
 
+    public function customizeFromLayer1ToLayer2(Pipeline $pipeline): Pipeline
+    {
+        return $this->customize('fromLayer1ToLayer2', $pipeline);
+    }
+
+    public function customizeFromLayer2ToLayer1(Pipeline $pipeline): Pipeline
+    {
+        return $this->customize('fromLayer2ToLayer1', $pipeline);
+    }
+
+    public function customizeFromRawXliffToLayer0(Pipeline $pipeline): Pipeline
+    {
+        return $this->customize('fromRawXliffToLayer0', $pipeline);
+    }
+
+    public function customizeFromLayer0ToRawXliff(Pipeline $pipeline): Pipeline
+    {
+        return $this->customize('fromLayer0ToRawXliff', $pipeline);
+    }
+
+    public function customizeFromLayer1ToLayer0(Pipeline $pipeline): Pipeline
+    {
+        return $this->customize('fromLayer1ToLayer0', $pipeline);
+    }
+
+    private function customize(string $hookName, Pipeline $pipeline): Pipeline
+    {
         foreach ($this->features as $feature) {
             /* @var $feature BaseFeature */
 
-            if (!is_null($feature)) {
-                if (method_exists($feature, $method)) {
-                    array_shift($args);
-                    array_unshift($args, $filterable);
-
-                    /**
-                     * There may be the need to avoid a filter to be executed before or after other ones.
-                     * To solve this problem we could always pass last argument to call_user_func_array which
-                     * contains a list of executed feature codes.
-                     *
-                     * Example: $args + [ $executed_features ]
-                     *
-                     * This way plugins have the chance to decide wether to change the value, throw an exception or
-                     * do whatever they need to based on the behaviour of the other features.
-                     *
-                     */
-
-                    $filterable = call_user_func_array([$feature, $method], $args);
-                }
+            if (!is_null($feature) && method_exists($feature, $hookName)) {
+                $pipeline = $feature->{$hookName}($pipeline);
             }
         }
 
-        return $filterable;
+        return $pipeline;
     }
 }

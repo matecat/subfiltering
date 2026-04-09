@@ -2,19 +2,19 @@
 
 namespace Matecat\SubFiltering\Contracts;
 
-use Exception;
+use Matecat\SubFiltering\Commons\Pipeline;
 
 interface FeatureSetInterface
 {
-    /**
-     * Returns the filtered subject variable passed to all enabled features.
-     *
-     * @param string $method
-     * @param mixed $filterable
-     *
-     * @return mixed
-     *
-     * @throws Exception
-     */
-    public function filter(string $method, mixed $filterable): mixed;
+    public function customizeFromLayer0ToLayer1(Pipeline $pipeline): Pipeline;
+
+    public function customizeFromLayer1ToLayer2(Pipeline $pipeline): Pipeline;
+
+    public function customizeFromLayer2ToLayer1(Pipeline $pipeline): Pipeline;
+
+    public function customizeFromRawXliffToLayer0(Pipeline $pipeline): Pipeline;
+
+    public function customizeFromLayer0ToRawXliff(Pipeline $pipeline): Pipeline;
+
+    public function customizeFromLayer1ToLayer0(Pipeline $pipeline): Pipeline;
 }

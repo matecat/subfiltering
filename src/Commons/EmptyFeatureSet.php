@@ -16,12 +16,33 @@ use Matecat\SubFiltering\Contracts\FeatureSetInterface;
  */
 class EmptyFeatureSet implements FeatureSetInterface
 {
-
-    /**
-     * @inheritDoc
-     */
-    public function filter($method, $filterable): mixed
+    public function customizeFromLayer0ToLayer1(Pipeline $pipeline): Pipeline
     {
-        return $filterable;
+        return $pipeline;
+    }
+
+    public function customizeFromLayer1ToLayer2(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
+    }
+
+    public function customizeFromLayer2ToLayer1(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
+    }
+
+    public function customizeFromRawXliffToLayer0(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
+    }
+
+    public function customizeFromLayer0ToRawXliff(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
+    }
+
+    public function customizeFromLayer1ToLayer0(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
     }
 }

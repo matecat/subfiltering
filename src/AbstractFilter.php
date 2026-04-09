@@ -167,8 +167,7 @@ abstract class AbstractFilter
         $channel->addLast(RestoreEquivText::class);               // Restore equiv-text content
 
         // Allow the current feature set to modify the pipeline (e.g., add or remove handlers).
-        /** @type $channel Pipeline */
-        $channel = $this->featureSet->filter('fromLayer1ToLayer0', $channel);
+        $channel = $this->featureSet->customizeFromLayer1ToLayer0($channel);
 
         // Process the segment through the pipeline and return the result.
         return $channel->transform($segment);
