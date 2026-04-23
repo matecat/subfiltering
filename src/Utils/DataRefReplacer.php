@@ -192,7 +192,7 @@ class DataRefReplacer
         } elseif ($node->tagName == 'pc' && $node->self_closed === true) {
             $attributesMap = Map::instance($node->attributes);
 
-            if ($dataRefStartValue = $this->map->get($node->attributes['dataRefStart'])) {
+            if (isset($node->attributes['dataRefStart']) && $dataRefStartValue = $this->map->get($node->attributes['dataRefStart'])) {
                 $string = $this->replaceNewTagString(
                     $node->node,
                     $attributesMap->get('id'),
