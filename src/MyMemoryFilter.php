@@ -4,10 +4,10 @@ namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
+use Matecat\SubFiltering\Filters\MarkupToPh;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\TwigToPh;
-use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 
 /**
  * A specific filter implementation tailored for MyMemory services.
@@ -70,7 +70,7 @@ class MyMemoryFilter extends AbstractFilter {
                 // For Airbnb, add the SmartCounts handler to process specific variable syntax
                 // that looks like `%{smart_count}`.
                 if ( !$channel->contains( SmartCounts::class ) ) {
-                    $channel->addAfter( PercentDoubleCurlyBrackets::class, SmartCounts::class );
+                    $channel->addAfter( MarkupToPh::class, SmartCounts::class );
                 }
                 break;
 
