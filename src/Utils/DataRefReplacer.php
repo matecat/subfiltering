@@ -67,7 +67,7 @@ class DataRefReplacer
 
         // try not to throw exception for wrong segments with opening tags and no closing
         try {
-            /** @var NodeShape[] $html */
+            /** @var ArrayObject<int, NodeShape> $html */
             $html = XmlParser::parse($string, true);
 
             $dataRefEndMap = new ArrayList();
@@ -340,7 +340,7 @@ class DataRefReplacer
             return $string;
         }
 
-        /** @var NodeShape[] $html */
+        /** @var ArrayObject<int, NodeShape> $html */
         $html = XmlParser::parse($string, true);
 
         foreach ($html as $node) {
