@@ -26,7 +26,7 @@ class DoubleSquareBrackets extends AbstractHandler
                     ) . '"/>',
                     $segment,
                     1
-                );
+                ) ?? $segment;
             }
         }
 

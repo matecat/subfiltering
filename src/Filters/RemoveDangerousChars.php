@@ -29,10 +29,10 @@ class RemoveDangerousChars extends AbstractHandler
         //remove binary chars in some xliff files
         $regexpAscii = '/[\x{00}-\x{08}\x{0B}\x{0C}\x{0E}-\x{1F}\x{7F}]/u';
 
-        $segment = preg_replace($regexpAscii, '', $segment);
-        $segment = preg_replace($regexpHexEntity, '', $segment);
+        $segment = preg_replace($regexpAscii, '', $segment) ?? $segment;
+        $segment = preg_replace($regexpHexEntity, '', $segment) ?? $segment;
 
-        return preg_replace($regexpEntity, '', $segment);
+        return preg_replace($regexpEntity, '', $segment) ?? $segment;
     }
 
 }

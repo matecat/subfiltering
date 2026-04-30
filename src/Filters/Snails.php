@@ -26,7 +26,7 @@ class Snails extends AbstractHandler
                     ) . '"/>',
                     $segment,
                     1
-                );
+                ) ?? $segment;
             }
         }
 

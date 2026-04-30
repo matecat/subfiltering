@@ -31,7 +31,7 @@ class StandardXEquivTextToMateCatCustomPH extends AbstractHandler
                 ) . '" equiv-text="base64:' . base64_encode($group[1]) . '"/>',
                 $segment,
                 1
-            );
+            ) ?? $segment;
         }
 
         return $segment;

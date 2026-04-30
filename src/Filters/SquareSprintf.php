@@ -43,7 +43,7 @@ class SquareSprintf extends AbstractHandler
                 ) . '"/>',
                 $segment,
                 1
-            );
+            ) ?? $segment;
         }
 
         return $segment;

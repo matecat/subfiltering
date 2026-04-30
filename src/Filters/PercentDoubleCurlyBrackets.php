@@ -30,7 +30,7 @@ class PercentDoubleCurlyBrackets extends AbstractHandler
                 ) . "\"/>",
                 $segment,
                 1
-            );
+            ) ?? $segment;
         }
 
         return $segment;

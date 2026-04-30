@@ -378,7 +378,7 @@ class DataRefReplacer
                     base64_decode($nodeAttributesMap->get('x-orig')),
                     $string,
                     1
-                );
+                ) ?? $string;
             }
         }
 

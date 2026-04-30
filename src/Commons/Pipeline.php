@@ -268,7 +268,7 @@ class Pipeline
             preg_match_all('/"__mtc_\d+"/', $segment, $html, PREG_SET_ORDER);
             foreach ($html as $pos => $tag_id) {
                 //replace subsequent elements excluding already encoded
-                $segment = preg_replace('/' . $tag_id[0] . '/', '"mtc_' . ($pos + 1) . '"', $segment, 1);
+                $segment = preg_replace('/' . $tag_id[0] . '/', '"mtc_' . ($pos + 1) . '"', $segment, 1) ?? $segment;
             }
         }
 

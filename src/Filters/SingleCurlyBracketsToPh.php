@@ -48,7 +48,7 @@ class SingleCurlyBracketsToPh extends AbstractHandler
                     ) . '"/>',
                     $segment,
                     1
-                );
+                ) ?? $segment;
             }
         }
 
