@@ -75,7 +75,7 @@ class DataRefReplace extends AbstractHandler
                     '"/>',
                     $segment,
                     1 // replace ONLY ONE occurrence
-                );
+                ) ?? $segment;
             }
         }
 
@@ -147,7 +147,7 @@ class DataRefReplace extends AbstractHandler
                 '"/>',
                 $segment,
                 1
-            );
+            ) ?? $segment;
         }
 
         foreach ($closingPcTags[0] as $closingPcTag) {
@@ -159,7 +159,7 @@ class DataRefReplace extends AbstractHandler
                 '"/>',
                 $segment,
                 1
-            );
+            ) ?? $segment;
         }
 
         return $segment;

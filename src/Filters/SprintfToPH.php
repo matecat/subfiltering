@@ -50,7 +50,7 @@ class SprintfToPH extends AbstractHandler
                 ) . '" ctype="' . CTypeEnum::SPRINTF->value . '" equiv-text="base64:' . base64_encode($variable[0]) . '"/>',
                 $segment,
                 1
-            );
+            ) ?? $segment;
         }
         return $segment;
     }

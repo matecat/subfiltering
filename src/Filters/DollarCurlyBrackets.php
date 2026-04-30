@@ -26,7 +26,7 @@ class DollarCurlyBrackets extends AbstractHandler
                     ) . '"/>',
                     $segment,
                     1
-                );
+                ) ?? $segment;
             }
         }
 

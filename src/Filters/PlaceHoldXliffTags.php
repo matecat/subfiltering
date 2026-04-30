@@ -24,7 +24,7 @@ class PlaceHoldXliffTags extends AbstractHandler
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
 
         //remove not existent </x> tags
-        $segment = preg_replace('|(</x>)|si', "", $segment);
+        $segment = preg_replace('|(</x>)|si', "", $segment) ?? $segment;
 
         $segment = $this->applyPlaceholders($segment);
 
@@ -36,7 +36,7 @@ class PlaceHoldXliffTags extends AbstractHandler
                     ) . ConstantEnum::GTPLACEHOLDER->value;
             },
             $segment
-        ); //base64 of the tag content to avoid unwanted manipulation
+        ) ?? $segment; //base64 of the tag content to avoid unwanted manipulation
     }
 
     /**
@@ -73,7 +73,7 @@ class PlaceHoldXliffTags extends AbstractHandler
                 $pattern,
                 ConstantEnum::LTPLACEHOLDER->value . "$1" . ConstantEnum::GTPLACEHOLDER->value,
                 $segment
-            );
+            ) ?? $segment;
         }
 
         return $segment;

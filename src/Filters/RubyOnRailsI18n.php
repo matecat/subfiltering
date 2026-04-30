@@ -50,7 +50,7 @@ class RubyOnRailsI18n extends AbstractHandler
                     ) . '"/>',
                     $segment,
                     1
-                );
+                ) ?? $segment;
             }
         }
 

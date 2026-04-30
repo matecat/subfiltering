@@ -42,7 +42,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler
                     '"/>',
                     $segment,
                     1
-                );
+                ) ?? $segment;
             }
         }
 
@@ -76,7 +76,7 @@ class StandardPHToMateCatCustomPH extends AbstractHandler
                 '"/>',
                 $segment,
                 1
-            );
+            ) ?? $segment;
         }
 
         return $segment;

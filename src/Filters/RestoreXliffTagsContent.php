@@ -30,7 +30,7 @@ class RestoreXliffTagsContent extends AbstractHandler
                 return ConstantEnum::LTPLACEHOLDER->value . $_match . ConstantEnum::GTPLACEHOLDER->value;
             },
             $segment
-        );
+        ) ?? $segment;
     }
 
 }

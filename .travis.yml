@@ -17,7 +17,9 @@ before_script:
   - git fetch --unshallow
   - composer install
 
-script: ./vendor/bin/phpunit -d memory_limit=-1 --coverage-clover=coverage.xml
+script:
+  - ./vendor/bin/phpunit -d memory_limit=-1 --coverage-clover=coverage.xml
+  - ./vendor/bin/phpstan analyse
 
 after_success:
   - sonar-scanner -X -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=matecat_subfiltering -Dsonar.sources=src -Dsonar.tests=tests/ -Dsonar.php.coverage.reportPaths=coverage.xml
