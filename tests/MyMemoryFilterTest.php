@@ -143,10 +143,9 @@ class MyMemoryFilterTest extends TestCase
             [
                 'cid' => 'airbnb',
                 'initialHandlers' => $handlersWithoutVariables,
-                'expectedToContain' => [],
+                'expectedToContain' => [SmartCounts::class],
                 'expectedToNotContain' => [
                     PercentDoubleCurlyBrackets::class,
-                    SmartCounts::class
                 ],
                 'name' => 'airbnb (PercentDoubleCurlyBrackets handler not present)'
             ],
