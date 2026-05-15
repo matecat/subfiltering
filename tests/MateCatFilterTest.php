@@ -24,7 +24,6 @@ use Matecat\SubFiltering\Filters\TwigToPh;
 use Matecat\SubFiltering\HandlersSorter;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Tests\Mocks\Features\AirbnbFeature;
-use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -40,7 +39,7 @@ class MateCatFilterTest extends TestCase
     private function getFilterInstance(array $data_ref_map = [], array $injectable_handlers = []): MateCatFilter
     {
         /** @type $filter MateCatFilter */
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', $data_ref_map, $injectable_handlers);
+        $filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', $data_ref_map, $injectable_handlers);
 
         return $filter;
     }
@@ -57,7 +56,7 @@ class MateCatFilterTest extends TestCase
     public function testGetInstanceWithDefaultHandlers()
     {
         // default $handlerClassNamesForLayer0ToLayer1Transition is an empty array
-        $filter = MateCatFilter::getInstance(new FeatureSet());
+        $filter = MateCatFilter::getInstance(null);
 
         $reflection = new ReflectionClass(AbstractFilter::class);
         $orderedHandlersProperty = $reflection->getProperty('orderedHandlersForLayer0ToLayer1Transition');
@@ -77,7 +76,7 @@ class MateCatFilterTest extends TestCase
     public function testGetInstanceWithNullHandlers()
     {
         // Pass null for $handlerClassNamesForLayer0ToLayer1Transition
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', [], null);
+        $filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', [], null);
 
         $reflection = new ReflectionClass(AbstractFilter::class);
         $orderedHandlersProperty = $reflection->getProperty('orderedHandlersForLayer0ToLayer1Transition');
@@ -102,7 +101,7 @@ class MateCatFilterTest extends TestCase
     {
         // Arrange: Define a custom handler and instantiate the filter.
         $customHandlers = [InjectableFiltersTags::markup->value, InjectableFiltersTags::single_curly->value];
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', [], $customHandlers);
+        $filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', [], $customHandlers);
 
         // Arrange: Create a mock Pipeline to capture calls to addLast.
         $pipelineMock = $this->createMock(Pipeline::class);
@@ -154,7 +153,7 @@ class MateCatFilterTest extends TestCase
             'double_square',      // valid -> DoubleSquareBrackets::class
         ];
 
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', [], $tags);
+        $filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', [], $tags);
 
         $reflection = new ReflectionClass(AbstractFilter::class);
         $orderedHandlersProperty = $reflection->getProperty('orderedHandlersForLayer0ToLayer1Transition');
@@ -182,7 +181,7 @@ class MateCatFilterTest extends TestCase
     {
         $tags = ['foo_bar', 'does_not_exist', '', 'another_wrong'];
 
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', [], $tags);
+        $filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', [], $tags);
 
         $reflection = new ReflectionClass(AbstractFilter::class);
         $orderedHandlersProperty = $reflection->getProperty('orderedHandlersForLayer0ToLayer1Transition');
@@ -195,7 +194,7 @@ class MateCatFilterTest extends TestCase
 
     public function testFromLayer0ToLayer1WithNoHandlers()
     {
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', [], null);
+        $filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', [], null);
 
         $string = 'This is &lt;b&gt;bold&lt;/b&gt; text.';
         $segmentL1 = $filter->fromLayer0ToLayer1($string);
@@ -218,7 +217,7 @@ class MateCatFilterTest extends TestCase
     {
         /** @var $filter MateCatFilter */
         $filter = MateCatFilter::getInstance(
-            new FeatureSet(),
+            null,
             'en-US',
             'it-IT',
             null,
@@ -297,7 +296,7 @@ class MateCatFilterTest extends TestCase
      */
     public function testGetInstanceWithNullDataRefMap()
     {
-        $filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', null);
+        $filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', null);
 
         $reflection = new ReflectionClass(AbstractFilter::class);
         $dataRefMapProperty = $reflection->getProperty('dataRefMap');
@@ -694,7 +693,7 @@ class MateCatFilterTest extends TestCase
 
     public function testXliffTagsInsideAXliffFile()
     {
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', []);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
 
         $xliffTags = [
             [
@@ -737,7 +736,7 @@ class MateCatFilterTest extends TestCase
     public function testTwigFilterWithLessThan()
     {
         // less than %lt;
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', []);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
 
         $db_segment = '{% if count &lt; 3 %}';
         $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::TWIG->value . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAzICV9"/>';
@@ -756,7 +755,7 @@ class MateCatFilterTest extends TestCase
     public function testTwigFilterWithLessThanAttachedToANumber()
     {
         // less than %lt;
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', []);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
 
         $db_segment = '{% if count &lt;3 %}';
         $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::TWIG->value . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OzMgJX0="/>';
@@ -775,7 +774,7 @@ class MateCatFilterTest extends TestCase
     public function testTwigFilterWithGreaterThan()
     {
         // less than %gt;
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', []);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
 
         $db_segment = '{% if count &gt; 3 %}';
         $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::TWIG->value . '" equiv-text="base64:eyUgaWYgY291bnQgJmd0OyAzICV9"/>';
@@ -794,7 +793,7 @@ class MateCatFilterTest extends TestCase
     public function testTwigFilterWithLessThanAndGreaterThan()
     {
         // less than %lt;
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', []);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
 
         $db_segment = '{% if count &lt; 10 and &gt; 3 %}';
         $expected_l1_segment = '<ph id="mtc_1" ctype="' . CTypeEnum::TWIG->value . '" equiv-text="base64:eyUgaWYgY291bnQgJmx0OyAxMCBhbmQgJmd0OyAzICV9"/>';
@@ -841,7 +840,7 @@ class MateCatFilterTest extends TestCase
     public function testPhWithoutDataRef()
     {
         $db_segment = 'We can control who sees %s content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', [], [InjectableFiltersTags::sprintf->value]);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', [], [InjectableFiltersTags::sprintf->value]);
 
         $expected_l1_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF->value . '" equiv-text="base64:JXM="/> content when with <ph id="source1" dataRef="source1"/>Visibility Constraints.';
         $expected_l2_segment = 'We can control who sees <ph id="mtc_1" ctype="' . CTypeEnum::SPRINTF->value . '" equiv-text="base64:JXM="/> content when with <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value . '" equiv-text="base64:PHBoIGlkPSJzb3VyY2UxIiBkYXRhUmVmPSJzb3VyY2UxIi8+"/>Visibility Constraints.';
@@ -873,7 +872,7 @@ class MateCatFilterTest extends TestCase
             'source2' => '&lt;a href=%s&gt;',
         ];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map, [InjectableFiltersTags::sprintf->value]);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', $data_ref_map, [InjectableFiltersTags::sprintf->value]);
 
         $db_segment = "Hi %s .";
         $db_translation = "Tere %s .";
@@ -906,7 +905,7 @@ class MateCatFilterTest extends TestCase
             'source1' => '&lt;br&gt;',
         ];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', $data_ref_map);
 
         $db_segment = 'Frase semplice: <ph id="source1" dataRef="source1"/>.';
         $db_translation = 'Simple sentence: <ph id="source1" dataRef="source1"/>.';
@@ -945,7 +944,7 @@ class MateCatFilterTest extends TestCase
             "source2" => "<hr>",
         ];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', $data_ref_map);
 
         $db_segment = '<pc id="source1" dataRefStart="source1">&lt;<pc id="source2" dataRefStart="source2">Rider /&gt;</pc></pc>';
         $expected_l1_segment = '<pc id="source1" dataRefStart="source1">&lt;<pc id="source2" dataRefStart="source2">Rider /&gt;</pc></pc>';
@@ -970,7 +969,7 @@ class MateCatFilterTest extends TestCase
             "source7" => "<g id=\"oZ3oW_0KaicFXFDS\" ctype=\"x-html-li\" \/>"
         ];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', $data_ref_map);
 
         $db_segment = '<pc id="source1" dataRefStart="source1">Click the image on the left, read the information and then select the contact type that would replace the red question mark.</pc><pc id="source2" dataRefStart="source2"><pc id="source3" dataRefStart="source3">Things to consider:</pc></pc><pc id="source4" dataRefStart="source4"><pc id="source5" dataRefStart="source5">The rider stated the car had a different tag from another state.</pc><pc id="source6" dataRefStart="source6">The rider stated the car had a color from the one registered in Bliss.</pc><pc id="source7" dataRefStart="source7">The rider can’t tell if the driver matched the profile picture.</pc></pc>';
         $expected_l1_segment = '<pc id="source1" dataRefStart="source1">Click the image on the left, read the information and then select the contact type that would replace the red question mark.</pc><pc id="source2" dataRefStart="source2"><pc id="source3" dataRefStart="source3">Things to consider:</pc></pc><pc id="source4" dataRefStart="source4"><pc id="source5" dataRefStart="source5">The rider stated the car had a different tag from another state.</pc><pc id="source6" dataRefStart="source6">The rider stated the car had a color from the one registered in Bliss.</pc><pc id="source7" dataRefStart="source7">The rider can’t tell if the driver matched the profile picture.</pc></pc>';
@@ -994,7 +993,7 @@ class MateCatFilterTest extends TestCase
     {
         $data_ref_map = [];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', $data_ref_map);
 
         $db_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
         $expected_l1_segment = 'Practice using <pc id="1b" type="fmt" subType="m:b">coaching frameworks</pc> and skills with peers and coaches in a safe learning environment.';
@@ -1020,7 +1019,7 @@ class MateCatFilterTest extends TestCase
             'd1' => '_',
         ];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', $data_ref_map);
 
         $db_segment = 'Testo libero contenente <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">corsivo</pc>.';
         $db_translation = 'Free text containing <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d1" dataRefStart="d1">curvise</pc>.';
@@ -1056,7 +1055,7 @@ class MateCatFilterTest extends TestCase
             'd2' => '](http://repubblica.it)',
         ];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', $data_ref_map);
 
         $db_segment = 'Link semplice: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
         $db_translation = 'Simple link: <pc id="1" canCopy="no" canDelete="no" dataRefEnd="d2" dataRefStart="d1">La Repubblica</pc>.';
@@ -1091,7 +1090,7 @@ class MateCatFilterTest extends TestCase
             'source1' => 'x',
         ];
 
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', $data_ref_map);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', $data_ref_map);
 
         $db_segment = 'Text <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
         $db_translation = 'Testo <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" subType="m:u">link</pc></pc>.';
@@ -1119,7 +1118,7 @@ class MateCatFilterTest extends TestCase
 
     public function testDontTouchAlreadyParsedPhTags()
     {
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', []);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
 
         $segment = 'Frase semplice: <ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>.';
         $expected = 'Frase semplice: <ph id="source1" dataRef="source1" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>.';
@@ -1130,7 +1129,7 @@ class MateCatFilterTest extends TestCase
 
     public function testHtmlStringsWithDataTypeAttribute()
     {
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', []);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
 
 //        $db_segment          = '&lt;span data-type="hotspot" class="hotspotOnImage" style="position: relative;display: inline-block;max-width: 100%"&gt;&lt;img src="https://files-storage.easygenerator.com/image/a59cc702-b609-483d-89bd-d65084cde0ed.png" alt="" style="max-width:100%"&gt;&lt;span class="spot" style="position: absolute; display: inline-block; width: 608px; height: 373px; top: 22px; left: 15px;" data-text="Fysische besmetting" data-id="b0d02fa9-a022-4258-d0a9-b9b1b5deacc0"&gt;&lt;/span&gt;&lt;span class="spot" style="position: absolute; display: inline-block; width: 591px; height: 340px; top: 55px; left: 675px;" data-text="Besmetting met allergenen" data-id="04e17f73-f836-485d-e2c5-293b0f4ec4ff"&gt;&lt;/span&gt;&lt;span class="spot" style="position: absolute; display: inline-block; width: 601px; height: 357px; top: 479px; left: 26px;" data-text="Microbiologische besmetting" data-id="6afa3766-4d97-4d08-c3d5-ce9281728d01"&gt;&lt;/span&gt;&lt;span class="spot" style="position: absolute; display: inline-block; width: 590px; height: 362px; top: 478px; left: 679px;" data-text="Chemische besmetting" data-id="2918ea16-fb49-409e-d33d-4f2bbcbd4d53"&gt;&lt;/span&gt;&lt;/span&gt;';
 //        $expected_l1_segment = '<ph id="mtc_1" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0O3NwYW4gZGF0YS10eXBlPSJob3RzcG90IiBjbGFzcz0iaG90c3BvdE9uSW1hZ2UiIHN0eWxlPSJwb3NpdGlvbjogcmVsYXRpdmU7ZGlzcGxheTogaW5saW5lLWJsb2NrO21heC13aWR0aDogMTAwJSImZ3Q7"/><ph id="mtc_2" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0O2ltZyBzcmM9Imh0dHBzOi8vZmlsZXMtc3RvcmFnZS5lYXN5Z2VuZXJhdG9yLmNvbS9pbWFnZS9hNTljYzcwMi1iNjA5LTQ4M2QtODliZC1kNjUwODRjZGUwZWQucG5nIiBhbHQ9IiIgc3R5bGU9Im1heC13aWR0aDoxMDAlIiZndDs="/><ph id="mtc_3" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwOHB4OyBoZWlnaHQ6IDM3M3B4OyB0b3A6IDIycHg7IGxlZnQ6IDE1cHg7IiBkYXRhLXRleHQ9IkZ5c2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9ImIwZDAyZmE5LWEwMjItNDI1OC1kMGE5LWI5YjFiNWRlYWNjMCImZ3Q7"/><ph id="mtc_4" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_5" equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MXB4OyBoZWlnaHQ6IDM0MHB4OyB0b3A6IDU1cHg7IGxlZnQ6IDY3NXB4OyIgZGF0YS10ZXh0PSJCZXNtZXR0aW5nIG1ldCBhbGxlcmdlbmVuIiBkYXRhLWlkPSIwNGUxN2Y3My1mODM2LTQ4NWQtZTJjNS0yOTNiMGY0ZWM0ZmYiJmd0Ow=="/><ph id="mtc_6" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_7" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDYwMXB4OyBoZWlnaHQ6IDM1N3B4OyB0b3A6IDQ3OXB4OyBsZWZ0OiAyNnB4OyIgZGF0YS10ZXh0PSJNaWNyb2Jpb2xvZ2lzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjZhZmEzNzY2LTRkOTctNGQwOC1jM2Q1LWNlOTI4MTcyOGQwMSImZ3Q7"/><ph id="mtc_8" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_9" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0O3NwYW4gY2xhc3M9InNwb3QiIHN0eWxlPSJwb3NpdGlvbjogYWJzb2x1dGU7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDU5MHB4OyBoZWlnaHQ6IDM2MnB4OyB0b3A6IDQ3OHB4OyBsZWZ0OiA2NzlweDsiIGRhdGEtdGV4dD0iQ2hlbWlzY2hlIGJlc21ldHRpbmciIGRhdGEtaWQ9IjI5MThlYTE2LWZiNDktNDA5ZS1kMzNkLTRmMmJiY2JkNGQ1MyImZ3Q7"/><ph id="mtc_10" ctype="'.CTypeEnum::XML.'"->value equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/><ph id="mtc_11" equiv-text="base64:Jmx0Oy9zcGFuJmd0Ow=="/>';
@@ -1154,7 +1153,7 @@ class MateCatFilterTest extends TestCase
 
     public function testPhTagsWithoutDataRef()
     {
-        $Filter = MateCatFilter::getInstance(new FeatureSet(), 'en-EN', 'et-ET', []);
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
 
         $db_segment = '<ph id="1j" type="other" subType="m:j"/>';
         $expected_l1_segment = '<ph id="1j" type="other" subType="m:j"/>';
@@ -1169,24 +1168,6 @@ class MateCatFilterTest extends TestCase
         $back_to_db_segment = $Filter->fromLayer1ToLayer0($l1_segment);
 
         $this->assertEquals($back_to_db_segment, $db_segment);
-    }
-
-    /**
-     * Test for airbnb
-     *
-     * @throws Exception
-     */
-    public function testSmartCount()
-    {
-        $Filter = MateCatFilter::getInstance(new FeatureSet([new AirbnbFeature()]), 'en-EN', 'et-ET', [], [InjectableFiltersTags::percent_double_curly->value, InjectableFiltersTags::ruby_on_rails->value]);
-
-        $db_segment = '%{smart_count} discount||||%{smart_count} discounts';
-        $segment_from_UI = '<ph id="mtc_1" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discount<ph id="mtc_2" ctype="x-smart-count" equiv-text="base64:fHx8fA=="/><ph id="mtc_3" ctype="' . CTypeEnum::RUBY_ON_RAILS->value . '" equiv-text="base64:JXtzbWFydF9jb3VudH0="/> discounts';
-
-        $l1_segment = $Filter->fromLayer0ToLayer1($db_segment);
-
-        $this->assertEquals($db_segment, $Filter->fromLayer1ToLayer0($segment_from_UI));
-        $this->assertEquals($segment_from_UI, $Filter->fromLayer0ToLayer1($db_segment));
     }
 
     /**

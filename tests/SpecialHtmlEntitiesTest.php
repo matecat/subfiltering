@@ -12,7 +12,6 @@ namespace Matecat\SubFiltering\Tests;
 use Exception;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
-use Matecat\SubFiltering\Tests\Mocks\FeatureSet;
 use PHPUnit\Framework\TestCase;
 
 class SpecialHtmlEntitiesTest extends TestCase
@@ -20,7 +19,7 @@ class SpecialHtmlEntitiesTest extends TestCase
 
     private function getFilterInstance()
     {
-        return MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT');
+        return MateCatFilter::getInstance(null, 'en-US', 'it-IT');
     }
 
     /**

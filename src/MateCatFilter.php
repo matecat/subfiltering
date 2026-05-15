@@ -4,6 +4,11 @@ namespace Matecat\SubFiltering;
 
 use Exception;
 use Matecat\SubFiltering\Commons\Pipeline;
+use Matecat\SubFiltering\Events\FromLayer0ToLayer1Event;
+use Matecat\SubFiltering\Events\FromLayer0ToRawXliffEvent;
+use Matecat\SubFiltering\Events\FromLayer1ToLayer2Event;
+use Matecat\SubFiltering\Events\FromLayer2ToLayer1Event;
+use Matecat\SubFiltering\Events\FromRawXliffToLayer0Event;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\Filters\DataRefReplace;
 use Matecat\SubFiltering\Filters\DataRefRestore;
@@ -60,8 +65,11 @@ class MateCatFilter extends AbstractFilter
 
         $this->configureFromLayer0ToLayer1Pipeline($channel);
 
-        // Allow the feature set to modify the pipeline for this specific transformation.
-        $channel = $this->featureSet->customizeFromLayer0ToLayer1($channel);
+        if ($this->dispatcher !== null) {
+            $event = new FromLayer0ToLayer1Event($channel);
+            $this->dispatcher->dispatch($event);
+            $channel = $event->getPipeline();
+        }
 
         // Process the segment and return the result.
         return $channel->transform($segment);
@@ -97,7 +105,11 @@ class MateCatFilter extends AbstractFilter
         $channel->addLast(EntityToEmoji::class);
         $channel->addLast(DataRefReplace::class);
 
-        $channel = $this->featureSet->customizeFromLayer1ToLayer2($channel);
+        if ($this->dispatcher !== null) {
+            $event = new FromLayer1ToLayer2Event($channel);
+            $this->dispatcher->dispatch($event);
+            $channel = $event->getPipeline();
+        }
 
         return $channel->transform($segment);
     }
@@ -121,7 +133,11 @@ class MateCatFilter extends AbstractFilter
         $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
         $channel->addLast(DataRefRestore::class);
 
-        $channel = $this->featureSet->customizeFromLayer2ToLayer1($channel);
+        if ($this->dispatcher !== null) {
+            $event = new FromLayer2ToLayer1Event($channel);
+            $this->dispatcher->dispatch($event);
+            $channel = $event->getPipeline();
+        }
 
         return $channel->transform($segment);
     }
@@ -162,7 +178,11 @@ class MateCatFilter extends AbstractFilter
         $channel->addLast(RestoreXliffTagsContent::class);
         $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
 
-        $channel = $this->featureSet->customizeFromRawXliffToLayer0($channel);
+        if ($this->dispatcher !== null) {
+            $event = new FromRawXliffToLayer0Event($channel);
+            $this->dispatcher->dispatch($event);
+            $channel = $event->getPipeline();
+        }
 
         return $channel->transform($segment);
     }
@@ -184,7 +204,11 @@ class MateCatFilter extends AbstractFilter
         $channel->addLast(RestorePlaceHoldersToXLIFFLtGt::class);
         $channel->addLast(LtGtEncode::class);
 
-        $channel = $this->featureSet->customizeFromLayer0ToRawXliff($channel);
+        if ($this->dispatcher !== null) {
+            $event = new FromLayer0ToRawXliffEvent($channel);
+            $this->dispatcher->dispatch($event);
+            $channel = $event->getPipeline();
+        }
 
         return $channel->transform($segment);
     }

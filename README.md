@@ -82,19 +82,16 @@ Create instances using the static `getInstance` factory:
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
-use Matecat\SubFiltering\Contracts\FeatureSetInterface;
-use Matecat\SubFiltering\Mocks\FeatureSet; // Example implementation lives under tests/ (use your own in production)
-
-$featureSet = new FeatureSet(); // must implement FeatureSetInterface
 
 // Optional parameters:
+// - $dispatcher (EventDispatcherInterface|null): PSR-14 event dispatcher for pipeline events (default: null)
 // - $source (string): source language (e.g., 'en-US')
 // - $target (string): target language (e.g., 'it-IT')
 // - $dataRefMap (array): map for XLIFF 2 dataRef replacement (see section below)
-$filter = MateCatFilter::getInstance($featureSet, 'it-IT', 'en-US', []);
+$filter = MateCatFilter::getInstance(null, 'it-IT', 'en-US', []);
 ```
 
-The first argument MUST be a concrete implementation of `Matecat\SubFiltering\Contracts\FeatureSetInterface`.
+The first argument is an optional PSR-14 `EventDispatcherInterface` for pipeline events. Pass `null` if you don't need event dispatching.
 
 ## DataRef replacement (XLIFF 2)
 
@@ -118,14 +115,13 @@ Example:
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
-use Matecat\SubFiltering\Mocks\FeatureSet;
 
 $dataRefMap = [
     'source1' => '${AMOUNT}',
     'source2' => '${RIDER}',
 ];
 
-$filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'it-IT', $dataRefMap);
+$filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', $dataRefMap);
 
 // When converting to Layer 2 (UI), the filter will:
 // - add equiv-text to <ph>/<sc>/<ec> using the map
@@ -172,16 +168,13 @@ Where:
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
-use Matecat\SubFiltering\Mocks\FeatureSet;
-
-$featureSet = new FeatureSet();
 
 $dataRefMap = [
     'd1' => '_',
     'd2' => '**',
 ];
 
-$filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT', $dataRefMap);
+$filter = MateCatFilter::getInstance(null, 'en-US', 'it-IT', $dataRefMap);
 
 // Example Layer 0 content holding XLIFF inline codes
 $layer0 = "Hi %s .";
@@ -201,9 +194,9 @@ $backToDb = $filter->fromLayer2ToLayer0($ui);
 ```php
 <?php
 
-use Matecat\SubFiltering\MateCatFilter;use Matecat\SubFiltering\Mocks\FeatureSet;
+use Matecat\SubFiltering\MateCatFilter;
 
-$filter = MateCatFilter::getInstance(new FeatureSet(), 'en-US', 'de-DE', []);
+$filter = MateCatFilter::getInstance(null, 'en-US', 'de-DE', []);
 
 $layer0 = 'Text with <ph id="1" equiv-text="&amp;lt;br/&amp;gt;"/> and placeholders.';
 
@@ -237,10 +230,8 @@ use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 
 // Example 1: enable only a subset of supported injectable handlers.
 // Only handlers known to the sorter will be kept and ordered.
-$featureSet = new YourFeatureSetImplementation(); // implements FeatureSetInterface
-
 $filter = MateCatFilter::getInstance(
-    $featureSet,
+    null, // no event dispatcher
     'en-US',
     'it-IT',
     [], // dataRef map
@@ -271,10 +262,8 @@ use Matecat\SubFiltering\MateCatFilter;
 
 // Example 2: disable all injectable handlers by passing null.
 // Only the fixed, non-injectable pipeline steps will run.
-$featureSet = new YourFeatureSetImplementation(); // implements FeatureSetInterface
-
 $filterNoInjectables = MateCatFilter::getInstance(
-    $featureSet,
+    null, // no event dispatcher
     'en-US',
     'it-IT',
     [],
@@ -283,15 +272,11 @@ $filterNoInjectables = MateCatFilter::getInstance(
 
 $string    = 'This is &amp;lt;b&amp;gt;bold&amp;lt;/b&amp;gt; text.';
 
-$l1_no = $filter->fromLayer0ToLayer1($input);
+$l1_no = $filterNoInjectables->fromLayer0ToLayer1($string);
 // 'This is &amp;lt;b&amp;gt;bold&amp;lt;/b&amp;gt; text.'
 
-$l2_no = $filterNoInjectables->fromLayer0ToLayer2($input);
+$l2_no = $filterNoInjectables->fromLayer0ToLayer2($string);
 ````
-
-## FeatureSet
-
-You must provide a `FeatureSetInterface` implementation to adjust the pipeline per transformation. A simple, working example lives under the tests/ folder. In your application, implement only the features you need and register them via your FeatureSet.
 
 ## Running tests
 

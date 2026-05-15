@@ -12,8 +12,8 @@ namespace Matecat\SubFiltering;
 use Exception;
 use Matecat\SubFiltering\Commons\AbstractHandler;
 use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Matecat\SubFiltering\Events\FromLayer1ToLayer0Event;
 use Matecat\SubFiltering\Filters\EncodeToRawXML;
 use Matecat\SubFiltering\Filters\EquivTextToBase64;
 use Matecat\SubFiltering\Filters\LtGtEncode;
@@ -25,6 +25,7 @@ use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
 use Matecat\SubFiltering\Filters\SplitPlaceholder;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use Matecat\SubFiltering\Filters\StandardXEquivTextToMateCatCustomPH;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Provides a blueprint for creating specific filter implementations.
@@ -41,10 +42,10 @@ abstract class AbstractFilter
 {
 
     /**
-     * @var FeatureSetInterface
-     * The set of features to be applied during the filtering process.
+     * @var EventDispatcherInterface|null
+     * Optional dispatcher used to customize pipelines via PSR-14 events.
      */
-    protected FeatureSetInterface $featureSet;
+    protected ?EventDispatcherInterface $dispatcher;
 
     /**
      * @var string|null
@@ -89,7 +90,7 @@ abstract class AbstractFilter
      * - `null` clears the handler list, meaning no handlers will be used.
      * - A specific array of class names will be used as the handler list.
      *
-     * @param FeatureSetInterface $featureSet The feature set to apply.
+     * @param EventDispatcherInterface|null $dispatcher Optional event dispatcher for pipeline customization.
      * @param string|null $source The source language code (e.g., 'en-US').
      * @param string|null $target The target language code (e.g., 'it-IT').
      * @param array<string,string>|null $dataRefMap A map for data-ref transformations, or null for an empty map.
@@ -99,7 +100,7 @@ abstract class AbstractFilter
      * @return AbstractFilter The configured instance of the filter.
      */
     public static function getInstance(
-        FeatureSetInterface $featureSet,
+        ?EventDispatcherInterface $dispatcher = null,
         ?string $source = null,
         ?string $target = null,
         ?array $dataRefMap = [],
@@ -110,7 +111,7 @@ abstract class AbstractFilter
         $newInstance = new static();
 
         // Configure the instance with the provided settings via direct property access.
-        $newInstance->featureSet = $featureSet;
+        $newInstance->dispatcher = $dispatcher;
         $newInstance->source = $source;
         $newInstance->target = $target;
         // Use the null coalescing operator to default to an empty array if $dataRefMap is null.
@@ -166,8 +167,11 @@ abstract class AbstractFilter
         $channel->addLast(SplitPlaceholder::class);               // Handle split placeholders
         $channel->addLast(RestoreEquivText::class);               // Restore equiv-text content
 
-        // Allow the current feature set to modify the pipeline (e.g., add or remove handlers).
-        $channel = $this->featureSet->customizeFromLayer1ToLayer0($channel);
+        if ($this->dispatcher !== null) {
+            $event = new FromLayer1ToLayer0Event($channel);
+            $this->dispatcher->dispatch($event);
+            $channel = $event->getPipeline();
+        }
 
         // Process the segment through the pipeline and return the result.
         return $channel->transform($segment);

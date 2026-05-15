@@ -4,7 +4,6 @@ namespace Matecat\SubFiltering\Tests;
 
 use Exception;
 use Matecat\SubFiltering\AbstractFilter;
-use Matecat\SubFiltering\Commons\EmptyFeatureSet;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
@@ -39,7 +38,7 @@ class MyMemoryFilterTest extends TestCase
      */
     private function getFilterInstance(array $injectable_handlers = [])
     {
-        return MyMemoryFilter::getInstance(new EmptyFeatureSet(), 'en-US', 'it-IT', [], $injectable_handlers);
+        return MyMemoryFilter::getInstance(null, 'en-US', 'it-IT', [], $injectable_handlers);
     }
 
     /**
@@ -61,7 +60,7 @@ class MyMemoryFilterTest extends TestCase
         string $name
     ) {
         // Arrange: Create a filter instance with a specific set of initial handlers.
-        $filter = MyMemoryFilter::getInstance(new EmptyFeatureSet(), 'en-US', 'it-IT', [], $initialHandlers);
+        $filter = MyMemoryFilter::getInstance(null, 'en-US', 'it-IT', [], $initialHandlers);
         $channel = new Pipeline();
 
         // Act: Invoke the protected method to configure the pipeline.
