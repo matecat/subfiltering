@@ -30,6 +30,7 @@
   },
   "require": {
     "php": ">=8.3",
+    "psr/event-dispatcher": "^1.0",
     "matecat/emoji-to-entity-converter": "^2",
     "matecat/xml-dom-parser": "^2",
     "phpstan/phpstan": "@stable",
