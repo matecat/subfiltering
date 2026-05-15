@@ -107,21 +107,17 @@ abstract class AbstractFilter
         ?array $handlerTagNamesForLayer0ToLayer1Transition = [],
         bool $icu_enabled = false
     ): AbstractFilter {
-        // Create a new instance of the specific filter class (e.g., MateCatFilter).
         $newInstance = new static();
 
-        // Configure the instance with the provided settings via direct property access.
         $newInstance->dispatcher = $dispatcher;
         $newInstance->source = $source;
         $newInstance->target = $target;
-        // Use the null coalescing operator to default to an empty array if $dataRefMap is null.
         $newInstance->dataRefMap = $dataRefMap ?? [];
 
         $handlerClassNamesForLayer0ToLayer1Transition = InjectableFiltersTags::classesForArrayTagNames(
             $handlerTagNamesForLayer0ToLayer1Transition
         );
 
-        // Determine which handlers to use for the Layer 0 to Layer 1 transition.
         if (is_array(
                 $handlerClassNamesForLayer0ToLayer1Transition
             ) && empty($handlerClassNamesForLayer0ToLayer1Transition)) {
@@ -131,13 +127,10 @@ abstract class AbstractFilter
             // If null is passed, use no handlers.
             $handlerClassNamesForLayer0ToLayer1Transition = [];
         }
-        // Otherwise, use the custom list of handlers provided.
 
-        // Sort the dynamic feature-based handlers.
         $sorter = new HandlersSorter($handlerClassNamesForLayer0ToLayer1Transition, $icu_enabled);
         $newInstance->orderedHandlersForLayer0ToLayer1Transition = $sorter->getOrderedHandlersClassNames();
 
-        // Return the fully configured filter instance.
         return $newInstance;
     }
 
@@ -154,10 +147,8 @@ abstract class AbstractFilter
      */
     public function fromLayer1ToLayer0(string $segment): string
     {
-        // Initialize a new pipeline for this transformation.
         $channel = new Pipeline($this->source, $this->target, $this->dataRefMap);
 
-        // Add handlers to reverse the sub-filtering process.
         $channel->addLast(MateCatCustomPHToOriginalValue::class); // Restore original PH values
         $channel->addLast(PlaceHoldXliffTags::class);             // Isolate XLIFF tags
         $channel->addLast(EncodeToRawXML::class);                 // Encode for raw XML storage
@@ -173,7 +164,6 @@ abstract class AbstractFilter
             $channel = $event->getPipeline();
         }
 
-        // Process the segment through the pipeline and return the result.
         return $channel->transform($segment);
     }
 
@@ -194,9 +184,6 @@ abstract class AbstractFilter
 
     /**
      * Configures the pipeline for transforming content from Layer 0 to Layer 1.
-     *
-     * This is the default configuration method of MateCatFilter for setting up the pipeline that processes segments.
-     * MyMemoryFilter or override this method to customize the pipeline as needed.
      *
      * This method builds the default pipeline for the Layer 0 to Layer 1 transformation.
      * It adds a series of standard handlers and then incorporates any custom handlers,
