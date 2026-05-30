@@ -1,1 +1,0 @@
-PSR-14 EventDispatcherInterface installed: PASS
