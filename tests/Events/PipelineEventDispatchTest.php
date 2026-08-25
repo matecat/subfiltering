@@ -12,6 +12,7 @@ namespace Psr\EventDispatcher {
 namespace Matecat\SubFiltering\Tests\Events {
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Events\FromLayer0ToLayer1Event;
 use Matecat\SubFiltering\Events\FromLayer0ToRawXliffEvent;
 use Matecat\SubFiltering\Events\FromLayer1ToLayer0Event;
@@ -127,6 +128,29 @@ class PipelineEventDispatchTest extends TestCase
             'fromLayer0ToRawXliff' => ['method' => 'fromLayer0ToRawXliff', 'eventClass' => FromLayer0ToRawXliffEvent::class],
             'fromLayer1ToLayer0' => ['method' => 'fromLayer1ToLayer0', 'eventClass' => FromLayer1ToLayer0Event::class],
         ];
+    }
+
+    /**
+     * A listener is not limited to adding handlers to the pipeline it was handed: it can
+     * hand back a different one, and the filter must run that one instead. The replacement
+     * carries the marker handler alone, so the marker in the output is the only way the
+     * text could have been produced.
+     */
+    #[DataProvider('allSixHookPointsProvider')]
+    public function testAListenerCanReplaceThePipelineOnEveryHookPoint(string $method, string $eventClass): void
+    {
+        $spy = new SpyDispatcher(function (object $event) use ($eventClass): void {
+            $this->assertInstanceOf($eventClass, $event);
+
+            $replacement = new Pipeline('en', 'it');
+            $replacement->addLast(AppendRedPhaseSuffixHandler::class);
+
+            $event->setPipeline($replacement);
+        });
+
+        $filter = $this->getFilterWithDispatcher($spy);
+
+        $this->assertSame('hello|event-mutated', $filter->{$method}('hello'));
     }
 
     private function assertDispatched(string $eventClass, SpyDispatcher $spy): void

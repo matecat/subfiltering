@@ -134,6 +134,23 @@ class FiltersTagsEnumTest extends TestCase
      * Ensures that tagForClassName() covers all mapped handler classes.
      * @test
      */
+    /**
+     * The mirror of test_tagForClassNameCoversAllMappedClasses: every declared tag must
+     * name a handler class that exists. A case added to the enum without its arm in the
+     * class map fails here instead of at the first project that asks for it.
+     * @test
+     */
+    public function test_classForTagNameCoversEveryDeclaredCase()
+    {
+        foreach (InjectableFiltersTags::cases() as $case) {
+            $className = InjectableFiltersTags::classForTagName($case->value);
+
+            $this->assertNotNull($className, 'no handler class mapped for ' . $case->value);
+            $this->assertTrue(class_exists($className), $className . ' does not exist');
+            $this->assertSame($case->value, InjectableFiltersTags::tagForClassName($className));
+        }
+    }
+
     public function test_tagForClassNameCoversAllMappedClasses()
     {
         $expectedMap = [

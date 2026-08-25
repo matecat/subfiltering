@@ -7,6 +7,7 @@
 namespace Matecat\SubFiltering;
 
 use Matecat\SubFiltering\Commons\AbstractHandler;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
 use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
@@ -71,6 +72,34 @@ class HandlersSorter
         return array_filter(self::INJECTABLE_HANDLERS_ORDER, function ($settings) {
             return $settings['default_enabled'];
         });
+    }
+
+    /**
+     * Resolves the handler tag names an API carries into the handler classes a filter runs.
+     *
+     * The two inputs are not interchangeable: `null` asks for no handlers, while an empty
+     * list — or one naming nothing that maps — asks for the default set. The ICU reduction
+     * is applied last, so it can leave an explicit list empty without that being read as a
+     * request for the defaults.
+     *
+     * @param array<string>|null $tagNames
+     * @param bool $icu_enabled When true, handlers that alter ICU syntax are dropped.
+     *
+     * @return class-string<AbstractHandler>[] The classes in execution order.
+     */
+    public static function resolveClassNames(?array $tagNames, bool $icu_enabled = false): array
+    {
+        if ($tagNames === null) {
+            return [];
+        }
+
+        $classNames = InjectableFiltersTags::classesForArrayTagNames($tagNames);
+
+        if (empty($classNames)) {
+            $classNames = array_keys(self::getDefaultInjectedHandlers());
+        }
+
+        return (new self($classNames, $icu_enabled))->getOrderedHandlersClassNames();
     }
 
     /**

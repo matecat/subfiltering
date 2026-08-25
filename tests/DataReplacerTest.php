@@ -424,4 +424,20 @@ class DataReplacerTest extends TestCase
         $this->assertEquals($string, $dataReplacer->restore($expected));
     }
 
+
+    /**
+     * A segment can reach here with an opening tag and no closing one: the parser refuses
+     * it, and replace() answers with the string it was given rather than letting the
+     * failure escape into the pipeline.
+     */
+    #[Test]
+    public function returns_the_original_string_when_the_segment_cannot_be_parsed(): void
+    {
+        $dataReplacer = new DataRefReplacer(['d1' => 'a']);
+
+        $unparseable = '<pc id="1" dataRefStart="d1">no closing tag';
+
+        $this->assertEquals($unparseable, $dataReplacer->replace($unparseable));
+    }
+
 }

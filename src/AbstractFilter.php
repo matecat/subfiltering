@@ -114,24 +114,29 @@ abstract class AbstractFilter
         $newInstance->target = $target;
         $newInstance->dataRefMap = $dataRefMap ?? [];
 
-        $handlerClassNamesForLayer0ToLayer1Transition = InjectableFiltersTags::classesForArrayTagNames(
-            $handlerTagNamesForLayer0ToLayer1Transition
+        $newInstance->orderedHandlersForLayer0ToLayer1Transition = HandlersSorter::resolveClassNames(
+            $handlerTagNamesForLayer0ToLayer1Transition,
+            $icu_enabled
         );
 
-        if (is_array(
-                $handlerClassNamesForLayer0ToLayer1Transition
-            ) && empty($handlerClassNamesForLayer0ToLayer1Transition)) {
-            // If an empty array is passed, load the default set of handlers from the sorter.
-            $handlerClassNamesForLayer0ToLayer1Transition = array_keys(HandlersSorter::getDefaultInjectedHandlers());
-        } elseif (is_null($handlerClassNamesForLayer0ToLayer1Transition)) {
-            // If null is passed, use no handlers.
-            $handlerClassNamesForLayer0ToLayer1Transition = [];
-        }
-
-        $sorter = new HandlersSorter($handlerClassNamesForLayer0ToLayer1Transition, $icu_enabled);
-        $newInstance->orderedHandlersForLayer0ToLayer1Transition = $sorter->getOrderedHandlersClassNames();
-
         return $newInstance;
+    }
+
+    /**
+     * The handlers this instance runs on the Layer 0 to Layer 1 transition, by tag name.
+     *
+     * Reports the configuration of the instance after the resolution and the ICU reduction,
+     * which is what a caller needs when it has to name the same handlers to another system.
+     * Handlers a subclass adds while configuring a single transformation, from an argument of
+     * that call, are not part of the instance and do not appear here.
+     *
+     * @return array<string>
+     */
+    public function getOrderedHandlerTagNames(): array
+    {
+        return InjectableFiltersTags::tagNamesForArrayClasses(
+            $this->orderedHandlersForLayer0ToLayer1Transition
+        );
     }
 
     /**

@@ -91,6 +91,8 @@ enum InjectableFiltersTags: string
      * @param string[]|null $tagNames
      *
      * @return array<class-string<AbstractHandler>>|null
+     *
+     * @phpstan-return ($tagNames is null ? null : array<class-string<AbstractHandler>>)
      */
     public static function classesForArrayTagNames(?array $tagNames = []): ?array
     {
@@ -125,6 +127,8 @@ enum InjectableFiltersTags: string
      * @param array<class-string<AbstractHandler>>|null $classNames
      *
      * @return array<string>|null
+     *
+     * @phpstan-return ($classNames is null ? null : array<string>)
      */
     public static function tagNamesForArrayClasses(?array $classNames = []): ?array
     {
