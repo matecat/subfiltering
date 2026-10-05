@@ -57,17 +57,28 @@ class MarkupToPh extends AbstractHandler
      */
     protected function _finalizeMarkupTag(string $buffer): string
     {
-        // Decode attributes by locking < and > first
-        // Because an HTML tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
-        // Ex:
-        // incoming string: <a href="/users/settings?test=123&amp;amp;foobar=1" target="_blank">
-        // this should be: <a href="/users/settings?test=123&amp;foobar=1" target="_blank"> with only one ampersand encoding
-        //
+        return $this->_finalizeTag($this->decodeEntitiesKeepingAngleBrackets($buffer));
+    }
+
+    /**
+     * Decodes one level of HTML entities in a markup buffer, leaving its '<' and '>' untouched.
+     *
+     * The buffer arrives with lt and gt decoded but everything else still encoded, while `_finalizeTag()` encodes
+     * the whole buffer again. Without this decode every round trip through the placeholder adds an encoding level.
+     * Ex:
+     * incoming string: <a href="/users/settings?test=123&amp;amp;foobar=1" target="_blank">
+     * this should be: <a href="/users/settings?test=123&amp;foobar=1" target="_blank"> with only one ampersand encoding
+     *
+     * @param string $buffer The markup string.
+     *
+     * @return string The markup with one level of entities decoded.
+     */
+    private function decodeEntitiesKeepingAngleBrackets(string $buffer): string
+    {
         $buffer = str_replace(['<', '>'], ['#_lt_#', '#_gt_#'], $buffer);
         $buffer = html_entity_decode($buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
-        $buffer = str_replace(['#_lt_#', '#_gt_#'], ['<', '>'], $buffer);
 
-        return $this->_finalizeTag($buffer);
+        return str_replace(['#_lt_#', '#_gt_#'], ['<', '>'], $buffer);
     }
 
     /**
@@ -100,15 +111,17 @@ class MarkupToPh extends AbstractHandler
     }
 
     /**
-     * Finalizes a <script> tag by converting it into a placeholder.
+     * Finalizes a comment, <script> or <style> block by converting it into a placeholder.
      *
-     * @param string $buffer The script tag string.
+     * Its entities are decoded once like a tag's, so the block survives a round trip unchanged.
+     *
+     * @param string $buffer The comment, script or style block.
      *
      * @return string The generated <ph> placeholder tag.
      */
     protected function _finalizeScriptTag(string $buffer): string
     {
-        return $this->_finalizeTag($buffer);
+        return $this->_finalizeTag($this->decodeEntitiesKeepingAngleBrackets($buffer));
     }
 
     /**
