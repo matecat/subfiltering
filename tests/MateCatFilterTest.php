@@ -496,6 +496,58 @@ class MateCatFilterTest extends TestCase
     }
 
     /**
+     * Comments, scripts and styles reaching the filter without escaping must still be placeholded with one escaping
+     * layer, and once escaped they must not gain another level on later round trips.
+     *
+     * @throws Exception
+     */
+    #[DataProvider('unescapedSpecialBlocksProvider')]
+    public function testUnescapedSpecialBlocksKeepOneEscapingLayer(string $segment, string $escapedSegment, string $block)
+    {
+        $filter = $this->getFilterInstance();
+
+        $segmentL1 = $filter->fromLayer0ToLayer1($segment);
+
+        $this->assertStringContainsString('equiv-text="base64:' . base64_encode($block) . '"', $segmentL1);
+        $this->assertDoesNotMatchRegularExpression('/[<>]|&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);)/i', $block);
+
+        $once = $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($segment));
+        $this->assertEquals($escapedSegment, $once);
+
+        $twice = $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($once));
+        $this->assertEquals($escapedSegment, $twice);
+    }
+
+    /**
+     * @return array<string, array{string, string, string}>
+     */
+    public static function unescapedSpecialBlocksProvider(): array
+    {
+        return [
+            'script with raw ampersands' => [
+                'X &lt;script&gt;if (a && b) go();&lt;/script&gt; Y',
+                'X &lt;script&gt;if (a &amp;&amp; b) go();&lt;/script&gt; Y',
+                '&lt;script&gt;if (a &amp;&amp; b) go();&lt;/script&gt;',
+            ],
+            'raw script tags' => [
+                'X <script>alert("x") && 1</script> Y',
+                'X &lt;script&gt;alert("x") &amp;&amp; 1&lt;/script&gt; Y',
+                '&lt;script&gt;alert("x") &amp;&amp; 1&lt;/script&gt;',
+            ],
+            'comment with raw markup' => [
+                'X &lt;!-- a && b <i> --&gt; Y',
+                'X &lt;!-- a &amp;&amp; b &lt;i&gt; --&gt; Y',
+                '&lt;!-- a &amp;&amp; b &lt;i&gt; --&gt;',
+            ],
+            'style with raw ampersand' => [
+                'X &lt;style&gt;p{content:"&";}&lt;/style&gt; Y',
+                'X &lt;style&gt;p{content:"&amp;";}&lt;/style&gt; Y',
+                '&lt;style&gt;p{content:"&amp;";}&lt;/style&gt;',
+            ],
+        ];
+    }
+
+    /**
      * @throws Exception
      */
     public function testComplexUrls()
