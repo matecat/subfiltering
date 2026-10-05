@@ -448,6 +448,106 @@ class MateCatFilterTest extends TestCase
     }
 
     /**
+     * Comments, scripts and styles must be placeholded exactly as they appear in the segment, like a tag is,
+     * or every round trip through the UI adds an encoding level and the tag never matches its source again.
+     *
+     * @throws Exception
+     */
+    #[DataProvider('encodedSpecialBlocksProvider')]
+    public function testEncodedSpecialBlocksSurviveRoundTrips(string $segment, string $block)
+    {
+        $filter = $this->getFilterInstance();
+
+        $segmentL1 = $filter->fromLayer0ToLayer1($segment);
+        $segmentL2 = $filter->fromLayer0ToLayer2($segment);
+
+        $this->assertStringContainsString('equiv-text="base64:' . base64_encode($block) . '"', $segmentL1);
+
+        $this->assertEquals($segment, $filter->fromLayer1ToLayer0($segmentL1));
+        $this->assertEquals($segment, $filter->fromLayer2ToLayer0($segmentL2));
+
+        $twice = $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($filter->fromLayer2ToLayer0($segmentL2)));
+        $this->assertEquals($segment, $twice);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function encodedSpecialBlocksProvider(): array
+    {
+        return [
+            'comment' => [
+                'is hosted by &lt;!--TgQPHd||[[&amp;quot;https://www.faidelhi.org/&amp;quot;,&amp;quot;Hon&amp;#39;ble&amp;quot;]]--&gt; under the theme',
+                '&lt;!--TgQPHd||[[&amp;quot;https://www.faidelhi.org/&amp;quot;,&amp;quot;Hon&amp;#39;ble&amp;quot;]]--&gt;',
+            ],
+            'comment next to a tag with the same encoding' => [
+                'The &lt;b style="font-family: &amp;quot;Google Sans&amp;quot;"&gt;seminar&lt;!--x||[&amp;quot;y&amp;quot;]--&gt;&lt;/b&gt; is hosted',
+                '&lt;!--x||[&amp;quot;y&amp;quot;]--&gt;',
+            ],
+            'script' => [
+                'Before &lt;script&gt;let a = &amp;quot;b&amp;quot; &amp;amp;&amp;amp; c;&lt;/script&gt; after',
+                '&lt;script&gt;let a = &amp;quot;b&amp;quot; &amp;amp;&amp;amp; c;&lt;/script&gt;',
+            ],
+            'style' => [
+                'Before &lt;style&gt;p { font-family: &amp;quot;Google Sans&amp;quot;; }&lt;/style&gt; after',
+                '&lt;style&gt;p { font-family: &amp;quot;Google Sans&amp;quot;; }&lt;/style&gt;',
+            ],
+        ];
+    }
+
+    /**
+     * Comments, scripts and styles reaching the filter without escaping must still be placeholded with one escaping
+     * layer, and once escaped they must not gain another level on later round trips.
+     *
+     * @throws Exception
+     */
+    #[DataProvider('unescapedSpecialBlocksProvider')]
+    public function testUnescapedSpecialBlocksKeepOneEscapingLayer(string $segment, string $escapedSegment, string $block)
+    {
+        $filter = $this->getFilterInstance();
+
+        $segmentL1 = $filter->fromLayer0ToLayer1($segment);
+
+        $this->assertStringContainsString('equiv-text="base64:' . base64_encode($block) . '"', $segmentL1);
+        $this->assertDoesNotMatchRegularExpression('/[<>]|&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);)/i', $block);
+
+        $once = $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($segment));
+        $this->assertEquals($escapedSegment, $once);
+
+        $twice = $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($once));
+        $this->assertEquals($escapedSegment, $twice);
+    }
+
+    /**
+     * @return array<string, array{string, string, string}>
+     */
+    public static function unescapedSpecialBlocksProvider(): array
+    {
+        return [
+            'script with raw ampersands' => [
+                'X &lt;script&gt;if (a && b) go();&lt;/script&gt; Y',
+                'X &lt;script&gt;if (a &amp;&amp; b) go();&lt;/script&gt; Y',
+                '&lt;script&gt;if (a &amp;&amp; b) go();&lt;/script&gt;',
+            ],
+            'raw script tags' => [
+                'X <script>alert("x") && 1</script> Y',
+                'X &lt;script&gt;alert("x") &amp;&amp; 1&lt;/script&gt; Y',
+                '&lt;script&gt;alert("x") &amp;&amp; 1&lt;/script&gt;',
+            ],
+            'comment with raw markup' => [
+                'X &lt;!-- a && b <i> --&gt; Y',
+                'X &lt;!-- a &amp;&amp; b &lt;i&gt; --&gt; Y',
+                '&lt;!-- a &amp;&amp; b &lt;i&gt; --&gt;',
+            ],
+            'style with raw ampersand' => [
+                'X &lt;style&gt;p{content:"&";}&lt;/style&gt; Y',
+                'X &lt;style&gt;p{content:"&amp;";}&lt;/style&gt; Y',
+                '&lt;style&gt;p{content:"&amp;";}&lt;/style&gt;',
+            ],
+        ];
+    }
+
+    /**
      * @throws Exception
      */
     public function testComplexUrls()
