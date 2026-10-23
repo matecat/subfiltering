@@ -230,3 +230,19 @@ $restored = $dataReplacer->restore($string);
 // $restored is:
 // Text <pc id="d1" dataRefStart="d1">Uber Community Guidelines</pc>.
 ```
+### `disp` and `equiv` attributes
+
+Inline codes can carry a display value: `disp`/`equiv` on `<ph>`, `<sc>` and `<ec>`, `dispStart`/`equivStart` (opening tag) and `dispEnd`/`equivEnd` (closing tag) on `<pc>`.
+
+The value shown in `equiv-text` follows this priority: `disp` → `equiv` → the `originalData` value pointed by the dataRef. Empty attributes are skipped.
+The value is encoded the same way as the `originalData` values (see `matecat/xliff-parser`), while `x-orig` always keeps the original tag, so the restore is unchanged:
+
+```php
+$dataReplacer = new DataRefReplacer(['d1' => '{name}']);
+
+$dataReplacer->replace('Hello <ph id="1" dataRef="d1" disp="[Name]" equiv="NAME"/>');
+
+// Hello <ph id="1" ctype="x-ph_data_ref" equiv-text="base64:W05hbWVd" x-orig="..."/>
+```
+
+The same rule applies to `<ph>` and `<pc>` tags without any dataRef correspondence (`x-original_ph_no_data_ref`, `x-original_pc_open`, `x-original_pc_close`): when a display value is present it is shown in place of the whole tag, and the original tag is kept in `x-orig`.
