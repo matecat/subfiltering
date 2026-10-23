@@ -1116,6 +1116,79 @@ class MateCatFilterTest extends TestCase
         $this->assertEquals($back_to_db_translation, $db_translation);
     }
 
+    /**
+     * @throws Exception
+     */
+    public function testPhWithDispAndDataRefRoundTrip()
+    {
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', ['d1' => '{name}']);
+
+        $db_segment = 'Hello <ph id="1" dataRef="d1" disp="[Name]" equiv="NAME"/>!';
+        $expected_l2_segment = 'Hello <ph id="1" ctype="' . CTypeEnum::PH_DATA_REF->value . '" equiv-text="base64:' . base64_encode('[Name]') . '" x-orig="' . base64_encode('<ph id="1" dataRef="d1" disp="[Name]" equiv="NAME"/>') . '"/>!';
+
+        $l2_segment = $Filter->fromLayer0ToLayer2($db_segment);
+
+        $this->assertEquals($expected_l2_segment, $l2_segment);
+        $this->assertEquals($db_segment, $Filter->fromLayer2ToLayer0($l2_segment));
+        $this->assertEquals($db_segment, $Filter->fromLayer1ToLayer0($Filter->fromLayer0ToLayer1($db_segment)));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testPhWithoutDataRefCorrespondenceShowsEquiv()
+    {
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET');
+
+        $db_segment = 'Total: <ph id="1" dataRef="d1" equiv="COUNT"/> items.';
+        $expected_l2_segment = 'Total: <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value . '" equiv-text="base64:' . base64_encode('COUNT') . '" x-orig="' . base64_encode('<ph id="1" dataRef="d1" equiv="COUNT"/>') . '"/> items.';
+
+        $l2_segment = $Filter->fromLayer0ToLayer2($db_segment);
+
+        $this->assertEquals($expected_l2_segment, $l2_segment);
+        $this->assertEquals($db_segment, $Filter->fromLayer2ToLayer0($l2_segment));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testPcWithoutDataRefShowsDispStartAndDispEnd()
+    {
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', ['source1' => 'x']);
+
+        // the outer pc has a dataRef, the middle one has disp*, the inner one has none
+        $db_segment = 'Text <pc id="source1" dataRefStart="source1" dataRefEnd="source1"><pc id="1u" type="fmt" dispStart="[u]" dispEnd="[/u]"><pc id="2">link</pc></pc></pc>.';
+        $expected_l2_segment = 'Text <ph id="source1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF->value . '" equiv-text="base64:eA==" x-orig="' . base64_encode('<pc id="source1" dataRefStart="source1" dataRefEnd="source1">') . '"/>'
+            . '<ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF->value . '" equiv-text="base64:' . base64_encode('[u]') . '" x-orig="' . base64_encode('<pc id="1u" type="fmt" dispStart="[u]" dispEnd="[/u]">') . '"/>'
+            . '<ph id="mtc_2" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF->value . '" equiv-text="base64:' . base64_encode('<pc id="2">') . '"/>link'
+            . '<ph id="mtc_3" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF->value . '" equiv-text="base64:PC9wYz4="/>'
+            . '<ph id="mtc_4" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF->value . '" equiv-text="base64:' . base64_encode('[/u]') . '" x-orig="PC9wYz4="/>'
+            . '<ph id="source1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF->value . '" equiv-text="base64:eA==" x-orig="PC9wYz4="/>.';
+
+        $l2_segment = $Filter->fromLayer0ToLayer2($db_segment);
+
+        $this->assertEquals($expected_l2_segment, $l2_segment);
+        $this->assertEquals($db_segment, $Filter->fromLayer2ToLayer0($l2_segment));
+    }
+
+    /**
+     * Without a dataRef map, ph/pc restore runs only from equiv-text/x-orig
+     *
+     * @throws Exception
+     */
+    public function testPcWithoutAnyDataRefMapShowsDispRoundTrip()
+    {
+        $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET');
+
+        $db_segment = '<pc id="1" equivStart="B" equivEnd="/B">bold</pc> <ph id="2" disp="[br]"/>';
+        $l2_segment = $Filter->fromLayer0ToLayer2($db_segment);
+
+        $this->assertStringContainsString('equiv-text="base64:' . base64_encode('B') . '"', $l2_segment);
+        $this->assertStringContainsString('equiv-text="base64:' . base64_encode('/B') . '"', $l2_segment);
+        $this->assertStringContainsString('equiv-text="base64:' . base64_encode('[br]') . '"', $l2_segment);
+        $this->assertEquals($db_segment, $Filter->fromLayer2ToLayer0($l2_segment));
+    }
+
     public function testDontTouchAlreadyParsedPhTags()
     {
         $Filter = MateCatFilter::getInstance(null, 'en-EN', 'et-ET', []);
@@ -1513,7 +1586,7 @@ class MateCatFilterTest extends TestCase
         $segmentL1 = $filter->fromLayer0ToLayer1($segment);
         $segmentL2 = $filter->fromLayer0ToLayer2($segment);
 
-        $string_from_UI = 'For the site <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value . '" equiv-text="base64:PHBoIGlkPSI0IiBkaXNwPSJ7e3NpdGVJZH19IiBkYXRhUmVmPSJkMiIvPg=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_X->value . '" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDs0JnF1b3Q7IGRpc3A9JnF1b3Q7e3tzaXRlSWR9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QyJnF1b3Q7IC8mZ3Q7Ii8+" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzQmcXVvdDsgZGlzcD0mcXVvdDt7e3NpdGVJZH19JnF1b3Q7IGRhdGFSZWY9JnF1b3Q7ZDImcXVvdDsgLyZndDs="/><x id="3"/> group id <x id="4"/><x id="5"/><x id="6"/> is already associated.';
+        $string_from_UI = 'For the site <ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value . '" equiv-text="base64:e3tzaXRlSWR9fQ==" x-orig="PHBoIGlkPSI0IiBkaXNwPSJ7e3NpdGVJZH19IiBkYXRhUmVmPSJkMiIvPg=="/><ph id="mtc_1" ctype="' . CTypeEnum::ORIGINAL_X->value . '" x-orig="PHggaWQ9IjIiIGVxdWl2LXRleHQ9IiZsdDtwaCBpZD0mcXVvdDs0JnF1b3Q7IGRpc3A9JnF1b3Q7e3tzaXRlSWR9fSZxdW90OyBkYXRhUmVmPSZxdW90O2QyJnF1b3Q7IC8mZ3Q7Ii8+" equiv-text="base64:Jmx0O3BoIGlkPSZxdW90OzQmcXVvdDsgZGlzcD0mcXVvdDt7e3NpdGVJZH19JnF1b3Q7IGRhdGFSZWY9JnF1b3Q7ZDImcXVvdDsgLyZndDs="/><x id="3"/> group id <x id="4"/><x id="5"/><x id="6"/> is already associated.';
 
         $this->assertEquals($string_from_UI, $segmentL2);
 

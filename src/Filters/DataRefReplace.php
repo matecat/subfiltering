@@ -69,10 +69,11 @@ class DataRefReplace extends AbstractHandler
             if ($this->isAValidPhTag($phTag)) {
                 $segment = preg_replace(
                     '/' . preg_quote($phTag, '/') . '/',
-                    '<ph id="' . $this->getPipeline()->getNextId() .
-                    '" ctype="' . CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF->value .
-                    '" equiv-text="base64:' . base64_encode($phTag) .
-                    '"/>',
+                    $this->getMatecatPhTag(
+                        CTypeEnum::ORIGINAL_PH_OR_NOT_DATA_REF,
+                        $phTag,
+                        DataRefReplacer::getDisplayValue($this->getTagAttributes($phTag), 'disp', 'equiv')
+                    ),
                     $segment,
                     1 // replace ONLY ONE occurrence
                 ) ?? $segment;
@@ -138,30 +139,99 @@ class DataRefReplace extends AbstractHandler
             return $segment;
         }
 
+        $closingPcDisplayValues = $this->getClosingPcDisplayValues($segment);
+
         foreach ($openingPcTags[0] as $openingPcTag) {
             $segment = preg_replace(
                 '/' . preg_quote($openingPcTag, '/') . '/',
-                '<ph id="' . $this->getPipeline()->getNextId() .
-                '" ctype="' . CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF->value .
-                '" equiv-text="base64:' . base64_encode($openingPcTag) .
-                '"/>',
+                $this->getMatecatPhTag(
+                    CTypeEnum::ORIGINAL_PC_OPEN_NO_DATA_REF,
+                    $openingPcTag,
+                    DataRefReplacer::getDisplayValue($this->getTagAttributes($openingPcTag), 'dispStart', 'equivStart')
+                ),
                 $segment,
                 1
             ) ?? $segment;
         }
 
-        foreach ($closingPcTags[0] as $closingPcTag) {
+        foreach ($closingPcTags[0] as $index => $closingPcTag) {
             $segment = preg_replace(
                 '/' . preg_quote($closingPcTag, '/') . '/',
-                '<ph id="' . $this->getPipeline()->getNextId() .
-                '" ctype="' . CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF->value .
-                '" equiv-text="base64:' . base64_encode($closingPcTag) .
-                '"/>',
+                $this->getMatecatPhTag(
+                    CTypeEnum::ORIGINAL_PC_CLOSE_NO_DATA_REF,
+                    $closingPcTag,
+                    $closingPcDisplayValues[$index] ?? null
+                ),
                 $segment,
                 1
             ) ?? $segment;
         }
 
         return $segment;
+    }
+
+    /**
+     * Pair every </pc> (in document order) with its opening <pc> and return the dispEnd/equivEnd value of the latter
+     *
+     * @param string $segment
+     *
+     * @return array<int,?string>
+     */
+    private function getClosingPcDisplayValues(string $segment): array
+    {
+        preg_match_all('#<pc .*?>|</pc>#iu', $segment, $pcTags);
+
+        $openingStack = [];
+        $displayValues = [];
+
+        foreach ($pcTags[0] as $pcTag) {
+            if (str_starts_with($pcTag, '</')) {
+                $displayValues[] = array_pop($openingStack);
+            } elseif (!str_ends_with($pcTag, '/>')) {
+                $openingStack[] = DataRefReplacer::getDisplayValue($this->getTagAttributes($pcTag), 'dispEnd', 'equivEnd');
+            }
+        }
+
+        return $displayValues;
+    }
+
+    /**
+     * @param string $tag a self-closed tag or an opening tag
+     *
+     * @return array<string,string>
+     */
+    private function getTagAttributes(string $tag): array
+    {
+        try {
+            // add a closing tag to opening tags to not break XML integrity
+            $xml = str_ends_with($tag, '/>') ? $tag : $tag . '</' . (preg_match('/^<([^\s>\/]+)/', $tag, $tagName) ? $tagName[1] : '') . '>';
+
+            return XmlParser::parse($xml, true)[0]->attributes ?? [];
+        } catch (Exception) {
+            return [];
+        }
+    }
+
+    /**
+     * Build the Matecat <ph> tag for an XLIFF 2.0 tag without dataRef correspondence.
+     *
+     * When the tag has a display value (disp/equiv), it is shown in place of the original tag,
+     * which is then kept in x-orig to be restored
+     *
+     * @param CTypeEnum $ctype
+     * @param string $originalTag
+     * @param string|null $displayValue
+     *
+     * @return string
+     */
+    private function getMatecatPhTag(CTypeEnum $ctype, string $originalTag, ?string $displayValue): string
+    {
+        $phTag = '<ph id="' . $this->getPipeline()->getNextId() . '" ctype="' . $ctype->value . '"';
+
+        if ($displayValue === null) {
+            return $phTag . ' equiv-text="base64:' . base64_encode($originalTag) . '"/>';
+        }
+
+        return $phTag . ' equiv-text="base64:' . base64_encode($displayValue) . '" x-orig="' . base64_encode($originalTag) . '"/>';
     }
 }

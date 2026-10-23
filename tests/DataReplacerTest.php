@@ -440,4 +440,99 @@ class DataReplacerTest extends TestCase
         $this->assertEquals($unparseable, $dataReplacer->replace($unparseable));
     }
 
+    /**
+     * XLIFF 2.0 inline codes show disp, else equiv, else the dataRef value
+     */
+    #[Test]
+    public function ph_shows_disp_then_equiv_then_data_ref_value(): void
+    {
+        $dataReplacer = new DataRefReplacer(['d1' => '&lt;br/&gt;']);
+
+        $cases = [
+            '<ph id="1" dataRef="d1" disp="[Name]"/>' => '[Name]',
+            '<ph id="1" dataRef="d1" equiv="NAME"/>' => 'NAME',
+            '<ph id="1" dataRef="d1" disp="[Name]" equiv="NAME"/>' => '[Name]',
+            '<ph id="1" dataRef="d1" disp="" equiv="NAME"/>' => 'NAME',
+            '<ph id="1" dataRef="d1"/>' => '&lt;br/&gt;',
+        ];
+
+        foreach ($cases as $string => $displayValue) {
+            $expected = '<ph id="1" ctype="' . CTypeEnum::PH_DATA_REF->value
+                . '" equiv-text="base64:' . base64_encode($displayValue) . '" x-orig="' . base64_encode($string) . '"/>';
+
+            $this->assertEquals($expected, $dataReplacer->replace($string), $string);
+            $this->assertEquals($string, $dataReplacer->restore($expected), $string);
+        }
+    }
+
+    #[Test]
+    public function sc_and_ec_show_disp_or_equiv(): void
+    {
+        $dataReplacer = new DataRefReplacer(['d1' => '&lt;i&gt;', 'd2' => '&lt;/i&gt;']);
+
+        $string = '<sc id="1" dataRef="d1" disp="[i]"/>text<ec id="2" startRef="1" dataRef="d2" equiv="/i"/>';
+        $expected = '<ph id="1" ctype="' . CTypeEnum::SC_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('[i]') . '" x-orig="' . base64_encode('<sc id="1" dataRef="d1" disp="[i]"/>') . '"/>text'
+            . '<ph id="2" ctype="' . CTypeEnum::EC_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('/i') . '" x-orig="' . base64_encode('<ec id="2" startRef="1" dataRef="d2" equiv="/i"/>') . '"/>';
+
+        $this->assertEquals($expected, $dataReplacer->replace($string));
+        $this->assertEquals($string, $dataReplacer->restore($expected));
+    }
+
+    #[Test]
+    public function pc_shows_disp_start_and_disp_end_on_the_right_tags(): void
+    {
+        $dataReplacer = new DataRefReplacer(['d1' => '&lt;b&gt;', 'd2' => '&lt;/b&gt;', 'd3' => '&lt;i&gt;']);
+
+        // the outer pc uses dispStart/dispEnd, the nested one falls back to equivStart/equivEnd and to the dataRef value
+        $string = '<pc id="1" dataRefStart="d1" dataRefEnd="d2" dispStart="[b]" dispEnd="[/b]" equivStart="B">bold <pc id="2" dataRefStart="d3" equivStart="I">nested</pc></pc>';
+        $expected = '<ph id="1_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('[b]') . '" x-orig="' . base64_encode('<pc id="1" dataRefStart="d1" dataRefEnd="d2" dispStart="[b]" dispEnd="[/b]" equivStart="B">') . '"/>bold '
+            . '<ph id="2_1" ctype="' . CTypeEnum::PC_OPEN_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('I') . '" x-orig="' . base64_encode('<pc id="2" dataRefStart="d3" equivStart="I">') . '"/>nested'
+            . '<ph id="2_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('&lt;i&gt;') . '" x-orig="PC9wYz4="/>'
+            . '<ph id="1_2" ctype="' . CTypeEnum::PC_CLOSE_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('[/b]') . '" x-orig="PC9wYz4="/>';
+
+        $this->assertEquals($expected, $dataReplacer->replace($string));
+        $this->assertEquals($string, $dataReplacer->restore($expected));
+    }
+
+    #[Test]
+    public function self_closed_pc_shows_disp_start(): void
+    {
+        $dataReplacer = new DataRefReplacer(['d1' => '&lt;img/&gt;']);
+
+        $string = 'Image: <pc id="1" dataRefStart="d1" dispStart="[img]"/>';
+        $expected = 'Image: <ph id="1_1" ctype="' . CTypeEnum::PC_SELF_CLOSE_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('[img]') . '" x-orig="' . base64_encode('<pc id="1" dataRefStart="d1" dispStart="[img]"/>') . '"/>';
+
+        $this->assertEquals($expected, $dataReplacer->replace($string));
+        $this->assertEquals($string, $dataReplacer->restore($expected));
+    }
+
+    /**
+     * disp/equiv values must be encoded like the <originalData> values of the dataRef map (see matecat/xliff-parser)
+     */
+    #[Test]
+    public function display_values_are_encoded_like_original_data(): void
+    {
+        $this->assertEquals('&lt;p class="x"&gt;', DataRefReplacer::getDisplayValue(['disp' => '<p class="x">'], 'disp', 'equiv'));
+        $this->assertEquals('a &amp; b', DataRefReplacer::getDisplayValue(['disp' => 'a & b'], 'disp', 'equiv'));
+        $this->assertEquals('&lt;/p&gt;', DataRefReplacer::getDisplayValue(['dispEnd' => '&lt;/p&gt;'], 'dispEnd', 'equivEnd'));
+        $this->assertEquals('&lt;b&gt;', DataRefReplacer::getDisplayValue(['equiv' => '&amp;lt;b&amp;gt;'], 'disp', 'equiv'));
+        $this->assertNull(DataRefReplacer::getDisplayValue(['disp' => '', 'equiv' => ''], 'disp', 'equiv'));
+        $this->assertNull(DataRefReplacer::getDisplayValue(['id' => '1'], 'disp', 'equiv'));
+
+        // XML escaped attribute in the segment
+        $dataReplacer = new DataRefReplacer(['d1' => 'x']);
+        $string = '<ph id="1" dataRef="d1" disp="&lt;b&gt; &amp; &quot;c&quot;"/>';
+        $expected = '<ph id="1" ctype="' . CTypeEnum::PH_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('&lt;b&gt; &amp; "c"') . '" x-orig="' . base64_encode($string) . '"/>';
+
+        $this->assertEquals($expected, $dataReplacer->replace($string));
+        $this->assertEquals($string, $dataReplacer->restore($expected));
+    }
 }
