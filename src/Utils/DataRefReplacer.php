@@ -36,13 +36,21 @@ class DataRefReplacer
     private Map $map;
 
     /**
+     * @var bool
+     */
+    private bool $useDisplayValues;
+
+    /**
      * DataRefReplacer constructor.
      *
      * @param array<string,string> $map
+     * @param bool $useDisplayValues when false, equiv-text always holds the dataRef value and disp/equiv attributes are ignored
+     *                               (the output is the same as before v4.2.0, needed to compare source and target tags or to hash segments)
      */
-    public function __construct(array $map = [])
+    public function __construct(array $map = [], bool $useDisplayValues = true)
     {
         $this->map = Map::instance($this->sanitizeMap($map));
+        $this->useDisplayValues = $useDisplayValues;
     }
 
     /**
@@ -121,6 +129,18 @@ class DataRefReplacer
     }
 
     /**
+     * @param array<string,string> $attributes
+     * @param string $dispAttribute
+     * @param string $equivAttribute
+     *
+     * @return string|null null when display values are disabled
+     */
+    private function getDisplayValueIfEnabled(array $attributes, string $dispAttribute, string $equivAttribute): ?string
+    {
+        return $this->useDisplayValues ? self::getDisplayValue($attributes, $dispAttribute, $equivAttribute) : null;
+    }
+
+    /**
      * XmlParser decodes attribute values, so re-encode them the same way xliff-parser encodes <originalData>:
      * double escaped entities are decoded once, otherwise the special chars are escaped (quotes excluded).
      *
@@ -186,7 +206,7 @@ class DataRefReplacer
                 $string = $this->replaceNewTagString(
                     $node->node,
                     $attributesMap->getOrDefault('id', $dataRefName),
-                    self::getDisplayValue($node->attributes, 'disp', 'equiv') ?? $this->map->getOrDefault($dataRefName, 'NULL'),
+                    $this->getDisplayValueIfEnabled($node->attributes, 'disp', 'equiv') ?? $this->map->getOrDefault($dataRefName, 'NULL'),
                     $ctype,
                     $string,
                     null
@@ -238,7 +258,7 @@ class DataRefReplacer
                 $string = $this->replaceNewTagString(
                     $node->node,
                     $attributesMap->get('id'),
-                    self::getDisplayValue($node->attributes, 'dispStart', 'equivStart') ?? $dataRefStartValue,
+                    $this->getDisplayValueIfEnabled($node->attributes, 'dispStart', 'equivStart') ?? $dataRefStartValue,
                     CTypeEnum::PC_SELF_CLOSE_DATA_REF->value,
                     $string
                 );
@@ -283,7 +303,7 @@ class DataRefReplacer
             $dataRefEndMap[] = [
                 'id' => $attributesMap->get('id'),
                 'dataRefEnd' => $dataRefEnd,
-                'displayValue' => self::getDisplayValue($node->attributes, 'dispEnd', 'equivEnd'),
+                'displayValue' => $this->getDisplayValueIfEnabled($node->attributes, 'dispEnd', 'equivEnd'),
             ];
         }
     }
@@ -300,7 +320,9 @@ class DataRefReplacer
      */
     private function replaceOpeningPcTags(string $string): string
     {
-        // a slash is allowed only inside quoted attribute values (ex. dispEnd="[/b]"), so that self-closed tags are excluded
+        // a slash is allowed only inside quoted attribute values (ex. dispEnd="[/b]"), so that self-closed tags are excluded.
+        // This applies without display values too: the pre-v4.2.0 regexp left such tags unconverted on one side only,
+        // so export QA saw a tag mismatch even when source and target tags were identical
         preg_match_all('#<pc (?:[^>/"\']|"[^"]*"|\'[^\']*\')+>#iu', $string, $openingPcMatches);
 
         foreach ($openingPcMatches[0] as $match) {
@@ -321,7 +343,7 @@ class DataRefReplacer
                 $string = $this->replaceNewTagString(
                     $match,
                     $attributesMap->get('id'),
-                    self::getDisplayValue($node->attributes, 'dispStart', 'equivStart') ?? $this->map->getOrDefault($node->attributes['dataRefStart'], 'NULL'),
+                    $this->getDisplayValueIfEnabled($node->attributes, 'dispStart', 'equivStart') ?? $this->map->getOrDefault($node->attributes['dataRefStart'], 'NULL'),
                     CTypeEnum::PC_OPEN_DATA_REF->value,
                     $string
                 );
