@@ -246,3 +246,7 @@ $dataReplacer->replace('Hello <ph id="1" dataRef="d1" disp="[Name]" equiv="NAME"
 ```
 
 The same rule applies to `<ph>` and `<pc>` tags without any dataRef correspondence (`x-original_ph_no_data_ref`, `x-original_pc_open`, `x-original_pc_close`): when a display value is present it is shown in place of the whole tag, and the original tag is kept in `x-orig`.
+
+Pass `false` as the second constructor argument (`new DataRefReplacer($map, false)`) to ignore `disp`/`equiv` and always put the dataRef value in `equiv-text`, as before v4.2.0.
+Use it when comparing source and target tags (a target can miss or localize `disp`) or when hashing segments (equal `disp` values can point to different `originalData`).
+Opening `<pc>` tags with a slash in an attribute value (ex. `dispEnd="[/b]"`) are converted in both modes; before v4.2.0 they were left as they were.

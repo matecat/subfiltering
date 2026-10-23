@@ -4,6 +4,7 @@ namespace Matecat\SubFiltering\Tests;
 
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -534,5 +535,132 @@ class DataReplacerTest extends TestCase
 
         $this->assertEquals($expected, $dataReplacer->replace($string));
         $this->assertEquals($string, $dataReplacer->restore($expected));
+    }
+
+    /**
+     * Expected outputs are the ones of v4.1.1 (before disp/equiv support)
+     *
+     * @return array<string,array{string,string}>
+     */
+    public static function displayValuesInputsProvider(): array
+    {
+        return [
+            'ph with disp' => [
+                '<ph id="1" dataRef="d3" disp="[Name]"/>',
+                '<ph id="1" ctype="x-ph_data_ref" equiv-text="base64:e25hbWV9" x-orig="PHBoIGlkPSIxIiBkYXRhUmVmPSJkMyIgZGlzcD0iW05hbWVdIi8+"/>',
+            ],
+            'ph with equiv' => [
+                '<ph id="1" dataRef="d3" equiv="NAME"/>',
+                '<ph id="1" ctype="x-ph_data_ref" equiv-text="base64:e25hbWV9" x-orig="PHBoIGlkPSIxIiBkYXRhUmVmPSJkMyIgZXF1aXY9Ik5BTUUiLz4="/>',
+            ],
+            'ph with disp and equiv' => [
+                '<ph id="1" dataRef="d3" disp="[Name]" equiv="NAME"/>',
+                '<ph id="1" ctype="x-ph_data_ref" equiv-text="base64:e25hbWV9" x-orig="PHBoIGlkPSIxIiBkYXRhUmVmPSJkMyIgZGlzcD0iW05hbWVdIiBlcXVpdj0iTkFNRSIvPg=="/>',
+            ],
+            'sc and ec' => [
+                '<sc id="1" dataRef="d1" disp="[b]"/>bold<ec id="2" startRef="1" dataRef="d2" equiv="/b"/>',
+                '<ph id="1" ctype="x-sc_data_ref" equiv-text="base64:Jmx0O2ImZ3Q7" x-orig="PHNjIGlkPSIxIiBkYXRhUmVmPSJkMSIgZGlzcD0iW2JdIi8+"/>bold<ph id="2" ctype="x-ec_data_ref" equiv-text="base64:Jmx0Oy9iJmd0Ow==" x-orig="PGVjIGlkPSIyIiBzdGFydFJlZj0iMSIgZGF0YVJlZj0iZDIiIGVxdWl2PSIvYiIvPg=="/>',
+            ],
+            'pc with dispStart and equivEnd' => [
+                '<pc id="1" dataRefStart="d1" dataRefEnd="d2" dispStart="[b]" equivEnd="B">bold</pc>',
+                '<ph id="1_1" ctype="x-pc_open_data_ref" equiv-text="base64:Jmx0O2ImZ3Q7" x-orig="PHBjIGlkPSIxIiBkYXRhUmVmU3RhcnQ9ImQxIiBkYXRhUmVmRW5kPSJkMiIgZGlzcFN0YXJ0PSJbYl0iIGVxdWl2RW5kPSJCIj4="/>bold<ph id="1_2" ctype="x-pc_close_data_ref" equiv-text="base64:Jmx0Oy9iJmd0Ow==" x-orig="PC9wYz4="/>',
+            ],
+            // v4.1.1 left this opening <pc> unconverted: it is converted now, still with the dataRef value
+            'pc with a slash in an attribute' => [
+                '<pc id="1" dataRefStart="d1" dataRefEnd="d2" dispStart="[b]" dispEnd="[/b]">bold</pc>',
+                '<ph id="1_1" ctype="x-pc_open_data_ref" equiv-text="base64:Jmx0O2ImZ3Q7" x-orig="PHBjIGlkPSIxIiBkYXRhUmVmU3RhcnQ9ImQxIiBkYXRhUmVmRW5kPSJkMiIgZGlzcFN0YXJ0PSJbYl0iIGRpc3BFbmQ9IlsvYl0iPg=="/>bold<ph id="1_2" ctype="x-pc_close_data_ref" equiv-text="base64:Jmx0Oy9iJmd0Ow==" x-orig="PC9wYz4="/>',
+            ],
+            'self-closed pc' => [
+                '<pc id="1" dataRefStart="d1" dispStart="[b]"/>',
+                '<ph id="1_1" ctype="x-pc_sc_data_ref" equiv-text="base64:Jmx0O2ImZ3Q7" x-orig="PHBjIGlkPSIxIiBkYXRhUmVmU3RhcnQ9ImQxIiBkaXNwU3RhcnQ9IltiXSIvPg=="/>',
+            ],
+            'nested pc' => [
+                '<pc id="1" dataRefStart="d1" dataRefEnd="d2" equivStart="B"><pc id="2" dataRefStart="d3" dispStart="[n]">x</pc></pc>',
+                '<ph id="1_1" ctype="x-pc_open_data_ref" equiv-text="base64:Jmx0O2ImZ3Q7" x-orig="PHBjIGlkPSIxIiBkYXRhUmVmU3RhcnQ9ImQxIiBkYXRhUmVmRW5kPSJkMiIgZXF1aXZTdGFydD0iQiI+"/><ph id="2_1" ctype="x-pc_open_data_ref" equiv-text="base64:e25hbWV9" x-orig="PHBjIGlkPSIyIiBkYXRhUmVmU3RhcnQ9ImQzIiBkaXNwU3RhcnQ9IltuXSI+"/>x<ph id="2_2" ctype="x-pc_close_data_ref" equiv-text="base64:e25hbWV9" x-orig="PC9wYz4="/><ph id="1_2" ctype="x-pc_close_data_ref" equiv-text="base64:Jmx0Oy9iJmd0Ow==" x-orig="PC9wYz4="/>',
+            ],
+        ];
+    }
+
+    /**
+     * Without display values equiv-text holds the dataRef value, as in v4.1.1, so that export QA and segment hashes
+     * do not depend on disp/equiv
+     */
+    #[Test]
+    #[DataProvider('displayValuesInputsProvider')]
+    public function without_display_values_the_output_is_the_one_before_disp_support(string $string, string $expected): void
+    {
+        $dataReplacer = new DataRefReplacer(['d1' => '&lt;b&gt;', 'd2' => '&lt;/b&gt;', 'd3' => '{name}'], false);
+
+        $this->assertEquals($expected, $dataReplacer->replace($string));
+        $this->assertEquals($string, $dataReplacer->restore($expected));
+    }
+
+    /**
+     * Export QA compares source and target equiv-text one by one: a missing or localized disp in the target must not be a mismatch
+     */
+    #[Test]
+    public function without_display_values_source_and_target_tags_have_the_same_equiv_text(): void
+    {
+        $map = ['d1' => '{name}', 'd2' => '&lt;b&gt;', 'd3' => '&lt;/b&gt;'];
+        $equivTexts = function (DataRefReplacer $dataReplacer, string $string): array {
+            preg_match_all('/equiv-text="([^"]*)"/', $dataReplacer->replace($string), $matches);
+
+            return $matches[1];
+        };
+
+        $source = 'Hello <ph id="1" dataRef="d1" disp="[Name]"/>, <pc id="2" dataRefStart="d2" dataRefEnd="d3" dispStart="[b]" dispEnd="[/b]">bold</pc>';
+        $targets = [
+            'missing disp' => 'Ciao <ph id="1" dataRef="d1"/>, <pc id="2" dataRefStart="d2" dataRefEnd="d3">grassetto</pc>',
+            'localized disp' => 'Ciao <ph id="1" dataRef="d1" disp="[Nome]"/>, <pc id="2" dataRefStart="d2" dataRefEnd="d3" dispStart="[g]" dispEnd="[/g]">grassetto</pc>',
+        ];
+
+        $dataReplacer = new DataRefReplacer($map, false);
+        $displayValuesReplacer = new DataRefReplacer($map);
+
+        foreach ($targets as $case => $target) {
+            $this->assertEquals($equivTexts($dataReplacer, $source), $equivTexts($dataReplacer, $target), $case);
+            // the editor (default) shows the tag own disp, so here they differ
+            $this->assertNotEquals($equivTexts($displayValuesReplacer, $source), $equivTexts($displayValuesReplacer, $target), $case);
+        }
+    }
+
+    /**
+     * Before the fix, an opening <pc> with a slash in an attribute value stayed unconverted without display values:
+     * identical source and target tags then looked different to export QA, and the translation was not exported
+     */
+    #[Test]
+    public function without_display_values_identical_pc_tags_with_a_slash_in_an_attribute_are_converted_alike(): void
+    {
+        $dataReplacer = new DataRefReplacer(['d2' => '&lt;b&gt;', 'd3' => '&lt;/b&gt;'], false);
+        $pc = '<pc id="2" dataRefStart="d2" dataRefEnd="d3" dispStart="[b]" dispEnd="[/b]">%s</pc>';
+
+        $source = $dataReplacer->replace(sprintf('A %s word', sprintf($pc, 'bold')));
+        $target = $dataReplacer->replace(sprintf('Una parola %s', sprintf($pc, 'grassetto')));
+
+        $this->assertStringNotContainsString('<pc ', $source);
+        $this->assertStringNotContainsString('<pc ', $target);
+
+        preg_match_all('/<ph [^>]*\/>/', $source, $sourceTags);
+        preg_match_all('/<ph [^>]*\/>/', $target, $targetTags);
+        $this->assertCount(2, $sourceTags[0]);
+        $this->assertEquals($sourceTags[0], $targetTags[0]);
+    }
+
+    /**
+     * Segments with the same disp but a different originalData must not get the same equiv-text (and hash)
+     */
+    #[Test]
+    public function without_display_values_equal_disp_with_different_data_ref_values_differ(): void
+    {
+        $string = '<ph id="1" dataRef="d1" disp="[x]"/>';
+
+        $this->assertNotEquals(
+            (new DataRefReplacer(['d1' => '&lt;br/&gt;'], false))->replace($string),
+            (new DataRefReplacer(['d1' => '&lt;hr/&gt;'], false))->replace($string)
+        );
+        $this->assertEquals(
+            (new DataRefReplacer(['d1' => '&lt;br/&gt;']))->replace($string),
+            (new DataRefReplacer(['d1' => '&lt;hr/&gt;']))->replace($string)
+        );
     }
 }
