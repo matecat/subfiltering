@@ -39,7 +39,7 @@ class HandlersSorterTest extends TestCase
             DoubleSquareBrackets::class, // 5
             DollarCurlyBrackets::class,  // 6
             ObjectiveCNSString::class,   // 8
-            SprintfToPH::class,          // 11
+            SprintfToPH::class,          // 12
         ];
 
         $sorter = new HandlersSorter($unordered);
@@ -68,7 +68,7 @@ class HandlersSorterTest extends TestCase
         $expected = [
             PercentDoubleCurlyBrackets::class,   // 1
             Snails::class,      // 4
-            SprintfToPH::class, // 11
+            SprintfToPH::class, // 12
         ];
 
         $sorter = new HandlersSorter($handlers);
@@ -155,7 +155,7 @@ class HandlersSorterTest extends TestCase
             DoubleSquareBrackets::class, // position 5
             DollarCurlyBrackets::class,  // position 6
             DoublePercentages::class,    // position 9
-            SprintfToPH::class,          // position 11
+            SprintfToPH::class,          // position 12
         ];
 
         $this->assertSame($expected, $orderedList);
@@ -187,7 +187,7 @@ class HandlersSorterTest extends TestCase
             RubyOnRailsI18n::class,      // position 3
             DoubleSquareBrackets::class, // position 5
             DoublePercentages::class,    // position 9
-            SprintfToPH::class,          // position 11
+            SprintfToPH::class,          // position 12
         ];
 
         $this->assertSame($expected, $orderedList);

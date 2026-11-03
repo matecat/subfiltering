@@ -16,6 +16,7 @@ use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
 use Matecat\SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use Matecat\SubFiltering\Filters\RestoreXliffTagsContent;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
+use Matecat\SubFiltering\Filters\SingleSquareBrackets;
 use Matecat\SubFiltering\Filters\SmartCounts;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\StandardPHToMateCatCustomPH;
@@ -1407,6 +1408,146 @@ class MateCatFilterTest extends TestCase
 
         $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
         $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+    }
+
+    private function ph(int $id, CTypeEnum $ctype, string $original): string
+    {
+        return '<ph id="mtc_' . $id . '" ctype="' . $ctype->value . '" equiv-text="base64:' . base64_encode($original) . '"/>';
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testWithSingleSquareBrackets()
+    {
+        $filter = $this->getFilterInstance([], [InjectableFiltersTags::single_square->value]);
+
+        $db_segment = 'This string contains [placeholder] and [other_one]';
+        $segment_from_UI = 'This string contains ' . $this->ph(1, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[placeholder]')
+            . ' and ' . $this->ph(2, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[other_one]');
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
+    }
+
+    /**
+     * The same placeholder repeated is locked at each position, with its own id.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testWithRepeatedSingleSquareBrackets()
+    {
+        $filter = $this->getFilterInstance([], [InjectableFiltersTags::single_square->value]);
+
+        $db_segment = '[name] and [name]';
+        $segment_from_UI = $this->ph(1, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[name]')
+            . ' and ' . $this->ph(2, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[name]');
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
+    }
+
+    /**
+     * Single square brackets are not part of the default configuration.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testSingleSquareBracketsAreNotLockedByDefault()
+    {
+        $this->assertArrayNotHasKey(SingleSquareBrackets::class, HandlersSorter::getDefaultInjectedHandlers());
+
+        $db_segment = 'This string contains [placeholder]';
+        $this->assertEquals($db_segment, $this->getFilterInstance()->fromLayer0ToLayer1($db_segment));
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function singleSquareBracketsLeftAloneProvider(): array
+    {
+        return [
+            'double square brackets' => ['This string contains [[placeholder]]'],
+            'whitespace inside' => ['This string contains [two words]'],
+            'empty brackets' => ['This string contains []'],
+            'unclosed bracket' => ['This string contains [placeholder'],
+            'doubled opening bracket' => ['This string contains [[placeholder]'],
+            'doubled closing bracket' => ['This string contains [placeholder]]'],
+        ];
+    }
+
+    /**
+     * @param string $db_segment
+     *
+     * @return void
+     * @throws Exception
+     */
+    #[DataProvider('singleSquareBracketsLeftAloneProvider')]
+    public function testSingleSquareBracketsLeavesNonMatchingTextAlone(string $db_segment)
+    {
+        $filter = $this->getFilterInstance([], [InjectableFiltersTags::single_square->value]);
+
+        $this->assertEquals($db_segment, $filter->fromLayer0ToLayer1($db_segment));
+    }
+
+    /**
+     * With double square brackets disabled, `[[x]]` stays as it is, and a later `[x]` is the
+     * one that gets locked, not the inner part of `[[x]]`.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testSingleSquareBracketsDoesNotTakeTheInnerPartOfDoubleSquareBrackets()
+    {
+        $filter = $this->getFilterInstance([], [InjectableFiltersTags::single_square->value]);
+
+        $db_segment = '[[name]] and [name]';
+        $segment_from_UI = '[[name]] and ' . $this->ph(1, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[name]');
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testSingleSquareBracketsWithDoubleSquareBrackets()
+    {
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::single_square->value,
+            InjectableFiltersTags::double_square->value,
+        ]);
+
+        $db_segment = '[[name]] and [name]';
+        $segment_from_UI = $this->ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[name]]')
+            . ' and ' . $this->ph(2, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[name]');
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
+    }
+
+    /**
+     * Square sprintf runs first, so `[%s]` keeps its own ctype.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testSingleSquareBracketsWithSquareSprintf()
+    {
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::single_square->value,
+            InjectableFiltersTags::square_sprintf->value,
+        ]);
+
+        $db_segment = '[%s] and [name]';
+        $segment_from_UI = $this->ph(1, CTypeEnum::SQUARE_SPRINTF, '[%s]')
+            . ' and ' . $this->ph(2, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[name]');
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
     }
 
 
