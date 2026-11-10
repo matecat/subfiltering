@@ -10,8 +10,6 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
  *
  * The brackets must hold no whitespace, no markup and no further brackets, so `[a b]` and
  * `[[text]]` are left alone; `[[text]]` belongs to {@see DoubleSquareBrackets}.
- * {@see AbstractPlaceholderHandler} also leaves alone whitespace written as an entity, so
- * `[a&#09;b]`, `[a&#13;b]` and `[a&#160;b]` stay as text.
  *
  * The lookarounds reject a bracket that is doubled on either side:
  * - the lookbehind `(?<!\[)` leaves `[[text]` alone;

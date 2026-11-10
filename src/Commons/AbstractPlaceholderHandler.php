@@ -50,6 +50,10 @@ abstract class AbstractPlaceholderHandler extends AbstractHandler
             return true;
         }
 
+        if (!str_contains($text, '&#')) {
+            return false;
+        }
+
         preg_match_all('/&#(?:[0-9]+|[xX][0-9a-fA-F]+);/', $text, $entities);
 
         return preg_match('/\s/u', html_entity_decode(implode('', $entities[0]), ENT_XML1, 'UTF-8')) === 1;
