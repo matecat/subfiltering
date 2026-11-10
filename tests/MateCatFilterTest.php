@@ -1505,8 +1505,8 @@ class MateCatFilterTest extends TestCase
     }
 
     /**
-     * A tag with no whitespace passes the pattern as `##LESSTHAN##...##GREATERTHAN##`,
-     * and the guard in the callback keeps it out of the placeholder.
+     * A tag with no whitespace reaches the pattern as `##LESSTHAN##...##GREATERTHAN##`,
+     * and the pattern stops at `##LESSTHAN##`, so the tag stays out of the placeholder.
      *
      * @return void
      */

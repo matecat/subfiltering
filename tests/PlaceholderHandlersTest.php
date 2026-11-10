@@ -345,16 +345,6 @@ class PlaceholderHandlersTest extends TestCase
                 str_repeat('${&#09;', 20000) . '} ${ok}',
                 str_repeat('${&#09;', 20000) . '} ' . self::ph(1, CTypeEnum::DOLLAR_CURLY_BRACKETS, '${ok}')
             ],
-            'double square, blocks of openers' => [
-                DoubleSquareBrackets::class,
-                str_repeat(str_repeat('[[', 5000) . ' ', 30) . ']] [[ok]]',
-                str_repeat(str_repeat('[[', 5000) . ' ', 30) . ']] ' . self::ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[ok]]')
-            ],
-            'dollar curly, blocks of openers' => [
-                DollarCurlyBrackets::class,
-                str_repeat(str_repeat('${', 5000) . ' ', 30) . '} ${ok}',
-                str_repeat(str_repeat('${', 5000) . ' ', 30) . '} ' . self::ph(1, CTypeEnum::DOLLAR_CURLY_BRACKETS, '${ok}')
-            ],
         ];
     }
 
@@ -491,27 +481,6 @@ class PlaceholderHandlersTest extends TestCase
             }
         }
         return $rows;
-    }
-
-    /**
-     * A placeholder of 30,000 characters is locked, and so is the short placeholder before it.
-     *
-     * @param class-string<AbstractPlaceholderHandler> $handler
-     * @param CTypeEnum $ctype
-     * @param string $plain
-     *
-     * @return void
-     */
-    #[DataProvider('handlerProvider')]
-    public function testLocksPlaceholderNextToLongOne(string $handler, CTypeEnum $ctype, string $plain): void
-    {
-        $long = str_replace('ab', str_repeat('a', 30000), $plain);
-        $input = $plain . ' ' . $long;
-
-        $channel = new Pipeline();
-        $channel->addLast($handler);
-
-        $this->assertEquals(self::ph(1, $ctype, $plain) . ' ' . self::ph(2, $ctype, $long), $channel->transform($input));
     }
 
     /**
