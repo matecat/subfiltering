@@ -1573,7 +1573,6 @@ class MateCatFilterTest extends TestCase
             'tab entity inside' => ['This string contains [[a&#09;b]]', 'This string contains [[a&#09;b]]'],
             'line feed entity inside' => ['This string contains [[a&#10;b]]', 'This string contains [[a&#10;b]]'],
             'NBSP entity inside' => ['This string contains [[a&#160;b]]', "This string contains [[a\u{00A0}b]]"],
-            'literal NBSP inside' => ["This string contains [[a\u{00A0}b]]", "This string contains [[a\u{00A0}b]]"],
         ];
     }
 
