@@ -27,7 +27,7 @@ class DoublePercentages extends AbstractPlaceholderHandler
      */
     protected function getPattern(): string
     {
-        return '/%%[^<>\s%{}]+?%%/u'; // removed single percentage support '/(?<!{)%[^<>\s%]+?%/'
+        return '/%%[^<>\s%{}]+?%%/'; // removed single percentage support '/(?<!{)%[^<>\s%]+?%/'
     }
 
     /**

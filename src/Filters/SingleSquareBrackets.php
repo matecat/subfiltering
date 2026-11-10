@@ -19,9 +19,6 @@ use Matecat\SubFiltering\Enum\CTypeEnum;
  *
  * They only look at the brackets next to the match. A `[x]` nested deeper inside double
  * brackets, such as the `[a]` in `[[x[a]y]]`, is still locked when double_square is disabled.
- *
- * The class leaves out `]`, so the possessive `++` matches what a lazy `+?` would, with no
- * backtracking.
  */
 class SingleSquareBrackets extends AbstractPlaceholderHandler
 {
@@ -30,7 +27,7 @@ class SingleSquareBrackets extends AbstractPlaceholderHandler
      */
     protected function getPattern(): string
     {
-        return '/(?<!\[)\[[^\[\]<>\s]++](?!])/u';
+        return '/(?<!\[)\[[^\[\]<>\s]+?](?!])/u';
     }
 
     /**
