@@ -34,7 +34,7 @@ class SingleCurlyBracketsToPh extends AbstractPlaceholderHandler
      */
     protected function getPattern(): string
     {
-        return '/{(?:' . self::NOT_HIDDEN . '[^<>{} ])+?}/';
+        return '/{[^<>{} ]+?}/';
     }
 
     /**

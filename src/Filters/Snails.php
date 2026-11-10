@@ -15,7 +15,7 @@ class Snails extends AbstractPlaceholderHandler
      */
     protected function getPattern(): string
     {
-        return '/@@(?:' . self::NOT_HIDDEN . '[^<>\s])+?@@/';
+        return '/@@[^<>\s]+?@@/';
     }
 
     /**
