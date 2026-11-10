@@ -114,8 +114,8 @@ class PlaceholderHandlersTest extends TestCase
      *
      * @return void
      */
-    #[DataProvider('textInsideRejectedMatchProvider')]
-    public function testLeavesTextInsideRejectedMatchAlone(string $db, string $expectedLayer1): void
+    #[DataProvider('placeholderAfterHiddenTokenProvider')]
+    public function testLocksPlaceholderAfterHiddenToken(string $db, string $expectedLayer1): void
     {
         $filter = $this->getFilterInstance();
 
@@ -125,24 +125,32 @@ class PlaceholderHandlersTest extends TestCase
     }
 
     /**
-     * A rejected match stays as text, whole: the scan goes on after its end, so a placeholder inside it stays as text too.
+     * A placeholder cannot run over a whitespace entity or an escaped tag, so the one right after it is locked, as after a literal space.
      *
      * @return array<string, array{string, string}>
      */
-    public static function textInsideRejectedMatchProvider(): array
+    public static function placeholderAfterHiddenTokenProvider(): array
     {
         return [
             'double square' => [
                 '[[a&#09;[[b]] [[b]]',
-                '[[a&#09;[[b]] ' . self::ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[b]]')
+                '[[a&#09;' . self::ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[b]]') . ' ' . self::ph(2, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[b]]')
             ],
             'snails' => [
                 '@@a&#09;@@b@@',
-                '@@a&#09;@@b@@'
+                '@@a&#09;' . self::ph(1, CTypeEnum::SNAILS, '@@b@@')
             ],
             'double percent' => [
                 '%%a&#09;%%b%%',
-                '%%a&#09;%%b%%'
+                '%%a&#09;' . self::ph(1, CTypeEnum::PERCENTAGES, '%%b%%')
+            ],
+            'double square after a closing tag' => [
+                '<g id="1">[[a</g>[[x]]',
+                '<g id="1">[[a</g>' . self::ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[x]]')
+            ],
+            'snails after a closing tag, twice' => [
+                '<g id="1">@@a</g>@@x@@ @@x@@',
+                '<g id="1">@@a</g>' . self::ph(1, CTypeEnum::SNAILS, '@@x@@') . ' ' . self::ph(2, CTypeEnum::SNAILS, '@@x@@')
             ],
         ];
     }
@@ -338,6 +346,140 @@ class PlaceholderHandlersTest extends TestCase
                 str_repeat('${&#09;', 20000) . '} ' . self::ph(1, CTypeEnum::DOLLAR_CURLY_BRACKETS, '${ok}')
             ],
         ];
+    }
+
+    /**
+     * Tokens that stop a placeholder pattern: escaped tags and whitespace entities.
+     */
+    private const HIDDEN_TOKENS = [
+        '##LESSTHAN##',
+        '##GREATERTHAN##',
+        '&#09;',
+        '&#9;',
+        '&#0009;',
+        '&#10;',
+        '&#13;',
+        '&#32;',
+        '&#160;',
+        '&#x9;',
+        '&#X9;',
+        '&#xA;',
+        '&#xa;',
+        '&#xD;',
+        '&#x20;',
+        '&#xA0;',
+        '&#x00A0;'
+    ];
+
+    /**
+     * Entities that are ordinary content inside a placeholder.
+     */
+    private const VISIBLE_ENTITIES = [
+        '&amp;',
+        '&nbsp;',
+        '&#233;',
+        '&#38;',
+        '&#90;',
+        '&#100;',
+        '&#130;',
+        '&#1600;',
+        '&#8232;',
+        '&#xA00;',
+        '&#xD0;',
+        '&#x200;',
+        '&#x9F;'
+    ];
+
+    /**
+     * A placeholder holding a hidden token stays as text.
+     *
+     * @param class-string<AbstractPlaceholderHandler> $handler
+     * @param CTypeEnum $ctype
+     * @param string $plain
+     * @param string $token
+     *
+     * @return void
+     */
+    #[DataProvider('hiddenTokenProvider')]
+    public function testHiddenTokenLeavesPlaceholderAlone(string $handler, CTypeEnum $ctype, string $plain, string $token): void
+    {
+        $input = str_replace('a', 'a' . $token, $plain);
+
+        $channel = new Pipeline();
+        $channel->addLast($handler);
+
+        $this->assertEquals($input, $channel->transform($input));
+    }
+
+    /**
+     * @return array<string, array{class-string<AbstractPlaceholderHandler>, CTypeEnum, string, string}>
+     */
+    public static function hiddenTokenProvider(): array
+    {
+        $rows = [];
+        foreach (self::handlerProvider() as $name => [$handler, $ctype, $plain]) {
+            foreach (self::HIDDEN_TOKENS as $token) {
+                $rows["$name, $token"] = [$handler, $ctype, $plain, $token];
+            }
+        }
+        return $rows;
+    }
+
+    /**
+     * A placeholder starting right after a hidden token is locked.
+     *
+     * @param class-string<AbstractPlaceholderHandler> $handler
+     * @param CTypeEnum $ctype
+     * @param string $plain
+     * @param string $token
+     *
+     * @return void
+     */
+    #[DataProvider('hiddenTokenProvider')]
+    public function testLocksPlaceholderRightAfterHiddenToken(string $handler, CTypeEnum $ctype, string $plain, string $token): void
+    {
+        $open = strstr($plain, 'a', true);
+        $input = $open . 'x' . $token . $plain;
+
+        $channel = new Pipeline();
+        $channel->addLast($handler);
+
+        $this->assertEquals($open . 'x' . $token . self::ph(1, $ctype, $plain), $channel->transform($input));
+    }
+
+    /**
+     * A placeholder holding a visible entity is locked.
+     *
+     * @param class-string<AbstractPlaceholderHandler> $handler
+     * @param CTypeEnum $ctype
+     * @param string $plain
+     * @param string $entity
+     *
+     * @return void
+     */
+    #[DataProvider('visibleEntityProvider')]
+    public function testVisibleEntityKeepsPlaceholderLocked(string $handler, CTypeEnum $ctype, string $plain, string $entity): void
+    {
+        $input = str_replace('a', 'a' . $entity, $plain);
+
+        $channel = new Pipeline();
+        $channel->addLast($handler);
+
+        $this->assertEquals(self::ph(1, $ctype, $input), $channel->transform($input));
+    }
+
+    /**
+     * @return array<string, array{class-string<AbstractPlaceholderHandler>, CTypeEnum, string, string}>
+     */
+    public static function visibleEntityProvider(): array
+    {
+        $rows = [];
+        foreach (self::handlerProvider() as $name => [$handler, $ctype, $plain]) {
+            foreach (self::VISIBLE_ENTITIES as $entity) {
+                $rows["$name, $entity"] = [$handler, $ctype, $plain, $entity];
+            }
+        }
+        return $rows;
     }
 
     /**
