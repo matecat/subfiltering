@@ -2,6 +2,7 @@
 
 namespace Matecat\SubFiltering\Tests;
 
+use Matecat\SubFiltering\Commons\AbstractPlaceholderHandler;
 use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Enum\ConstantEnum;
 use Matecat\SubFiltering\Enum\CTypeEnum;
@@ -147,7 +148,7 @@ class PlaceholderHandlersTest extends TestCase
     }
 
     /**
-     * @param class-string $handler
+     * @param class-string<AbstractPlaceholderHandler> $handler
      * @param CTypeEnum $ctype
      * @param string $plain
      *
@@ -170,7 +171,7 @@ class PlaceholderHandlersTest extends TestCase
     }
 
     /**
-     * @return array<string, array{class-string, CTypeEnum, string}>
+     * @return array<string, array{class-string<AbstractPlaceholderHandler>, CTypeEnum, string}>
      */
     public static function handlerProvider(): array
     {
@@ -246,7 +247,7 @@ class PlaceholderHandlersTest extends TestCase
     }
 
     /**
-     * @param class-string $handler
+     * @param class-string<AbstractPlaceholderHandler> $handler
      * @param CTypeEnum $ctype
      * @param string $plain
      *
@@ -262,17 +263,13 @@ class PlaceholderHandlersTest extends TestCase
     }
 
     /**
-     * @return array<string, array{class-string, CTypeEnum, string}>
+     * The handlers whose pattern has no `/u` flag: all but single square.
+     *
+     * @return array<string, array{class-string<AbstractPlaceholderHandler>, CTypeEnum, string}>
      */
     public static function handlerWithoutUnicodePatternProvider(): array
     {
-        return [
-            'snails' => [Snails::class, CTypeEnum::SNAILS, '@@ab@@'],
-            'double square' => [DoubleSquareBrackets::class, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[ab]]'],
-            'dollar curly' => [DollarCurlyBrackets::class, CTypeEnum::DOLLAR_CURLY_BRACKETS, '${ab}'],
-            'single curly' => [SingleCurlyBracketsToPh::class, CTypeEnum::CURLY_BRACKETS, '{ab}'],
-            'double percent' => [DoublePercentages::class, CTypeEnum::PERCENTAGES, '%%ab%%'],
-        ];
+        return array_diff_key(self::handlerProvider(), ['single square' => true]);
     }
 
     /**
@@ -304,7 +301,7 @@ class PlaceholderHandlersTest extends TestCase
     /**
      * A long run of rejected openers before one closer is scanned once: the time grows with the length, not with its square.
      *
-     * @param class-string $handler
+     * @param class-string<AbstractPlaceholderHandler> $handler
      * @param string $input
      * @param string $expected
      *
@@ -325,7 +322,7 @@ class PlaceholderHandlersTest extends TestCase
     }
 
     /**
-     * @return array<string, array{class-string, string, string}>
+     * @return array<string, array{class-string<AbstractPlaceholderHandler>, string, string}>
      */
     public static function chainedRejectedOpenersProvider(): array
     {
