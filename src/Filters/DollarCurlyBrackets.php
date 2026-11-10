@@ -15,7 +15,7 @@ class DollarCurlyBrackets extends AbstractPlaceholderHandler
      */
     protected function getPattern(): string
     {
-        return '/\$\{[^<>\s]+?}/';
+        return '/\$\{(?:' . self::NOT_HIDDEN . '[^<>\s])+?}/';
     }
 
     /**

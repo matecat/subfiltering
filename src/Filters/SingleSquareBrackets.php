@@ -25,7 +25,7 @@ class SingleSquareBrackets extends AbstractPlaceholderHandler
      */
     protected function getPattern(): string
     {
-        return '/(?<!\[)\[[^\[\]<>\s]+?](?!])/u';
+        return '/(?<!\[)\[(?:' . self::NOT_HIDDEN . '[^\[\]<>\s])+?](?!])/u';
     }
 
     /**
