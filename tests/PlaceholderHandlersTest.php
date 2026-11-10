@@ -345,6 +345,16 @@ class PlaceholderHandlersTest extends TestCase
                 str_repeat('${&#09;', 20000) . '} ${ok}',
                 str_repeat('${&#09;', 20000) . '} ' . self::ph(1, CTypeEnum::DOLLAR_CURLY_BRACKETS, '${ok}')
             ],
+            'double square, blocks of openers' => [
+                DoubleSquareBrackets::class,
+                str_repeat(str_repeat('[[', 5000) . ' ', 30) . ']] [[ok]]',
+                str_repeat(str_repeat('[[', 5000) . ' ', 30) . ']] ' . self::ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[ok]]')
+            ],
+            'dollar curly, blocks of openers' => [
+                DollarCurlyBrackets::class,
+                str_repeat(str_repeat('${', 5000) . ' ', 30) . '} ${ok}',
+                str_repeat(str_repeat('${', 5000) . ' ', 30) . '} ' . self::ph(1, CTypeEnum::DOLLAR_CURLY_BRACKETS, '${ok}')
+            ],
         ];
     }
 
@@ -366,6 +376,7 @@ class PlaceholderHandlersTest extends TestCase
         '&#xA;',
         '&#xa;',
         '&#xD;',
+        '&#xd;',
         '&#x20;',
         '&#xA0;',
         '&#x00A0;'
@@ -480,6 +491,89 @@ class PlaceholderHandlersTest extends TestCase
             }
         }
         return $rows;
+    }
+
+    /**
+     * A placeholder of 30,000 characters is locked, and so is the short placeholder before it.
+     *
+     * @param class-string<AbstractPlaceholderHandler> $handler
+     * @param CTypeEnum $ctype
+     * @param string $plain
+     *
+     * @return void
+     */
+    #[DataProvider('handlerProvider')]
+    public function testLocksPlaceholderNextToLongOne(string $handler, CTypeEnum $ctype, string $plain): void
+    {
+        $long = str_replace('ab', str_repeat('a', 30000), $plain);
+        $input = $plain . ' ' . $long;
+
+        $channel = new Pipeline();
+        $channel->addLast($handler);
+
+        $this->assertEquals(self::ph(1, $ctype, $plain) . ' ' . self::ph(2, $ctype, $long), $channel->transform($input));
+    }
+
+    /**
+     * The nearest closer ends a placeholder, and some patterns reject braces or accept literal tabs.
+     *
+     * @param class-string<AbstractPlaceholderHandler> $handler
+     * @param string $input
+     * @param string $expected
+     *
+     * @return void
+     */
+    #[DataProvider('nearestCloserProvider')]
+    public function testNearestCloserEndsPlaceholder(string $handler, string $input, string $expected): void
+    {
+        $channel = new Pipeline();
+        $channel->addLast($handler);
+
+        $this->assertEquals($expected, $channel->transform($input));
+    }
+
+    /**
+     * @return array<string, array{class-string<AbstractPlaceholderHandler>, string, string}>
+     */
+    public static function nearestCloserProvider(): array
+    {
+        return [
+            'double square' => [
+                DoubleSquareBrackets::class,
+                '[[a]]b]]',
+                self::ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[a]]') . 'b]]'
+            ],
+            'snails' => [
+                Snails::class,
+                '@@a@@b@@',
+                self::ph(1, CTypeEnum::SNAILS, '@@a@@') . 'b@@'
+            ],
+            'dollar curly' => [
+                DollarCurlyBrackets::class,
+                '${a}b}',
+                self::ph(1, CTypeEnum::DOLLAR_CURLY_BRACKETS, '${a}') . 'b}'
+            ],
+            'double percent' => [
+                DoublePercentages::class,
+                '%%a%%b%%',
+                self::ph(1, CTypeEnum::PERCENTAGES, '%%a%%') . 'b%%'
+            ],
+            'double percent, opening brace inside' => [
+                DoublePercentages::class,
+                '%%a{b%%',
+                '%%a{b%%'
+            ],
+            'double percent, closing brace inside' => [
+                DoublePercentages::class,
+                '%%a}b%%',
+                '%%a}b%%'
+            ],
+            'single curly, literal tab inside' => [
+                SingleCurlyBracketsToPh::class,
+                "{a\tb}",
+                self::ph(1, CTypeEnum::CURLY_BRACKETS, "{a\tb}")
+            ],
+        ];
     }
 
     /**
