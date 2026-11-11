@@ -1475,7 +1475,136 @@ class MateCatFilterTest extends TestCase
             'unclosed bracket' => ['This string contains [placeholder'],
             'doubled opening bracket' => ['This string contains [[placeholder]'],
             'doubled closing bracket' => ['This string contains [placeholder]]'],
+            'tab entity inside' => ['This string contains [a&#09;b]'],
+            'line feed entity inside' => ['This string contains [a&#10;b]'],
+            'CRLF entities inside' => ['This string contains [a&#13;&#10;b]'],
+            'NBSP entity inside' => ['This string contains [a&#160;b]'],
+            'literal NBSP inside' => ["This string contains [a\u{00A0}b]"],
+            'adjacent brackets inside double brackets' => ['This string contains [[a][b]]'],
+            'closing bracket doubled right after' => ['This string contains [a]]'],
+            'tag with attributes' => ['This string contains [<x id="1"/>]'],
         ];
+    }
+
+    /**
+     * Entities that do not decode to whitespace do not stop the lock.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testSingleSquareBracketsWithNonWhitespaceEntity()
+    {
+        $filter = $this->getFilterInstance([], [InjectableFiltersTags::single_square->value]);
+
+        $db_segment = 'This string contains [a&amp;b]';
+        $segment_from_UI = 'This string contains ' . $this->ph(1, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[a&amp;b]');
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
+        $this->assertEquals($db_segment, $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($db_segment)));
+    }
+
+    /**
+     * A tag with no whitespace reaches the pattern as `##LESSTHAN##...##GREATERTHAN##`,
+     * and the pattern stops at `##LESSTHAN##`, so the tag stays out of the placeholder.
+     *
+     * @return void
+     */
+    public function testSingleSquareBracketsDoesNotLockEscapedTags()
+    {
+        $segment = '[' . ConstantEnum::LTPLACEHOLDER->value . 'x/' . ConstantEnum::GTPLACEHOLDER->value . ']';
+
+        $channel = new Pipeline();
+        $channel->addLast(SingleSquareBrackets::class);
+
+        $this->assertEquals($segment, $channel->transform($segment));
+    }
+
+    /**
+     * The lookarounds only look at the brackets next to the match: with double square brackets
+     * disabled, a `[x]` nested deeper inside double brackets is still locked.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testSingleSquareBracketsNestedInsideDoubleSquareBrackets()
+    {
+        $filter = $this->getFilterInstance([], [InjectableFiltersTags::single_square->value]);
+
+        $db_segment = '[[x[a]y]]';
+        $segment_from_UI = '[[x' . $this->ph(1, CTypeEnum::SINGLE_SQUARE_BRACKETS, '[a]') . 'y]]';
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
+        $this->assertEquals($db_segment, $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($db_segment)));
+    }
+
+    /**
+     * Double square brackets run first and take the whole `[[x[a]y]]`.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testSingleSquareBracketsNestedInsideEnabledDoubleSquareBrackets()
+    {
+        $filter = $this->getFilterInstance([], [
+            InjectableFiltersTags::single_square->value,
+            InjectableFiltersTags::double_square->value,
+        ]);
+
+        $db_segment = '[[x[a]y]]';
+        $segment_from_UI = $this->ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[x[a]y]]');
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
+        $this->assertEquals($db_segment, $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($db_segment)));
+    }
+
+    /**
+     * The second value is the segment after a Layer 2 round trip: there `&#160;` comes back as a
+     * literal NBSP, as it does for any text outside a placeholder.
+     *
+     * @return array<string, array{string, string}>
+     */
+    public static function doubleSquareBracketsLeftAloneProvider(): array
+    {
+        return [
+            'whitespace inside' => ['This string contains [[two words]]', 'This string contains [[two words]]'],
+            'tab entity inside' => ['This string contains [[a&#09;b]]', 'This string contains [[a&#09;b]]'],
+            'line feed entity inside' => ['This string contains [[a&#10;b]]', 'This string contains [[a&#10;b]]'],
+            'NBSP entity inside' => ['This string contains [[a&#160;b]]', "This string contains [[a\u{00A0}b]]"],
+        ];
+    }
+
+    /**
+     * @param string $db_segment
+     * @param string $after_layer2_round_trip
+     *
+     * @return void
+     * @throws Exception
+     */
+    #[DataProvider('doubleSquareBracketsLeftAloneProvider')]
+    public function testDoubleSquareBracketsLeavesWhitespaceAlone(string $db_segment, string $after_layer2_round_trip)
+    {
+        $filter = $this->getFilterInstance();
+
+        $this->assertEquals($db_segment, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($after_layer2_round_trip, $filter->fromLayer2ToLayer0($filter->fromLayer0ToLayer2($db_segment)));
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testDoubleSquareBracketsWithNonWhitespaceEntity()
+    {
+        $filter = $this->getFilterInstance();
+
+        $db_segment = 'This string contains [[a&amp;b]]';
+        $segment_from_UI = 'This string contains ' . $this->ph(1, CTypeEnum::DOUBLE_SQUARE_BRACKETS, '[[a&amp;b]]');
+
+        $this->assertEquals($segment_from_UI, $filter->fromLayer0ToLayer1($db_segment));
+        $this->assertEquals($db_segment, $filter->fromLayer1ToLayer0($segment_from_UI));
     }
 
     /**

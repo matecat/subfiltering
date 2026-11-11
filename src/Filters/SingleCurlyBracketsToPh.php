@@ -9,50 +9,39 @@
 
 namespace Matecat\SubFiltering\Filters;
 
-use Matecat\SubFiltering\Commons\AbstractHandler;
-use Matecat\SubFiltering\Enum\ConstantEnum;
+use Matecat\SubFiltering\Commons\AbstractPlaceholderHandler;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 
-class SingleCurlyBracketsToPh extends AbstractHandler
+/**
+ * Locks `{text}` placeholders into `<ph>` tags.
+ *
+ * TestSet:
+ * <code>
+ *  Dear {{%%customer.first_name%%}}, This is {{ "now"|date(null, "Europe/Rome") }} with {%%agent.alias%%} Airbnb. {% for user in users %} e {%%ciao%%}
+ *  {# note: disabled template because we no longer use this
+ *          {% for user in users %}
+ *          ...
+ *          {% endfor %}
+ *
+ * ... {variable}
+ *  #}
+ * </code>
+ */
+class SingleCurlyBracketsToPh extends AbstractPlaceholderHandler
 {
-
     /**
-     * TestSet:
-     * <code>
-     *  Dear {{%%customer.first_name%%}}, This is {{ "now"|date(null, "Europe/Rome") }} with {%%agent.alias%%} Airbnb. {% for user in users %} e {%%ciao%%}
-     *  {# note: disabled template because we no longer use this
-     *          {% for user in users %}
-     *          ...
-     *          {% endfor %}
-     *
-     * ... {variable}
-     *  #}
-     * </code>
-     *
-     * @param string $segment
-     *
-     * @return string
+     * @inheritDoc
      */
-    public function transform(string $segment): string
+    protected function getPattern(): string
     {
-        preg_match_all('/{[^<>{} ]+?}/', $segment, $html, PREG_SET_ORDER);
-        foreach ($html as $twig_variable) {
-            //check if inside the variable there is a tag because in this case shouldn't replace the content with a PH tag
-            if (!strstr($twig_variable[0], ConstantEnum::GTPLACEHOLDER->value)) {
-                //replace subsequent elements excluding already encoded
-                $segment = preg_replace(
-                    '/' . preg_quote($twig_variable[0], '/') . '/',
-                    '<ph id="' . $this->getPipeline()->getNextId(
-                    ) . '" ctype="' . CTypeEnum::CURLY_BRACKETS->value . '" equiv-text="base64:' . base64_encode(
-                        $twig_variable[0]
-                    ) . '"/>',
-                    $segment,
-                    1
-                ) ?? $segment;
-            }
-        }
-
-        return $segment;
+        return '/{(?:' . self::NOT_HIDDEN . '[^<>{} ])+?}/';
     }
 
+    /**
+     * @inheritDoc
+     */
+    protected function getCType(): CTypeEnum
+    {
+        return CTypeEnum::CURLY_BRACKETS;
+    }
 }
