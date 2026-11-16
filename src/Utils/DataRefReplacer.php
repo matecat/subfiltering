@@ -36,13 +36,21 @@ class DataRefReplacer
     private Map $map;
 
     /**
+     * @var bool
+     */
+    private bool $useDisplayValues;
+
+    /**
      * DataRefReplacer constructor.
      *
      * @param array<string,string> $map
+     * @param bool $useDisplayValues when false, equiv-text always holds the dataRef value and disp/equiv attributes are ignored
+     *                               (the output is the same as before v4.2.0, needed to compare source and target tags or to hash segments)
      */
-    public function __construct(array $map = [])
+    public function __construct(array $map = [], bool $useDisplayValues = true)
     {
         $this->map = Map::instance($this->sanitizeMap($map));
+        $this->useDisplayValues = $useDisplayValues;
     }
 
     /**
@@ -96,6 +104,60 @@ class DataRefReplacer
     }
 
     /**
+     * Returns the value to show for an inline code (XLIFF 2.0), following the priority disp -> equiv.
+     * Returns null when neither attribute is set (or both are empty), so the caller can fall back to the dataRef value.
+     *
+     * The value is encoded like the <originalData> values of the dataRef map (see matecat/xliff-parser).
+     *
+     * @see http://docs.oasis-open.org/xliff/xliff-core/v2.1/os/xliff-core-v2.1-os.html#disp
+     *
+     * @param array<string,string> $attributes the (XmlParser decoded) attributes of the tag
+     * @param string $dispAttribute disp|dispStart|dispEnd
+     * @param string $equivAttribute equiv|equivStart|equivEnd
+     *
+     * @return string|null
+     */
+    public static function getDisplayValue(array $attributes, string $dispAttribute, string $equivAttribute): ?string
+    {
+        foreach ([$dispAttribute, $equivAttribute] as $attribute) {
+            if (isset($attributes[$attribute]) && $attributes[$attribute] !== '') {
+                return self::encodeDisplayValue($attributes[$attribute]);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string,string> $attributes
+     * @param string $dispAttribute
+     * @param string $equivAttribute
+     *
+     * @return string|null null when display values are disabled
+     */
+    private function getDisplayValueIfEnabled(array $attributes, string $dispAttribute, string $equivAttribute): ?string
+    {
+        return $this->useDisplayValues ? self::getDisplayValue($attributes, $dispAttribute, $equivAttribute) : null;
+    }
+
+    /**
+     * XmlParser decodes attribute values, so re-encode them the same way xliff-parser encodes <originalData>:
+     * double escaped entities are decoded once, otherwise the special chars are escaped (quotes excluded).
+     *
+     * @param string $value
+     *
+     * @return string
+     */
+    private static function encodeDisplayValue(string $value): string
+    {
+        if (preg_match('/&amp;[#a-zA-Z0-9]{1,20};/u', $value)) {
+            return preg_replace('/&amp;([#a-zA-Z0-9]{1,20};)/u', '&$1', $value) ?? $value;
+        }
+
+        return htmlspecialchars($value, ENT_NOQUOTES, 'UTF-8', false);
+    }
+
+    /**
      * @param string $string
      *
      * @return bool
@@ -144,7 +206,7 @@ class DataRefReplacer
                 $string = $this->replaceNewTagString(
                     $node->node,
                     $attributesMap->getOrDefault('id', $dataRefName),
-                    $this->map->getOrDefault($dataRefName, 'NULL'),
+                    $this->getDisplayValueIfEnabled($node->attributes, 'disp', 'equiv') ?? $this->map->getOrDefault($dataRefName, 'NULL'),
                     $ctype,
                     $string,
                     null
@@ -196,7 +258,7 @@ class DataRefReplacer
                 $string = $this->replaceNewTagString(
                     $node->node,
                     $attributesMap->get('id'),
-                    $dataRefStartValue,
+                    $this->getDisplayValueIfEnabled($node->attributes, 'dispStart', 'equivStart') ?? $dataRefStartValue,
                     CTypeEnum::PC_SELF_CLOSE_DATA_REF->value,
                     $string
                 );
@@ -241,6 +303,7 @@ class DataRefReplacer
             $dataRefEndMap[] = [
                 'id' => $attributesMap->get('id'),
                 'dataRefEnd' => $dataRefEnd,
+                'displayValue' => $this->getDisplayValueIfEnabled($node->attributes, 'dispEnd', 'equivEnd'),
             ];
         }
     }
@@ -257,7 +320,10 @@ class DataRefReplacer
      */
     private function replaceOpeningPcTags(string $string): string
     {
-        preg_match_all('|<pc ([^>/]+?)>|iu', $string, $openingPcMatches);
+        // a slash is allowed only inside quoted attribute values (ex. dispEnd="[/b]"), so that self-closed tags are excluded.
+        // This applies without display values too: the pre-v4.2.0 regexp left such tags unconverted on one side only,
+        // so export QA saw a tag mismatch even when source and target tags were identical
+        preg_match_all('#<pc (?:[^>/"\']|"[^"]*"|\'[^\']*\')+>#iu', $string, $openingPcMatches);
 
         foreach ($openingPcMatches[0] as $match) {
             $node = XmlParser::parse($match . '</pc>', true)[0]; // add a closing tag to not break XML integrity
@@ -277,7 +343,7 @@ class DataRefReplacer
                 $string = $this->replaceNewTagString(
                     $match,
                     $attributesMap->get('id'),
-                    $this->map->getOrDefault($node->attributes['dataRefStart'], 'NULL'),
+                    $this->getDisplayValueIfEnabled($node->attributes, 'dispStart', 'equivStart') ?? $this->map->getOrDefault($node->attributes['dataRefStart'], 'NULL'),
                     CTypeEnum::PC_OPEN_DATA_REF->value,
                     $string
                 );
@@ -311,7 +377,7 @@ class DataRefReplacer
                 $completeTag = $this->getNewTagString(
                     '</pc>',
                     $attr['id'],
-                    $this->map->getOrDefault($attr['dataRefEnd'], 'NULL'),
+                    $attr['displayValue'] ?? $this->map->getOrDefault($attr['dataRefEnd'], 'NULL'),
                     CTypeEnum::PC_CLOSE_DATA_REF->value,
                     '_2'
                 );

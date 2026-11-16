@@ -11,6 +11,7 @@ use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
+use Matecat\SubFiltering\Filters\SingleSquareBrackets;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
@@ -29,6 +30,7 @@ enum InjectableFiltersTags: string
     case objective_c_ns = 'objective_c_ns';
     case double_percent = 'double_percent';
     case square_sprintf = 'square_sprintf';
+    case single_square = 'single_square';
     case sprintf = 'sprintf';
 
     /**
@@ -48,6 +50,7 @@ enum InjectableFiltersTags: string
             self::objective_c_ns => ObjectiveCNSString::class,
             self::double_percent => DoublePercentages::class,
             self::square_sprintf => SquareSprintf::class,
+            self::single_square => SingleSquareBrackets::class,
             self::sprintf => SprintfToPH::class,
         };
     }
@@ -71,6 +74,7 @@ enum InjectableFiltersTags: string
             ObjectiveCNSString::class => self::objective_c_ns,
             DoublePercentages::class => self::double_percent,
             SquareSprintf::class => self::square_sprintf,
+            SingleSquareBrackets::class => self::single_square,
             SprintfToPH::class => self::sprintf,
             default => null
         };

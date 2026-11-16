@@ -64,7 +64,7 @@ class ResolveClassNamesTest extends TestCase
             [
                 MarkupToPh::class,                // 0
                 SingleCurlyBracketsToPh::class,   // 7
-                SprintfToPH::class,               // 11
+                SprintfToPH::class,               // 12
             ],
             $resolved
         );

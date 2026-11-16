@@ -15,7 +15,8 @@ class DataRefRestore extends AbstractHandler
      */
     private array $dataRefMap = [];
 
-    private const string REGEXP = '|<ph[^>]+? ctype="%s" equiv-text="base64:(.*?)"/>|iu';
+    // x-orig is present only when equiv-text holds the disp/equiv value instead of the original tag
+    private const string REGEXP = '|<ph[^>]+? ctype="%s" equiv-text="base64:([^"]*)"(?: x-orig="([^"]*)")?/>|iu';
 
     /**
      * @inheritDoc
@@ -64,15 +65,7 @@ class DataRefRestore extends AbstractHandler
             $matches
         );
 
-        if (empty($matches[0])) {
-            return $segment;
-        }
-
-        foreach ($matches[0] as $index => $match) {
-            $segment = str_replace($match, base64_decode($matches[1][$index]), $segment);
-        }
-
-        return $segment;
+        return $this->restoreOriginalTags($segment, $matches);
     }
 
     /**
@@ -107,13 +100,22 @@ class DataRefRestore extends AbstractHandler
 
         $matches[0] = array_merge($open_matches[0], $close_matches[0]);
         $matches[1] = array_merge($open_matches[1], $close_matches[1]);
+        $matches[2] = array_merge($open_matches[2], $close_matches[2]);
 
-        if (empty($matches[0])) {
-            return $segment;
-        }
+        return $this->restoreOriginalTags($segment, $matches);
+    }
 
+    /**
+     * @param string $segment
+     * @param array<int,array<int,string>> $matches
+     *
+     * @return string
+     */
+    private function restoreOriginalTags(string $segment, array $matches): string
+    {
         foreach ($matches[0] as $index => $match) {
-            $segment = str_replace($match, base64_decode($matches[1][$index]), $segment);
+            $originalTag = !empty($matches[2][$index]) ? $matches[2][$index] : $matches[1][$index];
+            $segment = str_replace($match, base64_decode($originalTag), $segment);
         }
 
         return $segment;

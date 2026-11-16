@@ -11,6 +11,7 @@ use Matecat\SubFiltering\Filters\DoublePercentages;
 use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
+use Matecat\SubFiltering\Filters\SingleSquareBrackets;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SquareSprintf;
 use PHPUnit\Framework\TestCase;
@@ -165,6 +166,7 @@ class FiltersTagsEnumTest extends TestCase
             ObjectiveCNSString::class => 'objective_c_ns',
             DoublePercentages::class => 'double_percent',
             SquareSprintf::class => 'square_sprintf',
+            SingleSquareBrackets::class => 'single_square',
             SprintfToPH::class => 'sprintf',
         ];
 
@@ -233,6 +235,7 @@ class FiltersTagsEnumTest extends TestCase
             InjectableFiltersTags::objective_c_ns->value,
             InjectableFiltersTags::double_percent->value,
             InjectableFiltersTags::square_sprintf->value,
+            InjectableFiltersTags::single_square->value,
             InjectableFiltersTags::sprintf->value,
         ];
 

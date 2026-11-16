@@ -16,6 +16,7 @@ use Matecat\SubFiltering\Filters\ObjectiveCNSString;
 use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
 use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
 use Matecat\SubFiltering\Filters\SingleCurlyBracketsToPh;
+use Matecat\SubFiltering\Filters\SingleSquareBrackets;
 use Matecat\SubFiltering\Filters\Snails;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\Filters\SquareSprintf;
@@ -59,7 +60,10 @@ class HandlersSorter
         ObjectiveCNSString::class => ['position' => 8, 'default_enabled' => false, 'icu_compliant' => false],
         DoublePercentages::class => ['position' => 9, 'default_enabled' => true, 'icu_compliant' => false],
         SquareSprintf::class => ['position' => 10, 'default_enabled' => false, 'icu_compliant' => false],
-        SprintfToPH::class => ['position' => 11, 'default_enabled' => false, 'icu_compliant' => false],
+        // Disabled by default because `[text]` is common in prose (citations, `[sic]`, Markdown links).
+        // Runs after SquareSprintf, so `[%s]` keeps its square-sprintf ctype when both are enabled.
+        SingleSquareBrackets::class => ['position' => 11, 'default_enabled' => false, 'icu_compliant' => false],
+        SprintfToPH::class => ['position' => 12, 'default_enabled' => false, 'icu_compliant' => false],
     ];
 
     /**

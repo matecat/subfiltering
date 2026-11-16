@@ -20,6 +20,7 @@ enum CTypeEnum: string
     case PERCENT_VARIABLE = 'x-percent-variable';
     case SMART_COUNT = 'x-smart-count';
     case DOUBLE_SQUARE_BRACKETS = 'x-double-square-brackets';
+    case SINGLE_SQUARE_BRACKETS = 'x-single-square-brackets';
     case DOLLAR_CURLY_BRACKETS = 'x-dollar-curly-brackets';
     case SQUARE_SPRINTF = 'x-square-sprintf';
 
