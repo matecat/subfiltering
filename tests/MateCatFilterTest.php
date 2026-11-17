@@ -2273,5 +2273,21 @@ class MateCatFilterTest extends TestCase
         $this->assertEquals($segmentL1, $filter->fromLayer2ToLayer1($segmentL2));
     }
 
+    /**
+     * Saving a translation (layer 2 -> layer 0) keeps "$n" in the disp of an XLIFF 2.0 inline code
+     *
+     * @throws Exception
+     */
+    public function testDollarDispSurvivesTheLayer2ToLayer0RoundTrip(): void
+    {
+        /** @var $filter MateCatFilter */
+        $filter = MateCatFilter::getInstance(null, 'en-US', 'es-ES', ['d1' => '%{Custom.creditAmount|none}', 'd2' => '&lt;br/&gt;']);
 
+        $segment = 'Vas a recibir un crédito de hasta <ph id="d1-1" dataRef="d1" disp="$50"/> y <ph id="d2-1" dataRef="d2" equiv="\1"/>.';
+        $segmentL2 = $filter->fromLayer0ToLayer2($segment);
+
+        $this->assertStringContainsString('equiv-text="base64:' . base64_encode('$50') . '"', $segmentL2);
+        $this->assertEquals($segment, $filter->fromLayer2ToLayer0($segmentL2));
+        $this->assertEquals($segment, $filter->fromLayer1ToLayer0($filter->fromLayer0ToLayer1($segment)));
+    }
 }

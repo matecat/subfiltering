@@ -663,4 +663,54 @@ class DataReplacerTest extends TestCase
             (new DataRefReplacer(['d1' => '&lt;hr/&gt;']))->replace($string)
         );
     }
+
+    /**
+     * The original tag is restored verbatim from x-orig: "$n", "${n}" and "\n" in an attribute are not backreferences.
+     *
+     * @return array<string,array{array<string,string>,string}>
+     */
+    public static function originalTagsWithBackreferenceLikeValuesProvider(): array
+    {
+        return [
+            'ph disp $50' => [['d1' => '%{Custom.creditAmount|none}'], 'Credit of <ph id="d1-1" dataRef="d1" disp="$50"/>.'],
+            'ph disp $1' => [['d1' => '&lt;br/&gt;'], '<ph id="1" dataRef="d1" disp="$1"/>'],
+            'ph disp $0' => [['d1' => '&lt;br/&gt;'], '<ph id="1" dataRef="d1" disp="$0"/>'],
+            'ph disp ${1}' => [['d1' => '&lt;br/&gt;'], '<ph id="1" dataRef="d1" disp="${1}"/>'],
+            'ph equiv \1' => [['d1' => '&lt;br/&gt;'], '<ph id="1" dataRef="d1" equiv="\1"/>'],
+            'ph disp with a path' => [['d1' => '&lt;br/&gt;'], '<ph id="1" dataRef="d1" disp="C:\\path\\0"/>'],
+            'sc and ec' => [
+                ['d1' => '&lt;i&gt;', 'd2' => '&lt;/i&gt;'],
+                '<sc id="1" dataRef="d1" disp="$1"/>text<ec id="2" startRef="1" dataRef="d2" equiv="\2"/>',
+            ],
+            'pc' => [
+                ['d1' => '&lt;b&gt;', 'd2' => '&lt;/b&gt;'],
+                '<pc id="1" dataRefStart="d1" dataRefEnd="d2" dispStart="$1" dispEnd="${2}">bold</pc>',
+            ],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('originalTagsWithBackreferenceLikeValuesProvider')]
+    public function restore_keeps_backreference_like_attribute_values(array $map, string $string): void
+    {
+        $dataReplacer = new DataRefReplacer($map);
+
+        $this->assertEquals($string, $dataReplacer->restore($dataReplacer->replace($string)));
+    }
+
+    /**
+     * The tag the editor sends when a user puts back the source tag (disp="$50") in the target
+     */
+    #[Test]
+    public function restore_keeps_a_dollar_disp_sent_by_the_editor(): void
+    {
+        $dataRef = 'cv-91d19b91c10f8f0cb75e6049afa9f47d9e775c388ffa8392682685c5f3a4f49c';
+        $original = '<ph dataRef="' . $dataRef . '" disp="$50" id="' . $dataRef . '-1"/>';
+        $dataReplacer = new DataRefReplacer([$dataRef => '%{Custom.creditAmount|none}']);
+
+        $fromTheEditor = 'Vas a recibir un crédito de hasta <ph id="' . $dataRef . '-1" ctype="' . CTypeEnum::PH_DATA_REF->value
+            . '" equiv-text="base64:' . base64_encode('$50') . '" x-orig="' . base64_encode($original) . '"/>*';
+
+        $this->assertEquals('Vas a recibir un crédito de hasta ' . $original . '*', $dataReplacer->restore($fromTheEditor));
+    }
 }

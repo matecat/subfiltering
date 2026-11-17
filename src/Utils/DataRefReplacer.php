@@ -439,16 +439,34 @@ class DataRefReplacer
             $cType = $nodeAttributesMap->get('ctype');
 
             if (CTypeEnum::isLayer2Constant($cType ?? '')) {
-                return preg_replace(
-                    '/' . preg_quote($node->node, '/') . '/',
-                    base64_decode($nodeAttributesMap->get('x-orig')),
-                    $string,
-                    1
-                ) ?? $string;
+                return self::replaceFirstOccurrence($node->node, base64_decode($nodeAttributesMap->get('x-orig')), $string);
             }
         }
 
         return $string;
+    }
+
+    /**
+     * Replace the first occurrence of $search, taking $replace literally.
+     *
+     * The restored original tag must not be a preg_replace() replacement: "$50", "${1}" or "\1" in one of its
+     * attributes (ex. disp="$50") would be read as backreferences and emptied.
+     *
+     * @param string $search
+     * @param string $replace
+     * @param string $subject
+     *
+     * @return string
+     */
+    private static function replaceFirstOccurrence(string $search, string $replace, string $subject): string
+    {
+        $position = strpos($subject, $search);
+
+        if ($position === false) {
+            return $subject;
+        }
+
+        return substr_replace($subject, $replace, $position, strlen($search));
     }
 
     /**
